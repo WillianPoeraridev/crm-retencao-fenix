@@ -5,10 +5,132 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
+
+enum Role {
+  ADMIN
+  ATENDENTE
+}
+
+enum StatusRetencao {
+  CANCELADO
+  RETIDO
+  INADIMPLENCIA
+}
+
+enum Regiao {
+  SINOS
+  LITORAL
+  MATRIZ
+}
+
+enum MotivoCancelamento {
+  INSATISFACAO_ATD
+  INSATISFACAO_SERVICO
+  MUDANCA_ENDERECO
+  MOTIVOS_PESSOAIS
+  TROCA_PROVEDOR
+  PROBLEMAS_FINANC
+  OUTROS
+}
+
+enum Cidade {
+  CACHOEIRINHA
+  GRAVATAI
+  TRAMANDAI
+  IMBE
+  CIDREIRA
+  OSORIO
+  SAO_LEOPOLDO
+  NOVO_HAMBURGO
+  IVOTI
+  TAQUARA
+  IGREJINHA
+  PAROBE
+  ESTANCIA_VELHA
+  DOIS_IRMAOS
+  CAMPO_BOM
+  SAPUCAIA
+  ESTEIO
+  CANOAS
+  PORTO_ALEGRE
+  VIAMAO
+  ALVORADA
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  login        String   @unique
+  passwordHash String
+  role         Role     @default(ATENDENTE)
+  isActive     Boolean  @default(true)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  solicitacoes SolicitacaoRetencao[] @relation("AtendenteSolicitacoes")
+}
+
+model Competencia {
+  id                String   @id @default(cuid())
+  ano               Int
+  mes               Int
+
+  // números “do gerente/sistema” (podem começar vazios)
+  metaCancelamentos Int?     // ex: 220
+  orcamentoComissaoCents Int? // ex: 200000 = R$ 2000,00
+  baseAtivosTotal   Int?     // ex: 19554
+  inadimplenciaTotal Int?    // opcional
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  solicitacoes      SolicitacaoRetencao[]
+
+  @@unique([ano, mes])
+  @@index([ano, mes])
+}
+
+model SolicitacaoRetencao {
+  id             String       @id @default(cuid())
+
+  competenciaId  String
+  competencia    Competencia  @relation(fields: [competenciaId], references: [id], onDelete: Cascade)
+
+  // colunas do “sheet”
+  dataRegistro   DateTime
+  status         StatusRetencao
+
+  nomeCliente    String
+  bairro         String?
+  contato        String?
+
+  cidade         Cidade
+  regiao         Regiao
+
+  agendaRetirada DateTime?
+  retiradaTexto  String?      // "Sem retirada", "Entregou em loja", "Entregou Matriz" etc.
+
+  atendenteId    String
+  atendente      User         @relation("AtendenteSolicitacoes", fields: [atendenteId], references: [id])
+
+  motivo         MotivoCancelamento?
+  observacoes    String?
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([competenciaId, status])
+  @@index([competenciaId, motivo])
+  @@index([atendenteId])
+  @@index([cidade])
+  @@index([regiao])
+}
+
+
