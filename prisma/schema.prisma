@@ -66,7 +66,7 @@ enum Cidade {
 model User {
   id           String   @id @default(cuid())
   name         String
-  login        String   @unique
+  email        String   @unique
   passwordHash String
   role         Role     @default(ATENDENTE)
   isActive     Boolean  @default(true)
@@ -94,7 +94,7 @@ model Competencia {
   solicitacoes      SolicitacaoRetencao[]
 
   @@unique([ano, mes])
-  @@index([ano, mes])
+  
 }
 
 model SolicitacaoRetencao {
