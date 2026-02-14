@@ -18,7 +18,7 @@ async function main() {
   const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter });
 
-  // Emails (vão no campo "login" do teu model atual)
+  // Emails (vão no campo "email" do teu model atual)
   const ADMIN_EMAIL = "willianpoerari@fenixfibra.com.br";
   const ATENDENTE_EMAIL = "willianpoerarifx@gmail.com";
 
@@ -31,7 +31,7 @@ async function main() {
 
   // 1) Users
   const admin = await prisma.user.upsert({
-    where: { login: ADMIN_EMAIL },
+    where: { email: ADMIN_EMAIL },
     update: {
       name: "Willian (Admin)",
       role: Role.ADMIN,
@@ -40,7 +40,7 @@ async function main() {
     },
     create: {
       name: "Willian (Admin)",
-      login: ADMIN_EMAIL,
+      email: ADMIN_EMAIL,
       passwordHash: adminHash,
       role: Role.ADMIN,
       isActive: true,
@@ -48,7 +48,7 @@ async function main() {
   });
 
   const atendente = await prisma.user.upsert({
-    where: { login: ATENDENTE_EMAIL },
+    where: { email: ATENDENTE_EMAIL },
     update: {
       name: "Willian P",
       role: Role.ATENDENTE,
@@ -57,7 +57,7 @@ async function main() {
     },
     create: {
       name: "Willian P",
-      login: ATENDENTE_EMAIL,
+      email: ATENDENTE_EMAIL,
       passwordHash: atendenteHash,
       role: Role.ATENDENTE,
       isActive: true,
@@ -116,7 +116,7 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log("✅ Seed concluído:", { ano, mes, admin: admin.login, atendente: atendente.login });
+  console.log("✅ Seed concluído:", { ano, mes, admin: admin.email, atendente: atendente.email });
 
   await prisma.$disconnect();
   await pool.end();
