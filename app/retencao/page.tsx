@@ -7,7 +7,12 @@ const MESES = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
-export default async function RetencaoPage() {
+export default async function RetencaoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ forbidden?: string }>;
+}) {
+  const params = await searchParams;
   const competencia = await getCompetenciaAtual();
 
   if (!competencia) {
@@ -29,6 +34,21 @@ export default async function RetencaoPage() {
 
   return (
     <main style={{ padding: 24, maxWidth: 1200, margin: "0 auto" }}>
+      {params.forbidden && (
+        <div
+          style={{
+            padding: "10px 16px",
+            marginBottom: 16,
+            backgroundColor: "#fef2f2",
+            border: "1px solid #fecaca",
+            borderRadius: 6,
+            color: "#991b1b",
+            fontSize: 14,
+          }}
+        >
+          Acesso negado. Área restrita para administradores.
+        </div>
+      )}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
         <h1 style={{ fontSize: 22, fontWeight: 700 }}>
           Retenção — {MESES[competencia.mes - 1]} {competencia.ano}

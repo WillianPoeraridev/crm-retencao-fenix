@@ -13,9 +13,17 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // se tentar acessar /admin sem ser ADMIN, redireciona pra /retencao
+  if (req.nextUrl.pathname.startsWith("/admin") && token.role !== "ADMIN") {
+    const url = req.nextUrl.clone();
+    url.pathname = "/retencao";
+    url.searchParams.set("forbidden", "1");
+    return NextResponse.redirect(url);
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/retencao/:path*"],
+  matcher: ["/retencao/:path*", "/admin/:path*"],
 };
