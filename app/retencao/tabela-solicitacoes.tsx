@@ -46,15 +46,15 @@ export function TabelaSolicitacoes({ solicitacoes }: Props) {
     <div style={{ overflowX: "auto", marginTop: 16 }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
         <thead>
-          <tr style={{ borderBottom: "2px solid #e5e7eb", textAlign: "left" }}>
-            <th style={{ padding: "8px 12px" }}>Data</th>
-            <th style={{ padding: "8px 12px" }}>Cliente</th>
-            <th style={{ padding: "8px 12px" }}>Cidade</th>
-            <th style={{ padding: "8px 12px" }}>Região</th>
-            <th style={{ padding: "8px 12px" }}>Status</th>
-            <th style={{ padding: "8px 12px" }}>Motivo</th>
-            <th style={{ padding: "8px 12px" }}>Atendente</th>
-            <th style={{ padding: "8px 12px" }}>Observações</th>
+          <tr style={{ textAlign: "left", backgroundColor: "#111827", color: "#ffffff" }}>
+            <th style={{ padding: "8px 12px", fontWeight: 600 }}>Data</th>
+            <th style={{ padding: "8px 12px", fontWeight: 600 }}>Cliente</th>
+            <th style={{ padding: "8px 12px", fontWeight: 600 }}>Cidade</th>
+            <th style={{ padding: "8px 12px", fontWeight: 600 }}>Região</th>
+            <th style={{ padding: "8px 12px", fontWeight: 600 }}>Status</th>
+            <th style={{ padding: "8px 12px", fontWeight: 600 }}>Motivo</th>
+            <th style={{ padding: "8px 12px", fontWeight: 600 }}>Atendente</th>
+            <th style={{ padding: "8px 12px", fontWeight: 600 }}>Observações</th>
           </tr>
         </thead>
         <tbody>
@@ -66,10 +66,10 @@ export function TabelaSolicitacoes({ solicitacoes }: Props) {
                 backgroundColor: i % 2 === 0 ? "#ffffff" : "#f9fafb",
               }}
             >
-              <td style={{ padding: "8px 12px", whiteSpace: "nowrap" }}>
+              <td style={{ padding: "8px 12px", whiteSpace: "nowrap", color: "#111827" }}>
                 {formatarData(s.dataRegistro)}
               </td>
-              <td style={{ padding: "8px 12px", fontWeight: 500 }}>
+              <td style={{ padding: "8px 12px", fontWeight: 500, color: "#111827" }}>
                 {s.nomeCliente}
                 {s.contato && (
                   <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 400 }}>
@@ -77,17 +77,17 @@ export function TabelaSolicitacoes({ solicitacoes }: Props) {
                   </div>
                 )}
               </td>
-              <td style={{ padding: "8px 12px" }}>{formatarCidade(s.cidade)}</td>
-              <td style={{ padding: "8px 12px" }}>{s.regiao}</td>
+              <td style={{ padding: "8px 12px", color: "#111827" }}>{formatarCidade(s.cidade)}</td>
+              <td style={{ padding: "8px 12px", color: "#111827" }}>{s.regiao}</td>
               <td style={{ padding: "8px 12px" }}>
                 <span style={{ fontWeight: 600, ...Object.fromEntries(STATUS_COR[s.status].split(";").map(p => p.trim().split(": "))) }}>
                   {STATUS_LABEL[s.status] ?? s.status}
                 </span>
               </td>
-              <td style={{ padding: "8px 12px" }}>
+              <td style={{ padding: "8px 12px", color: "#111827" }}>
                 {s.motivo ? MOTIVO_LABEL[s.motivo] ?? s.motivo : "—"}
               </td>
-              <td style={{ padding: "8px 12px" }}>{s.atendente.name}</td>
+              <td style={{ padding: "8px 12px", color: "#111827" }}>{s.atendente.name}</td>
               <td style={{ padding: "8px 12px", color: "#6b7280", maxWidth: 200 }}>
                 {s.observacoes ?? "—"}
               </td>
