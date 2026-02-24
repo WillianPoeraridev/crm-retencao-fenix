@@ -88,6 +88,11 @@ model Competencia {
   baseAtivosTotal   Int?     // ex: 19554
   inadimplenciaTotal Int?    // opcional
 
+  // campos manuais do gerente (topo do Sheets)
+  diasUteis         Int?     // ex: 24
+  diasTrabalhados   Int?     // ex: 19
+  metaDiariaManual  Int?     // ex: 9 (definida pelo gerente)
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -132,5 +137,3 @@ model SolicitacaoRetencao {
   @@index([cidade])
   @@index([regiao])
 }
-
-

@@ -29,7 +29,7 @@ async function main() {
   const adminHash = await bcrypt.hash(ADMIN_PASS, 10);
   const atendenteHash = await bcrypt.hash(ATENDENTE_PASS, 10);
 
-  // 1) Users
+  // 1) Users — Admin
   const admin = await prisma.user.upsert({
     where: { email: ADMIN_EMAIL },
     update: {
@@ -47,22 +47,37 @@ async function main() {
     },
   });
 
-  const atendente = await prisma.user.upsert({
-    where: { email: ATENDENTE_EMAIL },
-    update: {
-      name: "Willian P",
-      role: Role.ATENDENTE,
-      passwordHash: atendenteHash,
-      isActive: true,
-    },
-    create: {
-      name: "Willian P",
-      email: ATENDENTE_EMAIL,
-      passwordHash: atendenteHash,
-      role: Role.ATENDENTE,
-      isActive: true,
-    },
-  });
+  // Atendentes — todos usam a mesma senha provisória do .env
+  const atendentesData = [
+    { name: "Willian P", email: ATENDENTE_EMAIL },
+    { name: "José", email: "jose@fenixfibra.com.br" },
+    { name: "Anderson", email: "anderson@fenixfibra.com.br" },
+    { name: "Douglas", email: "douglas@fenixfibra.com.br" },
+    { name: "Tiago", email: "tiago@fenixfibra.com.br" },
+  ];
+
+  const atendentes = [];
+  for (const a of atendentesData) {
+    const user = await prisma.user.upsert({
+      where: { email: a.email },
+      update: {
+        name: a.name,
+        role: Role.ATENDENTE,
+        passwordHash: atendenteHash,
+        isActive: true,
+      },
+      create: {
+        name: a.name,
+        email: a.email,
+        passwordHash: atendenteHash,
+        role: Role.ATENDENTE,
+        isActive: true,
+      },
+    });
+    atendentes.push(user);
+  }
+
+  const atendente = atendentes[0]; // Willian P — usado nos exemplos abaixo
 
   // 2) Competência (mês/ano atual)
   const now = new Date();
@@ -79,6 +94,9 @@ async function main() {
       orcamentoComissaoCents: 200000, // R$ 2000,00
       baseAtivosTotal: 19554,
       inadimplenciaTotal: 43,
+      diasUteis: 24,
+      diasTrabalhados: 19,
+      metaDiariaManual: 9,
     },
   });
 
@@ -116,7 +134,12 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log("✅ Seed concluído:", { ano, mes, admin: admin.email, atendente: atendente.email });
+  console.log("✅ Seed concluído:", {
+    ano,
+    mes,
+    admin: admin.email,
+    atendentes: atendentes.map((a) => a.email),
+  });
 
   await prisma.$disconnect();
   await pool.end();
