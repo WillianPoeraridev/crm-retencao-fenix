@@ -1,5 +1,6 @@
 import { getCompetenciaAtual, getSolicitacoesByCompetencia } from "@/lib/retencao";
 import { TabelaSolicitacoes } from "./tabela-solicitacoes";
+import { BotaoNovaSolicitacao } from "./botao-nova-solicitacao";
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -28,9 +29,12 @@ export default async function RetencaoPage() {
 
   return (
     <main style={{ padding: 24, maxWidth: 1200, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 22, fontWeight: 700 }}>
-        Retenção — {MESES[competencia.mes - 1]} {competencia.ano}
-      </h1>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700 }}>
+          Retenção — {MESES[competencia.mes - 1]} {competencia.ano}
+        </h1>
+        <BotaoNovaSolicitacao />
+      </div>
 
       {/* Cards de resumo */}
       <div style={{ display: "flex", gap: 16, marginTop: 20, flexWrap: "wrap" }}>
