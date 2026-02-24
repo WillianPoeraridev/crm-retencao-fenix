@@ -1,7 +1,13 @@
-import type { NextAuthOptions } from "next-auth";
+import type { NextAuthOptions, User as NextAuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
+import type { Role } from "@prisma/client";
+
+// Estende o tipo base do NextAuth para incluir os campos do nosso User
+interface AppUser extends NextAuthUser {
+  role: Role;
+}
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
@@ -34,24 +40,23 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
-        } as any;
+        } satisfies AppUser;
       },
     }),
   ],
 
   callbacks: {
     async jwt({ token, user }) {
-      // quando loga, o "user" vem preenchido
       if (user) {
-        token.id = (user as any).id;
-        token.role = (user as any).role;
+        token.id = user.id;
+        token.role = (user as AppUser).role;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).role = token.role;
+        session.user.id = token.id as string;
+        session.user.role = token.role as Role;
       }
       return session;
     },
