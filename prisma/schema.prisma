@@ -37,6 +37,7 @@ enum MotivoCancelamento {
   TROCA_PROVEDOR
   PROBLEMAS_FINANC
   OUTROS
+  INADIMPLENCIA_90  // usado automaticamente quando status = INADIMPLENCIA
 }
 
 enum Cidade {

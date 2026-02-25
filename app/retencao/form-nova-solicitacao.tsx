@@ -103,7 +103,17 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
   const [erro, setErro] = useState<string | null>(null);
 
   function set(field: string, value: string) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => {
+      const next = { ...prev, [field]: value };
+      if (field === "status") {
+        if (value === "INADIMPLENCIA") {
+          next.motivo = "INADIMPLENCIA_90";
+        } else if (prev.status === "INADIMPLENCIA") {
+          next.motivo = "";
+        }
+      }
+      return next;
+    });
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -244,19 +254,35 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
                 ))}
               </select>
             </div>
-            <div style={CAMPO}>
-              <label style={LABEL}>Motivo do cancelamento</label>
-              <select
-                style={INPUT}
-                value={form.motivo}
-                onChange={(e) => set("motivo", e.target.value)}
-              >
-                <option value="">Selecione...</option>
-                {MOTIVOS.map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </div>
+
+            {/* Motivo — condicional por status */}
+            {form.status === "CANCELADO" && (
+              <div style={CAMPO}>
+                <label style={LABEL}>Motivo *</label>
+                <select
+                  style={INPUT}
+                  value={form.motivo}
+                  onChange={(e) => set("motivo", e.target.value)}
+                  required
+                >
+                  <option value="">Selecione...</option>
+                  {MOTIVOS.map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {form.status === "INADIMPLENCIA" && (
+              <div style={CAMPO}>
+                <label style={LABEL}>Motivo</label>
+                <input
+                  style={{ ...INPUT, backgroundColor: "#f3f4f6", color: "#6b7280" }}
+                  value="90 + Inadimplência"
+                  disabled
+                />
+              </div>
+            )}
           </div>
 
           {/* Retirada */}

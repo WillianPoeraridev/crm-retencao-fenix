@@ -20,6 +20,7 @@ const MOTIVO_LABEL: Record<string, string> = {
   TROCA_PROVEDOR: "Troca de Provedor",
   PROBLEMAS_FINANC: "Problemas Financeiros",
   OUTROS: "Outros",
+  INADIMPLENCIA_90: "90 + Inadimplência",
 };
 
 function formatarData(data: Date) {
