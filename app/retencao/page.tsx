@@ -2,6 +2,8 @@ import { getCompetenciaByAnoMes, getSolicitacoesByCompetencia, resolverAnoMes } 
 import { TabelaSolicitacoes } from "./tabela-solicitacoes";
 import { BotaoNovaSolicitacao } from "./botao-nova-solicitacao";
 import { SeletorCompetencia } from "./seletor-competencia";
+import { BlocoInformacoes } from "./bloco-informacoes";
+import { AbasRetencao } from "./abas-retencao";
 
 export default async function RetencaoPage({
   searchParams,
@@ -19,6 +21,11 @@ export default async function RetencaoPage({
   const totalCancelados = solicitacoes.filter((s) => s.status === "CANCELADO").length;
   const totalRetidos = solicitacoes.filter((s) => s.status === "RETIDO").length;
   const totalInadimplencia = solicitacoes.filter((s) => s.status === "INADIMPLENCIA").length;
+  const totalEmpresa = totalCancelados + totalInadimplencia;
+
+  const saldo = competencia?.metaCancelamentos != null
+    ? competencia.metaCancelamentos - totalCancelados
+    : null;
 
   return (
     <main style={{ padding: 24, maxWidth: 1200, margin: "0 auto" }}>
@@ -44,16 +51,28 @@ export default async function RetencaoPage({
         <BotaoNovaSolicitacao />
       </div>
 
-      {/* Cards de resumo */}
       {competencia ? (
         <>
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          {/* Cards de resumo */}
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
             <CardResumo label="Cancelados" valor={totalCancelados} meta={competencia.metaCancelamentos} cor="#b91c1c" />
             <CardResumo label="Retidos" valor={totalRetidos} cor="#15803d" />
             <CardResumo label="Inadimplência" valor={totalInadimplencia} cor="#b45309" />
-            <CardResumo label="Total de Registros" valor={solicitacoes.length} />
+            <CardResumo label="Total Empresa" valor={totalEmpresa} />
+            {saldo !== null && (
+              <CardResumo
+                label="Saldo"
+                valor={saldo}
+                cor={saldo >= 0 ? "#15803d" : "#b91c1c"}
+              />
+            )}
           </div>
-          <TabelaSolicitacoes solicitacoes={solicitacoes} />
+
+          {/* Abas: Tabela | Informações */}
+          <AbasRetencao>
+            <TabelaSolicitacoes solicitacoes={solicitacoes} />
+            <BlocoInformacoes solicitacoes={solicitacoes} competencia={competencia} />
+          </AbasRetencao>
         </>
       ) : (
         <div
