@@ -1,32 +1,20 @@
-import { getCompetenciaAtual, getSolicitacoesByCompetencia } from "@/lib/retencao";
+import { getCompetenciaByAnoMes, getSolicitacoesByCompetencia, resolverAnoMes } from "@/lib/retencao";
 import { TabelaSolicitacoes } from "./tabela-solicitacoes";
 import { BotaoNovaSolicitacao } from "./botao-nova-solicitacao";
-
-const MESES = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
-];
+import { SeletorCompetencia } from "./seletor-competencia";
 
 export default async function RetencaoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ forbidden?: string }>;
+  searchParams: Promise<{ forbidden?: string; ano?: string; mes?: string }>;
 }) {
   const params = await searchParams;
-  const competencia = await getCompetenciaAtual();
+  const { ano, mes } = resolverAnoMes(params);
+  const competencia = await getCompetenciaByAnoMes(ano, mes);
 
-  if (!competencia) {
-    return (
-      <main style={{ padding: 24 }}>
-        <h1>Retenção</h1>
-        <p style={{ color: "#b91c1c", marginTop: 12 }}>
-          Nenhuma competência ativa encontrada para este mês. Contate o administrador.
-        </p>
-      </main>
-    );
-  }
-
-  const solicitacoes = await getSolicitacoesByCompetencia(competencia.id);
+  const solicitacoes = competencia
+    ? await getSolicitacoesByCompetencia(competencia.id)
+    : [];
 
   const totalCancelados = solicitacoes.filter((s) => s.status === "CANCELADO").length;
   const totalRetidos = solicitacoes.filter((s) => s.status === "RETIDO").length;
@@ -49,23 +37,39 @@ export default async function RetencaoPage({
           Acesso negado. Área restrita para administradores.
         </div>
       )}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700 }}>
-          Retenção — {MESES[competencia.mes - 1]} {competencia.ano}
-        </h1>
+
+      {/* Header: seletor + botão */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
+        <SeletorCompetencia ano={ano} mes={mes} temCompetencia={!!competencia} />
         <BotaoNovaSolicitacao />
       </div>
 
       {/* Cards de resumo */}
-      <div style={{ display: "flex", gap: 16, marginTop: 20, flexWrap: "wrap" }}>
-        <CardResumo label="Cancelados" valor={totalCancelados} meta={competencia.metaCancelamentos} cor="#b91c1c" />
-        <CardResumo label="Retidos" valor={totalRetidos} cor="#15803d" />
-        <CardResumo label="Inadimplência" valor={totalInadimplencia} cor="#b45309" />
-        <CardResumo label="Total de Registros" valor={solicitacoes.length} />
-      </div>
-
-      {/* Tabela */}
-      <TabelaSolicitacoes solicitacoes={solicitacoes} />
+      {competencia ? (
+        <>
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+            <CardResumo label="Cancelados" valor={totalCancelados} meta={competencia.metaCancelamentos} cor="#b91c1c" />
+            <CardResumo label="Retidos" valor={totalRetidos} cor="#15803d" />
+            <CardResumo label="Inadimplência" valor={totalInadimplencia} cor="#b45309" />
+            <CardResumo label="Total de Registros" valor={solicitacoes.length} />
+          </div>
+          <TabelaSolicitacoes solicitacoes={solicitacoes} />
+        </>
+      ) : (
+        <div
+          style={{
+            marginTop: 32,
+            padding: 24,
+            border: "1px dashed #d1d5db",
+            borderRadius: 8,
+            textAlign: "center",
+            color: "#6b7280",
+          }}
+        >
+          <p style={{ fontSize: 16, marginBottom: 8 }}>Nenhuma competência cadastrada para este mês.</p>
+          <p style={{ fontSize: 13 }}>Um administrador precisa configurar os dados desta competência.</p>
+        </div>
+      )}
     </main>
   );
 }
