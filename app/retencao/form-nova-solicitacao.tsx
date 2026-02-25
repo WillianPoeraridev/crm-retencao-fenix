@@ -78,6 +78,7 @@ interface Solicitacao {
 }
 
 interface Props {
+  competenciaId?: string;  // obrigatório na criação, ignorado na edição
   solicitacao?: Solicitacao; // se vier, é edição; senão é criação
   onSucesso: () => void;
   onCancelar: () => void;
@@ -89,7 +90,7 @@ function formatarDataParaInput(data: Date | null): string {
   return d.toISOString().split("T")[0];
 }
 
-export function FormNovaSolicitacao({ solicitacao, onSucesso, onCancelar }: Props) {
+export function FormNovaSolicitacao({ competenciaId, solicitacao, onSucesso, onCancelar }: Props) {
   const router = useRouter();
   const ehEdicao = !!solicitacao;
 
@@ -135,7 +136,10 @@ export function FormNovaSolicitacao({ solicitacao, onSucesso, onCancelar }: Prop
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          ...(ehEdicao ? {} : { competenciaId }),
+        }),
       });
 
       const data = await res.json();

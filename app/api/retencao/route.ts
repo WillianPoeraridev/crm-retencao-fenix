@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getCompetenciaAtual } from "@/lib/retencao";
 import { Cidade, Regiao, StatusRetencao, MotivoCancelamento } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
@@ -12,19 +11,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  // 2. Competência atual — precisa existir para associar a solicitação
-  const competencia = await getCompetenciaAtual();
-  if (!competencia) {
-    return NextResponse.json(
-      { error: "Nenhuma competência ativa para este mês." },
-      { status: 422 }
-    );
-  }
-
-  // 3. Parsing do body
+  // 2. Parsing do body
   const body = await req.json();
 
   const {
+    competenciaId,
     nomeCliente,
     contato,
     bairro,
@@ -36,6 +27,25 @@ export async function POST(req: NextRequest) {
     retiradaTexto,
     agendaRetirada,
   } = body;
+
+  // 3. Validação da competência — vem do front, não do relógio do servidor
+  if (!competenciaId) {
+    return NextResponse.json(
+      { error: "competenciaId é obrigatório." },
+      { status: 400 }
+    );
+  }
+
+  const competencia = await prisma.competencia.findUnique({
+    where: { id: competenciaId },
+  });
+
+  if (!competencia) {
+    return NextResponse.json(
+      { error: "Competência não encontrada." },
+      { status: 404 }
+    );
+  }
 
   // 4. Validação dos campos obrigatórios
   if (!nomeCliente || !cidade || !regiao || !status) {
@@ -59,7 +69,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Motivo inválido: ${motivo}` }, { status: 400 });
   }
 
-  // 6. Criação no banco
+  // 6. Cancelado sem motivo — não pode
+  if (status === "CANCELADO" && !motivo) {
+    return NextResponse.json(
+      { error: "Motivo é obrigatório quando o status é CANCELADO." },
+      { status: 400 }
+    );
+  }
+
+  // 7. Criação no banco
   const solicitacao = await prisma.solicitacaoRetencao.create({
     data: {
       competenciaId: competencia.id,

@@ -48,7 +48,7 @@ export default async function RetencaoPage({
       {/* Header: seletor + botão */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
         <SeletorCompetencia ano={ano} mes={mes} temCompetencia={!!competencia} />
-        <BotaoNovaSolicitacao />
+        <BotaoNovaSolicitacao competenciaId={competencia?.id ?? null} />
       </div>
 
       {competencia ? (

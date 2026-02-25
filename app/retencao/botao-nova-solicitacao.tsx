@@ -3,20 +3,25 @@
 import { useState } from "react";
 import { FormNovaSolicitacao } from "./form-nova-solicitacao";
 
-export function BotaoNovaSolicitacao() {
+interface Props {
+  competenciaId: string | null;
+}
+
+export function BotaoNovaSolicitacao({ competenciaId }: Props) {
   const [aberto, setAberto] = useState(false);
 
   return (
     <>
       <button
         onClick={() => setAberto(true)}
+        disabled={!competenciaId}
         style={{
           padding: "8px 18px",
           border: "none",
           borderRadius: 6,
-          background: "#2563eb",
+          background: competenciaId ? "#2563eb" : "#9ca3af",
           color: "#fff",
-          cursor: "pointer",
+          cursor: competenciaId ? "pointer" : "not-allowed",
           fontSize: 14,
           fontWeight: 600,
         }}
@@ -24,8 +29,9 @@ export function BotaoNovaSolicitacao() {
         + Nova Solicitação
       </button>
 
-      {aberto && (
+      {aberto && competenciaId && (
         <FormNovaSolicitacao
+          competenciaId={competenciaId}
           onSucesso={() => setAberto(false)}
           onCancelar={() => setAberto(false)}
         />

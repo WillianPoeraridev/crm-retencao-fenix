@@ -43,6 +43,14 @@ export async function PATCH(
     return NextResponse.json({ error: "Motivo invalido: " + motivo }, { status: 400 });
   }
 
+  // Cancelado sem motivo — não pode
+  if (status === "CANCELADO" && !motivo) {
+    return NextResponse.json(
+      { error: "Motivo é obrigatório quando o status é CANCELADO." },
+      { status: 400 }
+    );
+  }
+
   const atualizado = await prisma.solicitacaoRetencao.update({
     where: { id },
     data: {
