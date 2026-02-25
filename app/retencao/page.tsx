@@ -1,5 +1,5 @@
 import { getCompetenciaByAnoMes, getSolicitacoesByCompetencia, resolverAnoMes } from "@/lib/retencao";
-import { TabelaSolicitacoes } from "./tabela-solicitacoes";
+import { FiltrosTabela } from "./filtros-tabela";
 import { BotaoNovaSolicitacao } from "./botao-nova-solicitacao";
 import { SeletorCompetencia } from "./seletor-competencia";
 import { BlocoInformacoes } from "./bloco-informacoes";
@@ -70,7 +70,7 @@ export default async function RetencaoPage({
 
           {/* Abas: Tabela | Informações */}
           <AbasRetencao>
-            <TabelaSolicitacoes solicitacoes={solicitacoes} />
+            <FiltrosTabela solicitacoes={solicitacoes} />
             <BlocoInformacoes solicitacoes={solicitacoes} competencia={competencia} />
           </AbasRetencao>
         </>
