@@ -49,18 +49,8 @@ const STATUS = [
   ["INADIMPLENCIA", "Inadimplência"],
 ] as const;
 
-const CAMPO: React.CSSProperties = {
-  display: "grid",
-  gap: 4,
-  marginBottom: 12,
-};
-
-const LABEL: React.CSSProperties = {
-  fontSize: 13,
-  fontWeight: 600,
-  color: "#374151",
-};
-
+const CAMPO: React.CSSProperties = { display: "grid", gap: 4, marginBottom: 12 };
+const LABEL: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "#374151" };
 const INPUT: React.CSSProperties = {
   padding: "8px 10px",
   border: "1px solid #d1d5db",
@@ -71,32 +61,49 @@ const INPUT: React.CSSProperties = {
   color: "#111827",
   backgroundColor: "#fff",
 };
+const GRID2: React.CSSProperties = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 };
 
-const GRID2: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 12,
-};
+interface Solicitacao {
+  id: string;
+  nomeCliente: string;
+  contato: string | null;
+  bairro: string | null;
+  cidade: string;
+  regiao: string;
+  status: string;
+  motivo: string | null;
+  observacoes: string | null;
+  retiradaTexto: string | null;
+  agendaRetirada: Date | null;
+}
 
 interface Props {
+  solicitacao?: Solicitacao; // se vier, é edição; senão é criação
   onSucesso: () => void;
   onCancelar: () => void;
 }
 
-export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
+function formatarDataParaInput(data: Date | null): string {
+  if (!data) return "";
+  const d = new Date(data);
+  return d.toISOString().split("T")[0];
+}
+
+export function FormNovaSolicitacao({ solicitacao, onSucesso, onCancelar }: Props) {
   const router = useRouter();
+  const ehEdicao = !!solicitacao;
 
   const [form, setForm] = useState({
-    nomeCliente: "",
-    contato: "",
-    bairro: "",
-    cidade: "",
-    regiao: "",
-    status: "",
-    motivo: "",
-    observacoes: "",
-    retiradaTexto: "",
-    agendaRetirada: "",
+    nomeCliente: solicitacao?.nomeCliente ?? "",
+    contato: solicitacao?.contato ?? "",
+    bairro: solicitacao?.bairro ?? "",
+    cidade: solicitacao?.cidade ?? "",
+    regiao: solicitacao?.regiao ?? "",
+    status: solicitacao?.status ?? "",
+    motivo: solicitacao?.motivo ?? "",
+    observacoes: solicitacao?.observacoes ?? "",
+    retiradaTexto: solicitacao?.retiradaTexto ?? "",
+    agendaRetirada: formatarDataParaInput(solicitacao?.agendaRetirada ?? null),
   });
 
   const [enviando, setEnviando] = useState(false);
@@ -122,8 +129,11 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
     setEnviando(true);
 
     try {
-      const res = await fetch("/api/retencao", {
-        method: "POST",
+      const url = ehEdicao ? `/api/retencao/${solicitacao.id}` : "/api/retencao";
+      const method = ehEdicao ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
@@ -135,7 +145,7 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
         return;
       }
 
-      router.refresh(); // recarrega os dados do Server Component
+      router.refresh();
       onSucesso();
     } catch {
       setErro("Erro de conexão. Tente novamente.");
@@ -169,11 +179,10 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
         }}
       >
         <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "#111827" }}>
-          Nova Solicitação
+          {ehEdicao ? "Editar Solicitação" : "Nova Solicitação"}
         </h2>
 
         <form onSubmit={onSubmit}>
-          {/* Cliente */}
           <div style={CAMPO}>
             <label style={LABEL}>Nome do cliente *</label>
             <input
@@ -206,7 +215,6 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
             </div>
           </div>
 
-          {/* Localização */}
           <div style={GRID2}>
             <div style={CAMPO}>
               <label style={LABEL}>Cidade *</label>
@@ -238,7 +246,7 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
             </div>
           </div>
 
-          {/* Status e Motivo */}
+          {/* Status e Motivo — condicional */}
           <div style={GRID2}>
             <div style={CAMPO}>
               <label style={LABEL}>Status *</label>
@@ -255,7 +263,6 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
               </select>
             </div>
 
-            {/* Motivo — condicional por status */}
             {form.status === "CANCELADO" && (
               <div style={CAMPO}>
                 <label style={LABEL}>Motivo *</label>
@@ -285,7 +292,6 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
             )}
           </div>
 
-          {/* Retirada */}
           <div style={GRID2}>
             <div style={CAMPO}>
               <label style={LABEL}>Situação da retirada</label>
@@ -307,7 +313,6 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
             </div>
           </div>
 
-          {/* Observações */}
           <div style={CAMPO}>
             <label style={LABEL}>Observações</label>
             <textarea
@@ -318,12 +323,10 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
             />
           </div>
 
-          {/* Erro */}
           {erro && (
             <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 12 }}>{erro}</p>
           )}
 
-          {/* Ações */}
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
             <button
               type="button"
@@ -354,7 +357,7 @@ export function FormNovaSolicitacao({ onSucesso, onCancelar }: Props) {
                 fontWeight: 600,
               }}
             >
-              {enviando ? "Salvando..." : "Salvar"}
+              {enviando ? "Salvando..." : ehEdicao ? "Salvar alterações" : "Salvar"}
             </button>
           </div>
         </form>
