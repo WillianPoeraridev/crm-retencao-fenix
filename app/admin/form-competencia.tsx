@@ -22,7 +22,7 @@ interface Competencia {
 }
 
 interface Props {
-  competencia?: Competencia; // se vier, é edição; se não, é criação
+  competencia?: Competencia;
   onSucesso: () => void;
   onCancelar: () => void;
 }
@@ -73,10 +73,7 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
     setEnviando(true);
 
     try {
-      const url = ehEdicao
-        ? `/api/competencia/${competencia.id}`
-        : "/api/competencia";
-
+      const url = ehEdicao ? `/api/competencia/${competencia.id}` : "/api/competencia";
       const method = ehEdicao ? "PATCH" : "POST";
 
       const res = await fetch(url, {
@@ -112,6 +109,7 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
 
   return (
     <div
+      onClick={onCancelar}
       style={{
         position: "fixed",
         inset: 0,
@@ -124,6 +122,7 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
       }}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: "#fff",
           borderRadius: 10,
@@ -139,17 +138,11 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
         </h2>
 
         <form onSubmit={onSubmit}>
-          {/* Mês e Ano — só na criação */}
           {!ehEdicao && (
             <div style={GRID2}>
               <div style={CAMPO}>
                 <label style={LABEL}>Mês *</label>
-                <select
-                  style={INPUT}
-                  value={form.mes}
-                  onChange={(e) => set("mes", e.target.value)}
-                  required
-                >
+                <select style={INPUT} value={form.mes} onChange={(e) => set("mes", e.target.value)} required>
                   <option value="">Selecione...</option>
                   {MESES.map(([valor, nome]) => (
                     <option key={valor} value={valor}>{nome}</option>
@@ -158,156 +151,64 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
               </div>
               <div style={CAMPO}>
                 <label style={LABEL}>Ano *</label>
-                <input
-                  style={INPUT}
-                  type="number"
-                  value={form.ano}
-                  onChange={(e) => set("ano", e.target.value)}
-                  min={2020}
-                  max={2100}
-                  required
-                />
+                <input style={INPUT} type="number" value={form.ano} onChange={(e) => set("ano", e.target.value)} min={2020} max={2100} required />
               </div>
             </div>
           )}
 
           {ehEdicao && (
             <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 16 }}>
-              Editando:{" "}
-              <strong style={{ color: "#111827" }}>
-                {MESES.find(([v]) => v === competencia.mes)?.[1]} {competencia.ano}
-              </strong>
+              Editando: <strong style={{ color: "#111827" }}>{MESES.find(([v]) => v === competencia.mes)?.[1]} {competencia.ano}</strong>
             </p>
           )}
 
-          {/* Metas */}
           <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 14, marginBottom: 4 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Metas
-            </p>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Metas</p>
           </div>
 
           <div style={GRID2}>
             <div style={CAMPO}>
               <label style={LABEL}>Meta de cancelamentos</label>
-              <input
-                style={INPUT}
-                type="number"
-                value={form.metaCancelamentos}
-                onChange={(e) => set("metaCancelamentos", e.target.value)}
-                placeholder="ex: 220"
-                min={0}
-              />
+              <input style={INPUT} type="number" value={form.metaCancelamentos} onChange={(e) => set("metaCancelamentos", e.target.value)} placeholder="ex: 220" min={0} />
             </div>
             <div style={CAMPO}>
               <label style={LABEL}>Meta diária (manual)</label>
-              <input
-                style={INPUT}
-                type="number"
-                value={form.metaDiariaManual}
-                onChange={(e) => set("metaDiariaManual", e.target.value)}
-                placeholder="ex: 9"
-                min={0}
-              />
+              <input style={INPUT} type="number" value={form.metaDiariaManual} onChange={(e) => set("metaDiariaManual", e.target.value)} placeholder="ex: 9" min={0} />
             </div>
           </div>
 
-          {/* Dias */}
           <div style={GRID2}>
             <div style={CAMPO}>
               <label style={LABEL}>Dias úteis</label>
-              <input
-                style={INPUT}
-                type="number"
-                value={form.diasUteis}
-                onChange={(e) => set("diasUteis", e.target.value)}
-                placeholder="ex: 24"
-                min={0}
-              />
+              <input style={INPUT} type="number" value={form.diasUteis} onChange={(e) => set("diasUteis", e.target.value)} placeholder="ex: 24" min={0} />
             </div>
             <div style={CAMPO}>
               <label style={LABEL}>Dias trabalhados</label>
-              <input
-                style={INPUT}
-                type="number"
-                value={form.diasTrabalhados}
-                onChange={(e) => set("diasTrabalhados", e.target.value)}
-                placeholder="ex: 19"
-                min={0}
-              />
+              <input style={INPUT} type="number" value={form.diasTrabalhados} onChange={(e) => set("diasTrabalhados", e.target.value)} placeholder="ex: 19" min={0} />
             </div>
           </div>
 
-          {/* Financeiro */}
           <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 14, marginBottom: 4 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Financeiro
-            </p>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Financeiro</p>
           </div>
 
           <div style={GRID2}>
             <div style={CAMPO}>
               <label style={LABEL}>Orçamento de comissão (R$)</label>
-              <input
-                style={INPUT}
-                type="number"
-                step="0.01"
-                value={form.orcamentoComissao}
-                onChange={(e) => set("orcamentoComissao", e.target.value)}
-                placeholder="ex: 2000.00"
-                min={0}
-              />
+              <input style={INPUT} type="number" step="0.01" value={form.orcamentoComissao} onChange={(e) => set("orcamentoComissao", e.target.value)} placeholder="ex: 2000.00" min={0} />
               <span style={HINT}>Valor em reais (ex: 2000.00)</span>
             </div>
             <div style={CAMPO}>
               <label style={LABEL}>Base de clientes ativos</label>
-              <input
-                style={INPUT}
-                type="number"
-                value={form.baseAtivosTotal}
-                onChange={(e) => set("baseAtivosTotal", e.target.value)}
-                placeholder="ex: 19554"
-                min={0}
-              />
+              <input style={INPUT} type="number" value={form.baseAtivosTotal} onChange={(e) => set("baseAtivosTotal", e.target.value)} placeholder="ex: 19554" min={0} />
             </div>
           </div>
 
-          {erro && (
-            <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 12 }}>{erro}</p>
-          )}
+          {erro && <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 12 }}>{erro}</p>}
 
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
-            <button
-              type="button"
-              onClick={onCancelar}
-              style={{
-                padding: "8px 18px",
-                border: "1px solid #d1d5db",
-                borderRadius: 6,
-                background: "#fff",
-                color: "#374151",
-                cursor: "pointer",
-                fontSize: 14,
-              }}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={enviando}
-              style={{
-                padding: "8px 18px",
-                border: "none",
-                borderRadius: 6,
-                background: enviando ? "#9ca3af" : "#2563eb",
-                color: "#fff",
-                cursor: enviando ? "not-allowed" : "pointer",
-                fontSize: 14,
-                fontWeight: 600,
-              }}
-            >
-              {enviando ? "Salvando..." : ehEdicao ? "Salvar alterações" : "Criar competência"}
-            </button>
+            <button type="button" onClick={onCancelar} style={{ padding: "8px 18px", border: "1px solid #d1d5db", borderRadius: 6, background: "#fff", color: "#374151", cursor: "pointer", fontSize: 14 }}>Cancelar</button>
+            <button type="submit" disabled={enviando} style={{ padding: "8px 18px", border: "none", borderRadius: 6, background: enviando ? "#9ca3af" : "#2563eb", color: "#fff", cursor: enviando ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>{enviando ? "Salvando..." : ehEdicao ? "Salvar alterações" : "Criar competência"}</button>
           </div>
         </form>
       </div>

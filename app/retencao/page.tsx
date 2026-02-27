@@ -1,4 +1,4 @@
-import { getCompetenciaByAnoMes, getSolicitacoesByCompetencia, resolverAnoMes } from "@/lib/retencao";
+import { getCompetenciaByAnoMes, getSolicitacoesByCompetencia, getCidadesAtivas, resolverAnoMes } from "@/lib/retencao";
 import { FiltrosTabela } from "./filtros-tabela";
 import { BotaoNovaSolicitacao } from "./botao-nova-solicitacao";
 import { SeletorCompetencia } from "./seletor-competencia";
@@ -13,6 +13,7 @@ export default async function RetencaoPage({
   const params = await searchParams;
   const { ano, mes } = resolverAnoMes(params);
   const competencia = await getCompetenciaByAnoMes(ano, mes);
+  const cidades = await getCidadesAtivas();
 
   const solicitacoes = competencia
     ? await getSolicitacoesByCompetencia(competencia.id)
@@ -48,7 +49,7 @@ export default async function RetencaoPage({
       {/* Header: seletor + botão */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
         <SeletorCompetencia ano={ano} mes={mes} temCompetencia={!!competencia} />
-        <BotaoNovaSolicitacao competenciaId={competencia?.id ?? null} />
+        <BotaoNovaSolicitacao competenciaId={competencia?.id ?? null} cidades={cidades} />
       </div>
 
       {competencia ? (
@@ -70,7 +71,7 @@ export default async function RetencaoPage({
 
           {/* Abas: Tabela | Informações */}
           <AbasRetencao>
-            <FiltrosTabela solicitacoes={solicitacoes} />
+            <FiltrosTabela solicitacoes={solicitacoes} cidades={cidades} />
             <BlocoInformacoes solicitacoes={solicitacoes} competencia={competencia} />
           </AbasRetencao>
         </>

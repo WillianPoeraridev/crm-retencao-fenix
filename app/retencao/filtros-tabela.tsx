@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { SolicitacaoComAtendente } from "@/lib/retencao";
+import type { SolicitacaoComAtendente, CidadeOption } from "@/lib/retencao";
 import { TabelaSolicitacoes } from "./tabela-solicitacoes";
 
 const STATUS_OPCOES = [
@@ -23,14 +23,14 @@ const INPUT: React.CSSProperties = {
 
 interface Props {
   solicitacoes: SolicitacaoComAtendente[];
+  cidades: CidadeOption[];
 }
 
-export function FiltrosTabela({ solicitacoes }: Props) {
+export function FiltrosTabela({ solicitacoes, cidades }: Props) {
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState("");
   const [atendenteId, setAtendenteId] = useState("");
 
-  // Monta lista de atendentes únicos a partir dos dados
   const atendentes = useMemo(() => {
     const mapa = new Map<string, string>();
     for (const s of solicitacoes) {
@@ -39,7 +39,6 @@ export function FiltrosTabela({ solicitacoes }: Props) {
     return Array.from(mapa.entries()).sort((a, b) => a[1].localeCompare(b[1]));
   }, [solicitacoes]);
 
-  // Filtra o array em memória
   const filtradas = useMemo(() => {
     return solicitacoes.filter((s) => {
       if (busca && !s.nomeCliente.toLowerCase().includes(busca.toLowerCase())) return false;
@@ -73,7 +72,6 @@ export function FiltrosTabela({ solicitacoes }: Props) {
           borderRadius: 8,
         }}
       >
-        {/* Busca por nome */}
         <input
           style={{ ...INPUT, minWidth: 200, flex: 1 }}
           placeholder="Buscar por nome do cliente..."
@@ -81,7 +79,6 @@ export function FiltrosTabela({ solicitacoes }: Props) {
           onChange={(e) => setBusca(e.target.value)}
         />
 
-        {/* Filtro por status */}
         <select
           style={{ ...INPUT, minWidth: 160 }}
           value={status}
@@ -92,7 +89,6 @@ export function FiltrosTabela({ solicitacoes }: Props) {
           ))}
         </select>
 
-        {/* Filtro por atendente */}
         <select
           style={{ ...INPUT, minWidth: 160 }}
           value={atendenteId}
@@ -104,7 +100,6 @@ export function FiltrosTabela({ solicitacoes }: Props) {
           ))}
         </select>
 
-        {/* Contador + limpar */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
           <span style={{ fontSize: 12, color: "#6b7280", whiteSpace: "nowrap" }}>
             {filtradas.length} de {solicitacoes.length} registro{solicitacoes.length !== 1 ? "s" : ""}
@@ -129,8 +124,7 @@ export function FiltrosTabela({ solicitacoes }: Props) {
         </div>
       </div>
 
-      {/* Tabela filtrada */}
-      <TabelaSolicitacoes solicitacoes={filtradas} />
+      <TabelaSolicitacoes solicitacoes={filtradas} cidades={cidades} />
     </div>
   );
 }

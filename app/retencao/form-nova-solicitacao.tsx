@@ -2,30 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-const CIDADES = [
-  ["CACHOEIRINHA", "Cachoeirinha"],
-  ["GRAVATAI", "Gravataí"],
-  ["TRAMANDAI", "Tramandaí"],
-  ["IMBE", "Imbé"],
-  ["CIDREIRA", "Cidreira"],
-  ["OSORIO", "Osório"],
-  ["SAO_LEOPOLDO", "São Leopoldo"],
-  ["NOVO_HAMBURGO", "Novo Hamburgo"],
-  ["IVOTI", "Ivoti"],
-  ["TAQUARA", "Taquara"],
-  ["IGREJINHA", "Igrejinha"],
-  ["PAROBE", "Parobé"],
-  ["ESTANCIA_VELHA", "Estância Velha"],
-  ["DOIS_IRMAOS", "Dois Irmãos"],
-  ["CAMPO_BOM", "Campo Bom"],
-  ["SAPUCAIA", "Sapucaia do Sul"],
-  ["ESTEIO", "Esteio"],
-  ["CANOAS", "Canoas"],
-  ["PORTO_ALEGRE", "Porto Alegre"],
-  ["VIAMAO", "Viamão"],
-  ["ALVORADA", "Alvorada"],
-] as const;
+import type { CidadeOption } from "@/lib/retencao";
 
 const REGIOES = [
   ["SINOS", "Sinos"],
@@ -78,8 +55,9 @@ interface Solicitacao {
 }
 
 interface Props {
-  competenciaId?: string;  // obrigatório na criação, ignorado na edição
-  solicitacao?: Solicitacao; // se vier, é edição; senão é criação
+  competenciaId?: string;
+  cidades: CidadeOption[];
+  solicitacao?: Solicitacao;
   onSucesso: () => void;
   onCancelar: () => void;
 }
@@ -90,7 +68,7 @@ function formatarDataParaInput(data: Date | null): string {
   return d.toISOString().split("T")[0];
 }
 
-export function FormNovaSolicitacao({ competenciaId, solicitacao, onSucesso, onCancelar }: Props) {
+export function FormNovaSolicitacao({ competenciaId, cidades, solicitacao, onSucesso, onCancelar }: Props) {
   const router = useRouter();
   const ehEdicao = !!solicitacao;
 
@@ -160,6 +138,7 @@ export function FormNovaSolicitacao({ competenciaId, solicitacao, onSucesso, onC
 
   return (
     <div
+      onClick={onCancelar}
       style={{
         position: "fixed",
         inset: 0,
@@ -172,6 +151,7 @@ export function FormNovaSolicitacao({ competenciaId, solicitacao, onSucesso, onC
       }}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: "#fff",
           borderRadius: 10,
@@ -229,8 +209,8 @@ export function FormNovaSolicitacao({ competenciaId, solicitacao, onSucesso, onC
                 required
               >
                 <option value="">Selecione...</option>
-                {CIDADES.map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
+                {cidades.map((c) => (
+                  <option key={c.id} value={c.id}>{c.nome}</option>
                 ))}
               </select>
             </div>
@@ -250,7 +230,7 @@ export function FormNovaSolicitacao({ competenciaId, solicitacao, onSucesso, onC
             </div>
           </div>
 
-          {/* Status e Motivo — condicional */}
+          {/* Status e Motivo */}
           <div style={GRID2}>
             <div style={CAMPO}>
               <label style={LABEL}>Status *</label>

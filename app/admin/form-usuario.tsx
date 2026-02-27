@@ -61,6 +61,7 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
 
   return (
     <div
+      onClick={onCancelar}
       style={{
         position: "fixed",
         inset: 0,
@@ -73,6 +74,7 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
       }}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: "#fff",
           borderRadius: 10,
@@ -88,74 +90,22 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
         <form onSubmit={onSubmit}>
           <div style={CAMPO}>
             <label style={LABEL}>Nome *</label>
-            <input
-              style={INPUT}
-              value={form.name}
-              onChange={(e) => set("name", e.target.value)}
-              placeholder="Nome completo"
-              required
-            />
+            <input style={INPUT} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Nome completo" required />
           </div>
           <div style={CAMPO}>
             <label style={LABEL}>Email *</label>
-            <input
-              style={INPUT}
-              type="email"
-              value={form.email}
-              onChange={(e) => set("email", e.target.value)}
-              placeholder="atendente@fenixfibra.com.br"
-              required
-            />
+            <input style={INPUT} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="atendente@fenixfibra.com.br" required />
           </div>
           <div style={CAMPO}>
             <label style={LABEL}>Senha provisória *</label>
-            <input
-              style={INPUT}
-              type="password"
-              value={form.password}
-              onChange={(e) => set("password", e.target.value)}
-              placeholder="Mínimo 6 caracteres"
-              required
-              minLength={6}
-            />
+            <input style={INPUT} type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Mínimo 6 caracteres" required minLength={6} />
           </div>
 
-          {erro && (
-            <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 12 }}>{erro}</p>
-          )}
+          {erro && <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 12 }}>{erro}</p>}
 
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
-            <button
-              type="button"
-              onClick={onCancelar}
-              style={{
-                padding: "8px 18px",
-                border: "1px solid #d1d5db",
-                borderRadius: 6,
-                background: "#fff",
-                color: "#374151",
-                cursor: "pointer",
-                fontSize: 14,
-              }}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={enviando}
-              style={{
-                padding: "8px 18px",
-                border: "none",
-                borderRadius: 6,
-                background: enviando ? "#9ca3af" : "#2563eb",
-                color: "#fff",
-                cursor: enviando ? "not-allowed" : "pointer",
-                fontSize: 14,
-                fontWeight: 600,
-              }}
-            >
-              {enviando ? "Criando..." : "Criar atendente"}
-            </button>
+            <button type="button" onClick={onCancelar} style={{ padding: "8px 18px", border: "1px solid #d1d5db", borderRadius: 6, background: "#fff", color: "#374151", cursor: "pointer", fontSize: 14 }}>Cancelar</button>
+            <button type="submit" disabled={enviando} style={{ padding: "8px 18px", border: "none", borderRadius: 6, background: enviando ? "#9ca3af" : "#2563eb", color: "#fff", cursor: enviando ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>{enviando ? "Criando..." : "Criar atendente"}</button>
           </div>
         </form>
       </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FormUsuario } from "./form-usuario";
+import { Toast } from "@/app/toast";
 
 interface Usuario {
   id: string;
@@ -14,16 +15,17 @@ interface Usuario {
 
 interface Props {
   usuarios: Usuario[];
-  sessaoId: string; // id do admin logado — para bloquear desativar a si mesmo
+  sessaoId: string;
 }
 
 export function AdminUsuarios({ usuarios, sessaoId }: Props) {
   const router = useRouter();
   const [criando, setCriando] = useState(false);
-  const [redefinindo, setRedefinindo] = useState<string | null>(null); // id do usuário
+  const [redefinindo, setRedefinindo] = useState<string | null>(null);
   const [novaSenha, setNovaSenha] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, setCarregando] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   async function toggleAtivo(id: string, ativo: boolean) {
     setErro(null);
@@ -37,6 +39,7 @@ export function AdminUsuarios({ usuarios, sessaoId }: Props) {
       const data = await res.json();
       if (!res.ok) { setErro(data.error ?? "Erro ao atualizar."); return; }
       router.refresh();
+      setToast(ativo ? "Usuário desativado." : "Usuário ativado.");
     } catch {
       setErro("Erro de conexão.");
     } finally {
@@ -58,11 +61,17 @@ export function AdminUsuarios({ usuarios, sessaoId }: Props) {
       if (!res.ok) { setErro(data.error ?? "Erro ao redefinir senha."); return; }
       setRedefinindo(null);
       setNovaSenha("");
+      setToast("Senha redefinida com sucesso!");
     } catch {
       setErro("Erro de conexão.");
     } finally {
       setCarregando(null);
     }
+  }
+
+  function handleSucessoCriacao() {
+    setCriando(false);
+    setToast("Atendente criado com sucesso!");
   }
 
   return (
@@ -120,7 +129,6 @@ export function AdminUsuarios({ usuarios, sessaoId }: Props) {
                   </span>
                 </td>
                 <td style={{ padding: "10px 16px", whiteSpace: "nowrap" }}>
-                  {/* Não mostra ações para o próprio admin logado */}
                   {u.id !== sessaoId && (
                     <>
                       <button
@@ -139,7 +147,6 @@ export function AdminUsuarios({ usuarios, sessaoId }: Props) {
                     </>
                   )}
 
-                  {/* Inline: campo de nova senha */}
                   {redefinindo === u.id && (
                     <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 6 }}>
                       <input
@@ -173,10 +180,12 @@ export function AdminUsuarios({ usuarios, sessaoId }: Props) {
 
       {criando && (
         <FormUsuario
-          onSucesso={() => setCriando(false)}
+          onSucesso={handleSucessoCriacao}
           onCancelar={() => setCriando(false)}
         />
       )}
+
+      {toast && <Toast mensagem={toast} onClose={() => setToast(null)} />}
     </>
   );
 }

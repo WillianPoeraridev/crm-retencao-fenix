@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { SolicitacaoComAtendente } from "@/lib/retencao";
+import type { SolicitacaoComAtendente, CidadeOption } from "@/lib/retencao";
 import { FormNovaSolicitacao } from "./form-nova-solicitacao";
+import { Toast } from "@/app/toast";
 
 const STATUS_LABEL: Record<string, string> = {
   CANCELADO: "Cancelado",
@@ -32,22 +33,22 @@ function formatarData(data: Date) {
   return new Intl.DateTimeFormat("pt-BR").format(new Date(data));
 }
 
-function formatarCidade(cidade: string) {
-  return cidade
-    .replace(/_/g, " ")
-    .toLowerCase()
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
 interface Props {
   solicitacoes: SolicitacaoComAtendente[];
+  cidades: CidadeOption[];
 }
 
-export function TabelaSolicitacoes({ solicitacoes }: Props) {
+export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
   const router = useRouter();
   const [editando, setEditando] = useState<SolicitacaoComAtendente | null>(null);
-  const [excluindo, setExcluindo] = useState<string | null>(null); // id sendo excluído
+  const [excluindo, setExcluindo] = useState<string | null>(null);
   const [erroExclusao, setErroExclusao] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  function handleEditSucesso() {
+    setEditando(null);
+    setToast("Solicitação atualizada com sucesso!");
+  }
 
   async function handleExcluir(id: string) {
     if (!confirm("Tem certeza que deseja excluir esta solicitação? Esta ação não pode ser desfeita.")) return;
@@ -63,6 +64,7 @@ export function TabelaSolicitacoes({ solicitacoes }: Props) {
         return;
       }
       router.refresh();
+      setToast("Solicitação excluída com sucesso!");
     } catch {
       setErroExclusao("Erro de conexão. Tente novamente.");
     } finally {
@@ -116,7 +118,7 @@ export function TabelaSolicitacoes({ solicitacoes }: Props) {
                     <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 400 }}>{s.contato}</div>
                   )}
                 </td>
-                <td style={{ padding: "8px 12px", color: "#111827" }}>{formatarCidade(s.cidade)}</td>
+                <td style={{ padding: "8px 12px", color: "#111827" }}>{s.cidadeInfo.nome}</td>
                 <td style={{ padding: "8px 12px", color: "#111827" }}>{s.regiao}</td>
                 <td style={{ padding: "8px 12px" }}>
                   <span style={{ fontWeight: 600, color: STATUS_COR[s.status] ?? "#111827" }}>
@@ -171,10 +173,13 @@ export function TabelaSolicitacoes({ solicitacoes }: Props) {
       {editando && (
         <FormNovaSolicitacao
           solicitacao={editando}
-          onSucesso={() => setEditando(null)}
+          cidades={cidades}
+          onSucesso={handleEditSucesso}
           onCancelar={() => setEditando(null)}
         />
       )}
+
+      {toast && <Toast mensagem={toast} onClose={() => setToast(null)} />}
     </>
   );
 }

@@ -2,13 +2,22 @@
 
 import { useState } from "react";
 import { FormNovaSolicitacao } from "./form-nova-solicitacao";
+import { Toast } from "@/app/toast";
+import type { CidadeOption } from "@/lib/retencao";
 
 interface Props {
   competenciaId: string | null;
+  cidades: CidadeOption[];
 }
 
-export function BotaoNovaSolicitacao({ competenciaId }: Props) {
+export function BotaoNovaSolicitacao({ competenciaId, cidades }: Props) {
   const [aberto, setAberto] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  function handleSucesso() {
+    setAberto(false);
+    setToast("Solicitação criada com sucesso!");
+  }
 
   return (
     <>
@@ -32,10 +41,13 @@ export function BotaoNovaSolicitacao({ competenciaId }: Props) {
       {aberto && competenciaId && (
         <FormNovaSolicitacao
           competenciaId={competenciaId}
-          onSucesso={() => setAberto(false)}
+          cidades={cidades}
+          onSucesso={handleSucesso}
           onCancelar={() => setAberto(false)}
         />
       )}
+
+      {toast && <Toast mensagem={toast} onClose={() => setToast(null)} />}
     </>
   );
 }

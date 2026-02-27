@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FormCompetencia } from "./form-competencia";
+import { Toast } from "@/app/toast";
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -27,6 +28,17 @@ interface Props {
 export function AdminCompetencias({ competencias }: Props) {
   const [criando, setCriando] = useState(false);
   const [editando, setEditando] = useState<Competencia | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  function handleSucessoCriacao() {
+    setCriando(false);
+    setToast("Competência criada com sucesso!");
+  }
+
+  function handleSucessoEdicao() {
+    setEditando(null);
+    setToast("Competência atualizada com sucesso!");
+  }
 
   function formatarReais(cents: number | null) {
     if (cents == null) return "—";
@@ -38,46 +50,19 @@ export function AdminCompetencias({ competencias }: Props) {
 
   return (
     <>
-      {/* Seção de competências */}
-      <div
-        style={{
-          border: "1px solid #e5e7eb",
-          borderRadius: 8,
-          overflow: "hidden",
-        }}
-      >
-        {/* Header da seção */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "14px 20px",
-            backgroundColor: "#f9fafb",
-            borderBottom: "1px solid #e5e7eb",
-          }}
-        >
+      <div style={{ border: "1px solid #e5e7eb", borderRadius: 8, overflow: "hidden" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", backgroundColor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
           <h2 style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
             Competências ({competencias.length})
           </h2>
           <button
             onClick={() => setCriando(true)}
-            style={{
-              padding: "6px 14px",
-              border: "none",
-              borderRadius: 6,
-              background: "#2563eb",
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 600,
-            }}
+            style={{ padding: "6px 14px", border: "none", borderRadius: 6, background: "#2563eb", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
           >
             + Nova competência
           </button>
         </div>
 
-        {/* Lista */}
         {competencias.length === 0 ? (
           <div style={{ padding: 24, textAlign: "center", color: "#6b7280", fontSize: 14 }}>
             Nenhuma competência cadastrada ainda.
@@ -97,43 +82,17 @@ export function AdminCompetencias({ competencias }: Props) {
             </thead>
             <tbody>
               {competencias.map((c, i) => (
-                <tr
-                  key={c.id}
-                  style={{
-                    borderBottom: "1px solid #e5e7eb",
-                    backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb",
-                  }}
-                >
-                  <td style={{ padding: "10px 16px", fontWeight: 600, color: "#111827" }}>
-                    {MESES[c.mes - 1]} {c.ano}
-                  </td>
-                  <td style={{ padding: "10px 16px", color: "#111827" }}>
-                    {c.metaCancelamentos ?? "—"}
-                  </td>
-                  <td style={{ padding: "10px 16px", color: "#111827" }}>
-                    {formatarReais(c.orcamentoComissaoCents)}
-                  </td>
-                  <td style={{ padding: "10px 16px", color: "#111827" }}>
-                    {c.baseAtivosTotal?.toLocaleString("pt-BR") ?? "—"}
-                  </td>
-                  <td style={{ padding: "10px 16px", color: "#111827" }}>
-                    {c.diasUteis ?? "—"}
-                  </td>
-                  <td style={{ padding: "10px 16px", color: "#111827" }}>
-                    {c.diasTrabalhados ?? "—"}
-                  </td>
+                <tr key={c.id} style={{ borderBottom: "1px solid #e5e7eb", backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
+                  <td style={{ padding: "10px 16px", fontWeight: 600, color: "#111827" }}>{MESES[c.mes - 1]} {c.ano}</td>
+                  <td style={{ padding: "10px 16px", color: "#111827" }}>{c.metaCancelamentos ?? "—"}</td>
+                  <td style={{ padding: "10px 16px", color: "#111827" }}>{formatarReais(c.orcamentoComissaoCents)}</td>
+                  <td style={{ padding: "10px 16px", color: "#111827" }}>{c.baseAtivosTotal?.toLocaleString("pt-BR") ?? "—"}</td>
+                  <td style={{ padding: "10px 16px", color: "#111827" }}>{c.diasUteis ?? "—"}</td>
+                  <td style={{ padding: "10px 16px", color: "#111827" }}>{c.diasTrabalhados ?? "—"}</td>
                   <td style={{ padding: "10px 16px" }}>
                     <button
                       onClick={() => setEditando(c)}
-                      style={{
-                        padding: "4px 12px",
-                        border: "1px solid #d1d5db",
-                        borderRadius: 6,
-                        background: "#fff",
-                        color: "#374151",
-                        cursor: "pointer",
-                        fontSize: 13,
-                      }}
+                      style={{ padding: "4px 12px", border: "1px solid #d1d5db", borderRadius: 6, background: "#fff", color: "#374151", cursor: "pointer", fontSize: 13 }}
                     >
                       Editar
                     </button>
@@ -145,10 +104,9 @@ export function AdminCompetencias({ competencias }: Props) {
         )}
       </div>
 
-      {/* Modais */}
       {criando && (
         <FormCompetencia
-          onSucesso={() => setCriando(false)}
+          onSucesso={handleSucessoCriacao}
           onCancelar={() => setCriando(false)}
         />
       )}
@@ -156,10 +114,12 @@ export function AdminCompetencias({ competencias }: Props) {
       {editando && (
         <FormCompetencia
           competencia={editando}
-          onSucesso={() => setEditando(null)}
+          onSucesso={handleSucessoEdicao}
           onCancelar={() => setEditando(null)}
         />
       )}
+
+      {toast && <Toast mensagem={toast} onClose={() => setToast(null)} />}
     </>
   );
 }

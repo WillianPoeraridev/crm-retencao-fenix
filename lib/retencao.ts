@@ -14,13 +14,11 @@ export async function getCompetenciaByAnoMes(ano: number, mes: number) {
 }
 
 // Retorna ano e mês a partir dos searchParams da URL
-// Se não vier nada, usa o mês atual
 export function resolverAnoMes(params: { ano?: string; mes?: string }) {
   const now = new Date();
   const ano = params.ano ? parseInt(params.ano) : now.getFullYear();
   const mes = params.mes ? parseInt(params.mes) : now.getMonth() + 1;
 
-  // sanidade: mês entre 1 e 12, ano razoável
   if (mes < 1 || mes > 12 || ano < 2020 || ano > 2100) {
     return { ano: now.getFullYear(), mes: now.getMonth() + 1 };
   }
@@ -28,7 +26,7 @@ export function resolverAnoMes(params: { ano?: string; mes?: string }) {
   return { ano, mes };
 }
 
-// Busca todas as solicitações de uma competência, com dados do atendente
+// Busca todas as solicitações de uma competência, com atendente e cidade
 export async function getSolicitacoesByCompetencia(competenciaId: string) {
   return prisma.solicitacaoRetencao.findMany({
     where: { competenciaId },
@@ -36,8 +34,20 @@ export async function getSolicitacoesByCompetencia(competenciaId: string) {
       atendente: {
         select: { id: true, name: true },
       },
+      cidadeInfo: {
+        select: { id: true, nome: true },
+      },
     },
     orderBy: { dataRegistro: "desc" },
+  });
+}
+
+// Busca cidades ativas (para dropdowns)
+export async function getCidadesAtivas() {
+  return prisma.cidade.findMany({
+    where: { isActive: true },
+    orderBy: { nome: "asc" },
+    select: { id: true, nome: true },
   });
 }
 
@@ -45,3 +55,5 @@ export async function getSolicitacoesByCompetencia(competenciaId: string) {
 export type SolicitacaoComAtendente = Awaited<
   ReturnType<typeof getSolicitacoesByCompetencia>
 >[number];
+
+export type CidadeOption = { id: string; nome: string };

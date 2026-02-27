@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { AdminCompetencias } from "./admin-competencias";
 import { AdminUsuarios } from "./admin-usuarios";
+import { AdminCidades } from "./admin-cidades";
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
@@ -12,13 +13,17 @@ export default async function AdminPage() {
     redirect("/retencao?forbidden=1");
   }
 
-  const [competencias, usuarios] = await Promise.all([
+  const [competencias, usuarios, cidades] = await Promise.all([
     prisma.competencia.findMany({
       orderBy: [{ ano: "desc" }, { mes: "desc" }],
     }),
     prisma.user.findMany({
       orderBy: [{ role: "asc" }, { name: "asc" }],
       select: { id: true, name: true, email: true, role: true, isActive: true },
+    }),
+    prisma.cidade.findMany({
+      orderBy: { nome: "asc" },
+      select: { id: true, nome: true, isActive: true },
     }),
   ]);
 
@@ -34,6 +39,7 @@ export default async function AdminPage() {
       </div>
 
       <AdminCompetencias competencias={competencias} />
+      <AdminCidades cidades={cidades} />
       <AdminUsuarios usuarios={usuarios} sessaoId={session.user.id} />
     </main>
   );

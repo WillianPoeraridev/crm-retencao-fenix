@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -40,28 +37,14 @@ enum MotivoCancelamento {
   INADIMPLENCIA_90  // usado automaticamente quando status = INADIMPLENCIA
 }
 
-enum Cidade {
-  CACHOEIRINHA
-  GRAVATAI
-  TRAMANDAI
-  IMBE
-  CIDREIRA
-  OSORIO
-  SAO_LEOPOLDO
-  NOVO_HAMBURGO
-  IVOTI
-  TAQUARA
-  IGREJINHA
-  PAROBE
-  ESTANCIA_VELHA
-  DOIS_IRMAOS
-  CAMPO_BOM
-  SAPUCAIA
-  ESTEIO
-  CANOAS
-  PORTO_ALEGRE
-  VIAMAO
-  ALVORADA
+// Cidade agora é uma tabela editável (antes era enum)
+model Cidade {
+  id        String   @id          // ex: "CACHOEIRINHA" — mesmo valor do antigo enum
+  nome      String                // ex: "Cachoeirinha" — nome legível
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  solicitacoes SolicitacaoRetencao[]
 }
 
 model User {
@@ -83,16 +66,14 @@ model Competencia {
   ano               Int
   mes               Int
 
-  // números “do gerente/sistema” (podem começar vazios)
-  metaCancelamentos Int?     // ex: 220
-  orcamentoComissaoCents Int? // ex: 200000 = R$ 2000,00
-  baseAtivosTotal   Int?     // ex: 19554
-  inadimplenciaTotal Int?    // opcional
+  metaCancelamentos Int?
+  orcamentoComissaoCents Int?
+  baseAtivosTotal   Int?
+  inadimplenciaTotal Int?
 
-  // campos manuais do gerente (topo do Sheets)
-  diasUteis         Int?     // ex: 24
-  diasTrabalhados   Int?     // ex: 19
-  metaDiariaManual  Int?     // ex: 9 (definida pelo gerente)
+  diasUteis         Int?
+  diasTrabalhados   Int?
+  metaDiariaManual  Int?
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -100,7 +81,6 @@ model Competencia {
   solicitacoes      SolicitacaoRetencao[]
 
   @@unique([ano, mes])
-  
 }
 
 model SolicitacaoRetencao {
@@ -109,7 +89,6 @@ model SolicitacaoRetencao {
   competenciaId  String
   competencia    Competencia  @relation(fields: [competenciaId], references: [id], onDelete: Cascade)
 
-  // colunas do “sheet”
   dataRegistro   DateTime
   status         StatusRetencao
 
@@ -117,11 +96,13 @@ model SolicitacaoRetencao {
   bairro         String?
   contato        String?
 
-  cidade         Cidade
+  cidade         String
+  cidadeInfo     Cidade       @relation(fields: [cidade], references: [id])
+
   regiao         Regiao
 
   agendaRetirada DateTime?
-  retiradaTexto  String?      // "Sem retirada", "Entregou em loja", "Entregou Matriz" etc.
+  retiradaTexto  String?
 
   atendenteId    String
   atendente      User         @relation("AtendenteSolicitacoes", fields: [atendenteId], references: [id])

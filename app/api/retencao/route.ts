@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Cidade, Regiao, StatusRetencao, MotivoCancelamento } from "@prisma/client";
+import { Regiao, StatusRetencao, MotivoCancelamento } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
-  // 1. Autenticação — só usuários logados podem criar
+  // 1. Autenticação
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     agendaRetirada,
   } = body;
 
-  // 3. Validação da competência — vem do front, não do relógio do servidor
+  // 3. Validação da competência
   if (!competenciaId) {
     return NextResponse.json(
       { error: "competenciaId é obrigatório." },
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 4. Validação dos campos obrigatórios
+  // 4. Campos obrigatórios
   if (!nomeCliente || !cidade || !regiao || !status) {
     return NextResponse.json(
       { error: "Campos obrigatórios faltando: nomeCliente, cidade, regiao, status." },
@@ -55,10 +55,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 5. Validação dos enums
-  if (!Object.values(Cidade).includes(cidade)) {
-    return NextResponse.json({ error: `Cidade inválida: ${cidade}` }, { status: 400 });
+  // 5. Validação de cidade — agora consulta a tabela
+  const cidadeExiste = await prisma.cidade.findUnique({ where: { id: cidade } });
+  if (!cidadeExiste || !cidadeExiste.isActive) {
+    return NextResponse.json({ error: `Cidade inválida ou inativa: ${cidade}` }, { status: 400 });
   }
+
+  // 6. Validação dos enums restantes
   if (!Object.values(Regiao).includes(regiao)) {
     return NextResponse.json({ error: `Região inválida: ${regiao}` }, { status: 400 });
   }
@@ -69,7 +72,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Motivo inválido: ${motivo}` }, { status: 400 });
   }
 
-  // 6. Cancelado sem motivo — não pode
+  // 7. Cancelado sem motivo — não pode
   if (status === "CANCELADO" && !motivo) {
     return NextResponse.json(
       { error: "Motivo é obrigatório quando o status é CANCELADO." },
@@ -77,7 +80,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 7. Criação no banco
+  // 8. Criação no banco
   const solicitacao = await prisma.solicitacaoRetencao.create({
     data: {
       competenciaId: competencia.id,
