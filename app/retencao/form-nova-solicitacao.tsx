@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CidadeOption } from "@/lib/retencao";
+import type { RascunhoSolicitacao } from "./botao-nova-solicitacao";
 
 const REGIOES = [
   ["SINOS", "Sinos"],
@@ -57,9 +58,12 @@ interface Solicitacao {
 interface Props {
   competenciaId?: string;
   cidades: CidadeOption[];
+  rascunho?: RascunhoSolicitacao;
   solicitacao?: Solicitacao;
   onSucesso: () => void;
-  onCancelar: () => void;
+  onFechar?: (formAtual: RascunhoSolicitacao) => void;  // criação: salva rascunho
+  onDescartar?: () => void;                               // criação: descarta rascunho
+  onCancelar?: () => void;                                // edição: fecha simples
 }
 
 function formatarDataParaInput(data: Date | null): string {
@@ -68,21 +72,36 @@ function formatarDataParaInput(data: Date | null): string {
   return d.toISOString().split("T")[0];
 }
 
-export function FormNovaSolicitacao({ competenciaId, cidades, solicitacao, onSucesso, onCancelar }: Props) {
+function formTemDados(f: RascunhoSolicitacao): boolean {
+  return Object.values(f).some((v) => v.trim() !== "");
+}
+
+export function FormNovaSolicitacao({
+  competenciaId,
+  cidades,
+  rascunho,
+  solicitacao,
+  onSucesso,
+  onFechar,
+  onDescartar,
+  onCancelar,
+}: Props) {
   const router = useRouter();
   const ehEdicao = !!solicitacao;
 
-  const [form, setForm] = useState({
-    nomeCliente: solicitacao?.nomeCliente ?? "",
-    contato: solicitacao?.contato ?? "",
-    bairro: solicitacao?.bairro ?? "",
-    cidade: solicitacao?.cidade ?? "",
-    regiao: solicitacao?.regiao ?? "",
-    status: solicitacao?.status ?? "",
-    motivo: solicitacao?.motivo ?? "",
-    observacoes: solicitacao?.observacoes ?? "",
-    retiradaTexto: solicitacao?.retiradaTexto ?? "",
-    agendaRetirada: formatarDataParaInput(solicitacao?.agendaRetirada ?? null),
+  const [form, setForm] = useState<RascunhoSolicitacao>({
+    nomeCliente: solicitacao?.nomeCliente ?? rascunho?.nomeCliente ?? "",
+    contato: solicitacao?.contato ?? rascunho?.contato ?? "",
+    bairro: solicitacao?.bairro ?? rascunho?.bairro ?? "",
+    cidade: solicitacao?.cidade ?? rascunho?.cidade ?? "",
+    regiao: solicitacao?.regiao ?? rascunho?.regiao ?? "",
+    status: solicitacao?.status ?? rascunho?.status ?? "",
+    motivo: solicitacao?.motivo ?? rascunho?.motivo ?? "",
+    observacoes: solicitacao?.observacoes ?? rascunho?.observacoes ?? "",
+    retiradaTexto: solicitacao?.retiradaTexto ?? rascunho?.retiradaTexto ?? "",
+    agendaRetirada: solicitacao
+      ? formatarDataParaInput(solicitacao.agendaRetirada)
+      : rascunho?.agendaRetirada ?? "",
   });
 
   const [enviando, setEnviando] = useState(false);
@@ -100,6 +119,37 @@ export function FormNovaSolicitacao({ competenciaId, cidades, solicitacao, onSuc
       }
       return next;
     });
+  }
+
+  // Fecha o modal — na criação, salva rascunho; na edição, fecha direto
+  function handleFecharModal() {
+    if (ehEdicao) {
+      onCancelar?.();
+      return;
+    }
+
+    // Se tem dados, salva como rascunho silenciosamente
+    if (formTemDados(form)) {
+      onFechar?.(form);
+    } else {
+      onDescartar?.();
+    }
+  }
+
+  // Botão Cancelar explícito — pergunta se quer descartar quando tem dados
+  function handleCancelar() {
+    if (ehEdicao) {
+      onCancelar?.();
+      return;
+    }
+
+    if (formTemDados(form)) {
+      if (confirm("Deseja descartar o rascunho? Os dados preenchidos serão perdidos.")) {
+        onDescartar?.();
+      }
+    } else {
+      onDescartar?.();
+    }
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -138,7 +188,7 @@ export function FormNovaSolicitacao({ competenciaId, cidades, solicitacao, onSuc
 
   return (
     <div
-      onClick={onCancelar}
+      onClick={handleFecharModal}
       style={{
         position: "fixed",
         inset: 0,
@@ -230,7 +280,6 @@ export function FormNovaSolicitacao({ competenciaId, cidades, solicitacao, onSuc
             </div>
           </div>
 
-          {/* Status e Motivo */}
           <div style={GRID2}>
             <div style={CAMPO}>
               <label style={LABEL}>Status *</label>
@@ -314,7 +363,7 @@ export function FormNovaSolicitacao({ competenciaId, cidades, solicitacao, onSuc
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
             <button
               type="button"
-              onClick={onCancelar}
+              onClick={handleCancelar}
               style={{
                 padding: "8px 18px",
                 border: "1px solid #d1d5db",
@@ -325,7 +374,7 @@ export function FormNovaSolicitacao({ competenciaId, cidades, solicitacao, onSuc
                 fontSize: 14,
               }}
             >
-              Cancelar
+              {ehEdicao ? "Cancelar" : "Descartar"}
             </button>
             <button
               type="submit"
