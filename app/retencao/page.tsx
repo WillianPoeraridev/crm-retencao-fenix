@@ -1,9 +1,12 @@
 import { getCompetenciaByAnoMes, getSolicitacoesByCompetencia, getCidadesAtivas, resolverAnoMes } from "@/lib/retencao";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { FiltrosTabela } from "./filtros-tabela";
 import { BotaoNovaSolicitacao } from "./botao-nova-solicitacao";
 import { SeletorCompetencia } from "./seletor-competencia";
 import { BlocoInformacoes } from "./bloco-informacoes";
 import { AbasRetencao } from "./abas-retencao";
+import { ImportarExportar } from "./importar-exportar";
 
 export default async function RetencaoPage({
   searchParams,
@@ -14,6 +17,8 @@ export default async function RetencaoPage({
   const { ano, mes } = resolverAnoMes(params);
   const competencia = await getCompetenciaByAnoMes(ano, mes);
   const cidades = await getCidadesAtivas();
+  const session = await getServerSession(authOptions);
+  const isAdmin = session?.user?.role === "ADMIN";
 
   const solicitacoes = competencia
     ? await getSolicitacoesByCompetencia(competencia.id)
@@ -49,7 +54,10 @@ export default async function RetencaoPage({
       {/* Header: seletor + botão */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
         <SeletorCompetencia ano={ano} mes={mes} temCompetencia={!!competencia} />
-        <BotaoNovaSolicitacao competenciaId={competencia?.id ?? null} cidades={cidades} />
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <ImportarExportar competenciaId={competencia?.id ?? null} ano={ano} isAdmin={isAdmin} />
+          <BotaoNovaSolicitacao competenciaId={competencia?.id ?? null} cidades={cidades} />
+        </div>
       </div>
 
       {competencia ? (
