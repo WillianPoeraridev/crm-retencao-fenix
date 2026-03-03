@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Cidade, Regiao, StatusRetencao, MotivoCancelamento } from "@prisma/client";
+import { Regiao, StatusRetencao, MotivoCancelamento } from "@prisma/client";
 
 export async function PATCH(
   req: NextRequest,
@@ -30,8 +30,9 @@ export async function PATCH(
   if (!nomeCliente || !cidade || !regiao || !status) {
     return NextResponse.json({ error: "Campos obrigatorios faltando." }, { status: 400 });
   }
-  if (!Object.values(Cidade).includes(cidade)) {
-    return NextResponse.json({ error: "Cidade invalida: " + cidade }, { status: 400 });
+  const cidadeExiste = await prisma.cidade.findUnique({ where: { id: cidade } });
+  if (!cidadeExiste || !cidadeExiste.isActive) {
+    return NextResponse.json({ error: "Cidade inválida ou inativa: " + cidade }, { status: 400 });
   }
   if (!Object.values(Regiao).includes(regiao)) {
     return NextResponse.json({ error: "Regiao invalida: " + regiao }, { status: 400 });
