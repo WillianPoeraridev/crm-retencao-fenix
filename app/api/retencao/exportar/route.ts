@@ -138,7 +138,7 @@ export async function GET(req: NextRequest) {
 
   const csv = "\uFEFF" + linhas.join("\r\n") + "\r\n";
 
-  const nomeArquivo = `CRM_Retencao_${competencia.ano}_${mesNome}_${competencia.ano}.csv`;
+  const nomeArquivo = `CRM_Retencao_${mesNome}_${competencia.ano}.csv`;
 
   return new NextResponse(csv, {
     status: 200,
