@@ -334,7 +334,7 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
       {/* Modal de preview */}
       {preview && (
         <div
-          onClick={() => setPreview(null)}
+          onClick={(e) => { if (e.target === e.currentTarget) setPreview(null); }}
           style={{
             position: "fixed",
             inset: 0,
@@ -347,7 +347,6 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
           }}
         >
           <div
-            onClick={(e) => e.stopPropagation()}
             style={{
               backgroundColor: "#fff",
               borderRadius: 10,

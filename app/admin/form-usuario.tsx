@@ -61,7 +61,7 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
 
   return (
     <div
-      onClick={onCancelar}
+      onClick={(e) => { if (e.target === e.currentTarget) onCancelar(); }}
       style={{
         position: "fixed",
         inset: 0,
@@ -74,7 +74,6 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
       }}
     >
       <div
-        onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: "#fff",
           borderRadius: 10,

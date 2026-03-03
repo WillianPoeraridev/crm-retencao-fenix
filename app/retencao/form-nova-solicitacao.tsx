@@ -188,7 +188,7 @@ export function FormNovaSolicitacao({
 
   return (
     <div
-      onClick={handleFecharModal}
+      onClick={(e) => { if (e.target === e.currentTarget) handleFecharModal(); }}
       style={{
         position: "fixed",
         inset: 0,
@@ -201,7 +201,6 @@ export function FormNovaSolicitacao({
       }}
     >
       <div
-        onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: "#fff",
           borderRadius: 10,
