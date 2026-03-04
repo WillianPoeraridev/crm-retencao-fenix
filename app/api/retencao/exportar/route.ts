@@ -139,9 +139,106 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // ─── SEÇÃO: INFORMAÇÕES ───────────────────────────────────────────
+    linhas.push("");
+    linhas.push("INFORMAÇÕES DA COMPETÊNCIA;;;;;;;;;;;;;;;;;;");
+    linhas.push("");
+
+    // Indicadores
+    const totalAtendidos = cancelados + retidos;
+    const txRetencao = totalAtendidos > 0
+      ? ((retidos / totalAtendidos) * 100).toFixed(2) + "%"
+      : "0,00%";
+    const metaRecalcStr = diasRestantes > 0
+      ? String(Math.ceil(saldo / diasRestantes))
+      : "—";
+    const churnStr = baseAtivos > 0
+      ? ((totalEmpresa / baseAtivos) * 100).toFixed(2).replace(".", ",") + "%"
+      : "—";
+
+    linhas.push("INDICADORES;;;;;;;;;;;;;;;;;;");
+    linhas.push(`Realizado orgânico;${cancelados};;;;;;;;;;;;;;;;;`);
+    linhas.push(`Realizado inadimplência;${inadimplencia};;;;;;;;;;;;;;;;;`);
+    linhas.push(`Total empresa;${totalEmpresa};;;;;;;;;;;;;;;;;`);
+    linhas.push(`Saldo;${saldo};;;;;;;;;;;;;;;;;`);
+    if (diasRestantes > 0) {
+      linhas.push(`Dias restantes;${diasRestantes};;;;;;;;;;;;;;;;;`);
+      linhas.push(`Meta recalculada;${metaRecalcStr};;;;;;;;;;;;;;;;;`);
+    }
+    linhas.push(`Churn geral fulltime;${churnStr};;;;;;;;;;;;;;;;;`);
+    linhas.push(`Taxa de retenção;${txRetencao};;;;;;;;;;;;;;;;;`);
+
+    // Motivos de cancelamento
+    linhas.push("");
+    linhas.push(`MOTIVOS DE CANCELAMENTO (${cancelados} cancelados);;;;;;;;;;;;;;;;;;`);
+    linhas.push("Motivo;Quantidade;Percentual;;;;;;;;;;;;;;;;;");
+
+    const MOTIVO_LABEL: Record<string, string> = {
+      INSATISFACAO_ATD: "Insatisfação c/ Atendimento",
+      INSATISFACAO_SERVICO: "Insatisfação c/ Serviço",
+      MUDANCA_ENDERECO: "Mudança de Endereço",
+      MOTIVOS_PESSOAIS: "Motivos Pessoais",
+      TROCA_PROVEDOR: "Troca de Provedor",
+      PROBLEMAS_FINANC: "Problemas Financeiros",
+      OUTROS: "Outros",
+    };
+
+    const motivosCount: Record<string, number> = {};
+    for (const s of solicitacoes) {
+      if (s.status === "CANCELADO" && s.motivo && s.motivo !== "INADIMPLENCIA_90") {
+        motivosCount[s.motivo] = (motivosCount[s.motivo] ?? 0) + 1;
+      }
+    }
+    const motivosOrdenados = Object.entries(motivosCount).sort((a, b) => b[1] - a[1]);
+    for (const [motivo, count] of motivosOrdenados) {
+      const pct = cancelados > 0
+        ? ((count / cancelados) * 100).toFixed(2).replace(".", ",") + "%"
+        : "0,00%";
+      const label = MOTIVO_LABEL[motivo] ?? motivo;
+      linhas.push(`${label};${count};${pct};;;;;;;;;;;;;;;;;`);
+    }
+
+    // Ranking por atendente
+    linhas.push("");
+    linhas.push("RANKING POR ATENDENTE;;;;;;;;;;;;;;;;;;");
+    linhas.push("Atendente;Total;Cancelados;Retidos;Tx. Retenção;Tx. Participação;Proj. Comissão;;;;;;;;;;;;;");
+
+    const atendentesMap: Record<string, { nome: string; total: number; cancelados: number; retidos: number }> = {};
+    for (const s of solicitacoes) {
+      if (s.status === "INADIMPLENCIA") continue;
+      const id = s.atendenteId;
+      if (!atendentesMap[id]) {
+        atendentesMap[id] = { nome: s.atendente.name, total: 0, cancelados: 0, retidos: 0 };
+      }
+      atendentesMap[id].total++;
+      if (s.status === "CANCELADO") atendentesMap[id].cancelados++;
+      if (s.status === "RETIDO") atendentesMap[id].retidos++;
+    }
+
+    const ranking = Object.values(atendentesMap).sort((a, b) => b.retidos - a.retidos);
+    for (const a of ranking) {
+      const txRet = a.total > 0
+        ? ((a.retidos / a.total) * 100).toFixed(2).replace(".", ",") + "%"
+        : "0,00%";
+      const txPart = retidos > 0
+        ? ((a.retidos / retidos) * 100).toFixed(2).replace(".", ",") + "%"
+        : "0,00%";
+      const projComissao = competencia.orcamentoComissaoCents && retidos > 0
+        ? ((competencia.orcamentoComissaoCents * a.retidos / retidos) / 100)
+            .toFixed(2).replace(".", ",")
+        : "";
+      linhas.push(`${a.nome};${a.total};${a.cancelados};${a.retidos};${txRet};${txPart};${projComissao ? "R$ " + projComissao : "—"};;;;;;;;;;;;;`);
+    }
+
+    if (competencia.orcamentoComissaoCents) {
+      const orcamento = (competencia.orcamentoComissaoCents / 100).toFixed(2).replace(".", ",");
+      linhas.push(`Orçamento total;;;;;;R$ ${orcamento};;;;;;;;;;;;;`);
+    }
+    // ──────────────────────────────────────────────────────────────────
+
     const csv = "\uFEFF" + linhas.join("\r\n") + "\r\n";
 
-    const nomeArquivo = `CRM_Retencao_${competencia.ano}_${mesNome}_${competencia.ano}.csv`;
+    const nomeArquivo = `CRM_Retencao_${mesNome}_${competencia.ano}.csv`;
 
     return new NextResponse(csv, {
       status: 200,
