@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import ExcelJS from "exceljs";
 import {
   STATUS_SYSTEM_TO_CSV,
   MOTIVO_SYSTEM_TO_CSV,
@@ -9,52 +10,48 @@ import {
   MESES_PT,
 } from "@/lib/csv-mappings";
 
+const COR_HEADER_ESCURO = "FF111827";
+const COR_HEADER_MEDIO  = "FF1E3A5F";
+const COR_HEADER_SUAVE  = "FFF3F4F6";
+const COR_CANCELADO     = "FFB91C1C";
+const COR_RETIDO        = "FF15803D";
+const COR_INADIMPLENCIA = "FFB45309";
+const COR_BRANCO        = "FFFFFFFF";
+
 function formatarData(d: Date): string {
   const dt = new Date(d);
-  const dia = dt.getDate().toString().padStart(2, "0");
-  const mes = (dt.getMonth() + 1).toString().padStart(2, "0");
-  return `${dia}/${mes}`;
+  return `${dt.getDate().toString().padStart(2,"0")}/${(dt.getMonth()+1).toString().padStart(2,"0")}`;
 }
 
 function formatarDataCompleta(d: Date): string {
   const dt = new Date(d);
-  const dia = dt.getDate().toString().padStart(2, "0");
-  const mes = (dt.getMonth() + 1).toString().padStart(2, "0");
-  const ano = dt.getFullYear();
-  return `${dia}/${mes}/${ano}`;
+  return `${dt.getDate().toString().padStart(2,"0")}/${(dt.getMonth()+1).toString().padStart(2,"0")}/${dt.getFullYear()}`;
 }
 
-function escaparCSV(texto: string | null): string {
-  if (!texto) return "";
-  // Se contém ; ou " ou quebra de linha, envolve em aspas
-  if (texto.includes(";") || texto.includes('"') || texto.includes("\n")) {
-    return `"${texto.replace(/"/g, '""')}"`;
-  }
-  return texto;
+function pct(valor: number, total: number): string {
+  if (total === 0) return "0,00%";
+  return ((valor / total) * 100).toFixed(2).replace(".", ",") + "%";
 }
 
-// GET — exporta solicitações da competência no formato da planilha do gerente
+function estilizarLinhaHeader(row: ExcelJS.Row, bgColor: string, fontColor = COR_BRANCO, fontSize = 10) {
+  row.eachCell({ includeEmpty: true }, (cell) => {
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: bgColor } };
+    cell.font = { bold: true, color: { argb: fontColor }, size: fontSize };
+    cell.alignment = { vertical: "middle", horizontal: "left" };
+  });
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
-    }
+    if (!session) return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
     const competenciaId = searchParams.get("competenciaId");
+    if (!competenciaId) return NextResponse.json({ error: "competenciaId é obrigatório." }, { status: 400 });
 
-    if (!competenciaId) {
-      return NextResponse.json({ error: "competenciaId é obrigatório." }, { status: 400 });
-    }
-
-    const competencia = await prisma.competencia.findUnique({
-      where: { id: competenciaId },
-    });
-
-    if (!competencia) {
-      return NextResponse.json({ error: "Competência não encontrada." }, { status: 404 });
-    }
+    const competencia = await prisma.competencia.findUnique({ where: { id: competenciaId } });
+    if (!competencia) return NextResponse.json({ error: "Competência não encontrada." }, { status: 404 });
 
     const solicitacoes = await prisma.solicitacaoRetencao.findMany({
       where: { competenciaId },
@@ -65,122 +62,186 @@ export async function GET(req: NextRequest) {
       orderBy: [{ status: "asc" }, { dataRegistro: "asc" }],
     });
 
-    // Contadores
-    const cancelados = solicitacoes.filter((s) => s.status === "CANCELADO").length;
-    const retidos = solicitacoes.filter((s) => s.status === "RETIDO").length;
-    const inadimplencia = solicitacoes.filter((s) => s.status === "INADIMPLENCIA").length;
-    const totalEmpresa = cancelados + inadimplencia;
-    const meta = competencia.metaCancelamentos ?? 0;
-    const saldo = meta - cancelados;
-    const baseAtivos = competencia.baseAtivosTotal ?? 0;
-    const churn = baseAtivos > 0 ? ((totalEmpresa / baseAtivos) * 100).toFixed(2) + "%" : "";
+    const cancelados     = solicitacoes.filter((s) => s.status === "CANCELADO").length;
+    const retidos        = solicitacoes.filter((s) => s.status === "RETIDO").length;
+    const inadimplencia  = solicitacoes.filter((s) => s.status === "INADIMPLENCIA").length;
+    const totalEmpresa   = cancelados + inadimplencia;
+    const totalAtendidos = cancelados + retidos;
+    const meta           = competencia.metaCancelamentos ?? 0;
+    const saldo          = meta - cancelados;
+    const baseAtivos     = competencia.baseAtivosTotal ?? 0;
+    const diasUteis      = competencia.diasUteis ?? 0;
+    const diasTrab       = competencia.diasTrabalhados ?? 0;
+    const diasRestantes  = diasUteis - diasTrab;
+    const metaDiaria     = competencia.metaDiariaManual ?? 0;
+    const metaRecalculada = diasRestantes > 0 ? saldo - diasRestantes * metaDiaria : saldo;
+    const churnStr       = baseAtivos > 0 ? ((totalEmpresa / baseAtivos) * 100).toFixed(2).replace(".", ",") + "%" : "—";
+    const txRetencaoStr  = totalAtendidos > 0 ? pct(retidos, totalAtendidos) : "0,00%";
+    const mesNome        = MESES_PT[competencia.mes - 1] ?? "";
+    const nomeArquivo    = `CRM_Retencao_${mesNome}_${competencia.ano}.xlsx`;
 
-    const mesNome = MESES_PT[competencia.mes - 1] ?? "";
+    const wb = new ExcelJS.Workbook();
+    wb.creator = "Fênix CRM";
+    wb.created = new Date();
 
-    // Monta as linhas
-    const linhas: string[] = [];
+    // ══════════════════════════════════════════════
+    // ABA 1 — DADOS
+    // ══════════════════════════════════════════════
+    const wsDados = wb.addWorksheet("Dados");
+
+    wsDados.columns = [
+      { key: "qnt",      width: 5  },
+      { key: "data",     width: 10 },
+      { key: "status",   width: 14 },
+      { key: "nome",     width: 30 },
+      { key: "bairro",   width: 18 },
+      { key: "contato",  width: 16 },
+      { key: "cidade",   width: 18 },
+      { key: "regiao",   width: 10 },
+      { key: "agenda",   width: 16 },
+      { key: "retirada", width: 20 },
+      { key: "atend",    width: 20 },
+      { key: "motivo",   width: 28 },
+      { key: "obs",      width: 40 },
+      { key: "ixc",      width: 14 },
+    ];
 
     // Linha 1 — cabeçalho resumo
-    linhas.push(
-      `META;;REALIZADO FULL TIME organico;SALDO;DIAS úteis;DIAS trabalhados;DIAS RESTANTES;META diaria;META recalculada;REALIZADO FULL TIME inadimplencia;TOTAL EMPRESA;CHURN GERAL fulltime;;;;;;`
-    );
+    const rowResumoH = wsDados.addRow([
+      "META", "", "REALIZADO ORGÂNICO", "SALDO",
+      "DIAS ÚTEIS", "DIAS TRABALHADOS", "DIAS RESTANTES",
+      "META DIÁRIA", "META RECALCULADA", "REALIZADO INADIMPL.",
+      "TOTAL EMPRESA", "CHURN GERAL", "", "",
+    ]);
+    rowResumoH.height = 22;
+    estilizarLinhaHeader(rowResumoH, COR_HEADER_ESCURO);
 
     // Linha 2 — valores resumo
-    const diasUteis = competencia.diasUteis ?? 0;
-    const diasTrab = competencia.diasTrabalhados ?? 0;
-    const diasRestantes = diasUteis - diasTrab;
-    const metaDiaria = competencia.metaDiariaManual ?? 0;
-    const metaRecalculada = diasRestantes > 0 ? saldo - (diasRestantes * metaDiaria) : saldo;
-
-    linhas.push(
-      `${meta};;${cancelados};${saldo};${diasUteis};${diasTrab};${diasRestantes};${metaDiaria};${metaRecalculada};${inadimplencia};${totalEmpresa};${churn};;;;;;`
-    );
+    const rowResumoV = wsDados.addRow([
+      meta, "", cancelados, saldo,
+      diasUteis, diasTrab, diasRestantes,
+      metaDiaria, metaRecalculada, inadimplencia,
+      totalEmpresa, churnStr, "", "",
+    ]);
+    rowResumoV.height = 20;
+    rowResumoV.eachCell({ includeEmpty: false }, (cell) => {
+      cell.font = { bold: true, size: 11 };
+      cell.alignment = { vertical: "middle", horizontal: "center" };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDBEAFE" } };
+    });
 
     // Linha 3 — nome do mês
-    linhas.push(`${mesNome};;;;;;;;;;;;;;;;;;`);
+    const rowMes = wsDados.addRow([mesNome]);
+    rowMes.height = 20;
+    rowMes.getCell(1).font = { bold: true, size: 13, color: { argb: COR_HEADER_ESCURO } };
 
-    // Linha 4 — cabeçalho dados
-    linhas.push(
-      `QNT;DATA;STATUS;NOME COMPLETO CLIENTE;BAIRRO;CONTATO;CIDADE;REGIÃO;AGENDA RETIRADA;RETIRADA;ATENDENTE;MOTIVO;OBSERVAÇÕES;REGISTRADO IXC;;;;;`
-    );
+    // Linha 4 — cabeçalho de dados
+    const rowDadosH = wsDados.addRow([
+      "QNT", "DATA", "STATUS", "NOME COMPLETO CLIENTE",
+      "BAIRRO", "CONTATO", "CIDADE", "REGIÃO",
+      "AGENDA RETIRADA", "RETIRADA", "ATENDENTE",
+      "MOTIVO", "OBSERVAÇÕES", "REGISTRADO IXC",
+    ]);
+    rowDadosH.height = 22;
+    estilizarLinhaHeader(rowDadosH, COR_HEADER_ESCURO);
 
-    // Linhas de dados — agrupa por status na ordem: CANCELADO, RETIDO, INADIMPLENCIA
-    for (const s of solicitacoes) {
-      const data = formatarData(s.dataRegistro);
-      const status = STATUS_SYSTEM_TO_CSV[s.status] ?? s.status;
-      const motivo = s.motivo ? (MOTIVO_SYSTEM_TO_CSV[s.motivo] ?? s.motivo) : "";
-      const regiao = REGIAO_SYSTEM_TO_CSV[s.regiao] ?? s.regiao;
-      const cidade = s.cidadeInfo.nome;
-      // AGENDA RETIRADA: data formatada se existir, senão vazio
-      const agenda = s.agendaRetirada
-        ? formatarDataCompleta(s.agendaRetirada)
-        : "";
-      // RETIRADA: texto livre sempre exportado na coluna correta
-      const retirada = s.retiradaTexto ?? "";
+    const COR_STATUS: Record<string, string> = {
+      CANCELADO:     COR_CANCELADO,
+      RETIDO:        COR_RETIDO,
+      INADIMPLENCIA: COR_INADIMPLENCIA,
+    };
 
-      linhas.push(
-        [
-          "1",
-          data,
-          status,
-          escaparCSV(s.nomeCliente),
-          escaparCSV(s.bairro),
-          escaparCSV(s.contato),
-          escaparCSV(cidade),
-          regiao,
-          agenda,
-          escaparCSV(retirada),
-          s.atendente.name.toUpperCase(),
-          motivo,
-          escaparCSV(s.observacoes),
-          "", // REGISTRADO IXC
-          "", "", "", "", "",
-        ].join(";")
-      );
-    }
+    solicitacoes.forEach((s, i) => {
+      const row = wsDados.addRow([
+        1,
+        formatarData(s.dataRegistro),
+        STATUS_SYSTEM_TO_CSV[s.status] ?? s.status,
+        s.nomeCliente,
+        s.bairro ?? "",
+        s.contato ?? "",
+        s.cidadeInfo.nome,
+        REGIAO_SYSTEM_TO_CSV[s.regiao] ?? s.regiao,
+        s.agendaRetirada ? formatarDataCompleta(s.agendaRetirada) : "",
+        s.retiradaTexto ?? "",
+        s.atendente.name.toUpperCase(),
+        s.motivo ? (MOTIVO_SYSTEM_TO_CSV[s.motivo] ?? s.motivo) : "",
+        s.observacoes ?? "",
+        "",
+      ]);
 
-    // ─── SEÇÃO: INFORMAÇÕES ───────────────────────────────────────────
-    linhas.push("");
-    linhas.push("INFORMAÇÕES DA COMPETÊNCIA;;;;;;;;;;;;;;;;;;");
-    linhas.push("");
+      row.height = 18;
+      const bgZebra = i % 2 === 0 ? COR_BRANCO : "FFF9FAFB";
+      row.eachCell({ includeEmpty: true }, (cell) => {
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: bgZebra } };
+        cell.alignment = { vertical: "middle", wrapText: false };
+        cell.font = { size: 10 };
+      });
+      row.getCell(3).font = {
+        bold: true, size: 10,
+        color: { argb: COR_STATUS[s.status] ?? COR_HEADER_ESCURO },
+      };
+      row.getCell(13).alignment = { vertical: "middle", wrapText: true };
+    });
+
+    wsDados.views = [{ state: "frozen", ySplit: 4 }];
+
+    // ══════════════════════════════════════════════
+    // ABA 2 — INFORMAÇÕES
+    // ══════════════════════════════════════════════
+    const wsInfo = wb.addWorksheet("Informações");
+    wsInfo.columns = [
+      { width: 32 }, { width: 16 }, { width: 16 },
+      { width: 16 }, { width: 16 }, { width: 16 }, { width: 18 },
+    ];
+
+    const addSecaoHeader = (titulo: string) => {
+      const r = wsInfo.addRow([titulo]);
+      r.height = 22;
+      estilizarLinhaHeader(r, COR_HEADER_MEDIO, COR_BRANCO, 11);
+      wsInfo.addRow([]);
+    };
+
+    const addSubHeader = (colunas: string[]) => {
+      const r = wsInfo.addRow(colunas);
+      r.height = 18;
+      estilizarLinhaHeader(r, COR_HEADER_SUAVE, COR_HEADER_ESCURO, 10);
+    };
+
+    const addLinha = (valores: (string | number)[], negrito = false) => {
+      const r = wsInfo.addRow(valores);
+      r.height = 17;
+      r.eachCell({ includeEmpty: false }, (cell) => {
+        cell.font = { size: 10, bold: negrito };
+        cell.alignment = { vertical: "middle" };
+      });
+      return r;
+    };
 
     // Indicadores
-    const totalAtendidos = cancelados + retidos;
-    const txRetencao = totalAtendidos > 0
-      ? ((retidos / totalAtendidos) * 100).toFixed(2) + "%"
-      : "0,00%";
-    const metaRecalcStr = diasRestantes > 0
-      ? String(Math.ceil(saldo / diasRestantes))
-      : "—";
-    const churnStr = baseAtivos > 0
-      ? ((totalEmpresa / baseAtivos) * 100).toFixed(2).replace(".", ",") + "%"
-      : "—";
-
-    linhas.push("INDICADORES;;;;;;;;;;;;;;;;;;");
-    linhas.push(`Realizado orgânico;${cancelados};;;;;;;;;;;;;;;;;`);
-    linhas.push(`Realizado inadimplência;${inadimplencia};;;;;;;;;;;;;;;;;`);
-    linhas.push(`Total empresa;${totalEmpresa};;;;;;;;;;;;;;;;;`);
-    linhas.push(`Saldo;${saldo};;;;;;;;;;;;;;;;;`);
+    addSecaoHeader("INDICADORES DA COMPETÊNCIA");
+    addSubHeader(["Indicador", "Valor"]);
+    addLinha(["Realizado orgânico", cancelados]);
+    addLinha(["Realizado inadimplência", inadimplencia]);
+    addLinha(["Total empresa", totalEmpresa], true);
+    const rowSaldo = addLinha(["Saldo", saldo], true);
+    rowSaldo.getCell(2).font = { bold: true, size: 10, color: { argb: saldo >= 0 ? COR_RETIDO : COR_CANCELADO } };
     if (diasRestantes > 0) {
-      linhas.push(`Dias restantes;${diasRestantes};;;;;;;;;;;;;;;;;`);
-      linhas.push(`Meta recalculada;${metaRecalcStr};;;;;;;;;;;;;;;;;`);
+      addLinha(["Dias restantes", diasRestantes]);
+      addLinha(["Meta recalculada", metaRecalculada]);
     }
-    linhas.push(`Churn geral fulltime;${churnStr};;;;;;;;;;;;;;;;;`);
-    linhas.push(`Taxa de retenção;${txRetencao};;;;;;;;;;;;;;;;;`);
+    addLinha(["Churn geral fulltime", churnStr]);
+    addLinha(["Taxa de retenção", txRetencaoStr]);
+    wsInfo.addRow([]);
 
-    // Motivos de cancelamento
-    linhas.push("");
-    linhas.push(`MOTIVOS DE CANCELAMENTO (${cancelados} cancelados);;;;;;;;;;;;;;;;;;`);
-    linhas.push("Motivo;Quantidade;Percentual;;;;;;;;;;;;;;;;;");
-
+    // Motivos
     const MOTIVO_LABEL: Record<string, string> = {
-      INSATISFACAO_ATD: "Insatisfação c/ Atendimento",
+      INSATISFACAO_ATD:     "Insatisfação c/ Atendimento",
       INSATISFACAO_SERVICO: "Insatisfação c/ Serviço",
-      MUDANCA_ENDERECO: "Mudança de Endereço",
-      MOTIVOS_PESSOAIS: "Motivos Pessoais",
-      TROCA_PROVEDOR: "Troca de Provedor",
-      PROBLEMAS_FINANC: "Problemas Financeiros",
-      OUTROS: "Outros",
+      MUDANCA_ENDERECO:     "Mudança de Endereço",
+      MOTIVOS_PESSOAIS:     "Motivos Pessoais",
+      TROCA_PROVEDOR:       "Troca de Provedor",
+      PROBLEMAS_FINANC:     "Problemas Financeiros",
+      OUTROS:               "Outros",
     };
 
     const motivosCount: Record<string, number> = {};
@@ -189,61 +250,56 @@ export async function GET(req: NextRequest) {
         motivosCount[s.motivo] = (motivosCount[s.motivo] ?? 0) + 1;
       }
     }
-    const motivosOrdenados = Object.entries(motivosCount).sort((a, b) => b[1] - a[1]);
-    for (const [motivo, count] of motivosOrdenados) {
-      const pct = cancelados > 0
-        ? ((count / cancelados) * 100).toFixed(2).replace(".", ",") + "%"
-        : "0,00%";
-      const label = MOTIVO_LABEL[motivo] ?? motivo;
-      linhas.push(`${label};${count};${pct};;;;;;;;;;;;;;;;;`);
-    }
 
-    // Ranking por atendente
-    linhas.push("");
-    linhas.push("RANKING POR ATENDENTE;;;;;;;;;;;;;;;;;;");
-    linhas.push("Atendente;Total;Cancelados;Retidos;Tx. Retenção;Tx. Participação;Proj. Comissão;;;;;;;;;;;;;");
+    addSecaoHeader(`MOTIVOS DE CANCELAMENTO (${cancelados} cancelados)`);
+    addSubHeader(["Motivo", "Quantidade", "Percentual"]);
+    Object.entries(motivosCount)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([motivo, count]) => {
+        addLinha([MOTIVO_LABEL[motivo] ?? motivo, count, pct(count, cancelados)]);
+      });
+    wsInfo.addRow([]);
 
+    // Ranking
     const atendentesMap: Record<string, { nome: string; total: number; cancelados: number; retidos: number }> = {};
     for (const s of solicitacoes) {
       if (s.status === "INADIMPLENCIA") continue;
-      const id = s.atendenteId;
-      if (!atendentesMap[id]) {
-        atendentesMap[id] = { nome: s.atendente.name, total: 0, cancelados: 0, retidos: 0 };
+      if (!atendentesMap[s.atendenteId]) {
+        atendentesMap[s.atendenteId] = { nome: s.atendente.name, total: 0, cancelados: 0, retidos: 0 };
       }
-      atendentesMap[id].total++;
-      if (s.status === "CANCELADO") atendentesMap[id].cancelados++;
-      if (s.status === "RETIDO") atendentesMap[id].retidos++;
+      atendentesMap[s.atendenteId].total++;
+      if (s.status === "CANCELADO") atendentesMap[s.atendenteId].cancelados++;
+      if (s.status === "RETIDO")    atendentesMap[s.atendenteId].retidos++;
     }
 
-    const ranking = Object.values(atendentesMap).sort((a, b) => b.retidos - a.retidos);
-    for (const a of ranking) {
-      const txRet = a.total > 0
-        ? ((a.retidos / a.total) * 100).toFixed(2).replace(".", ",") + "%"
-        : "0,00%";
-      const txPart = retidos > 0
-        ? ((a.retidos / retidos) * 100).toFixed(2).replace(".", ",") + "%"
-        : "0,00%";
-      const projComissao = competencia.orcamentoComissaoCents && retidos > 0
-        ? ((competencia.orcamentoComissaoCents * a.retidos / retidos) / 100)
-            .toFixed(2).replace(".", ",")
-        : "";
-      linhas.push(`${a.nome};${a.total};${a.cancelados};${a.retidos};${txRet};${txPart};${projComissao ? "R$ " + projComissao : "—"};;;;;;;;;;;;;`);
-    }
+    addSecaoHeader("RANKING POR ATENDENTE");
+    addSubHeader(["Atendente", "Total", "Cancelados", "Retidos", "Tx. Retenção", "Tx. Part.", "Proj. Comissão"]);
+
+    Object.values(atendentesMap)
+      .sort((a, b) => b.retidos - a.retidos)
+      .forEach((a) => {
+        const projComissao = competencia.orcamentoComissaoCents && retidos > 0
+          ? "R$ " + ((competencia.orcamentoComissaoCents * a.retidos / retidos) / 100).toFixed(2).replace(".", ",")
+          : "—";
+        const row = addLinha([a.nome, a.total, a.cancelados, a.retidos, pct(a.retidos, a.total), pct(a.retidos, retidos), projComissao]);
+        row.getCell(3).font = { size: 10, color: { argb: COR_CANCELADO } };
+        row.getCell(4).font = { size: 10, color: { argb: COR_RETIDO } };
+        row.getCell(7).font = { size: 10, bold: true, color: { argb: COR_RETIDO } };
+      });
 
     if (competencia.orcamentoComissaoCents) {
-      const orcamento = (competencia.orcamentoComissaoCents / 100).toFixed(2).replace(".", ",");
-      linhas.push(`Orçamento total;;;;;;R$ ${orcamento};;;;;;;;;;;;;`);
+      wsInfo.addRow([]);
+      const orcamento = "R$ " + (competencia.orcamentoComissaoCents / 100).toFixed(2).replace(".", ",");
+      const rowOrc = addLinha(["Orçamento total", "", "", "", "", "", orcamento], true);
+      rowOrc.getCell(7).font = { bold: true, size: 11, color: { argb: COR_HEADER_ESCURO } };
     }
-    // ──────────────────────────────────────────────────────────────────
 
-    const csv = "\uFEFF" + linhas.join("\r\n") + "\r\n";
+    const buffer = await wb.xlsx.writeBuffer();
 
-    const nomeArquivo = `CRM_Retencao_${mesNome}_${competencia.ano}.csv`;
-
-    return new NextResponse(csv, {
+    return new NextResponse(buffer, {
       status: 200,
       headers: {
-        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="${nomeArquivo}"`,
       },
     });
