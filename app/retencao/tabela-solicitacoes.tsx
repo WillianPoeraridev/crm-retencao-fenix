@@ -87,7 +87,7 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
           <thead>
-            <tr style={{ textAlign: "left", backgroundColor: "#111827", color: "#ffffff" }}>
+            <tr style={{ textAlign: "left", backgroundColor: "#1e2530", color: "#ffffff", borderBottom: "1px solid #2a3340" }}>
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>Data</th>
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>Cliente</th>
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>Cidade</th>
