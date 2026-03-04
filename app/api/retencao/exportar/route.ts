@@ -111,10 +111,12 @@ export async function GET(req: NextRequest) {
       const motivo = s.motivo ? (MOTIVO_SYSTEM_TO_CSV[s.motivo] ?? s.motivo) : "";
       const regiao = REGIAO_SYSTEM_TO_CSV[s.regiao] ?? s.regiao;
       const cidade = s.cidadeInfo.nome;
+      // AGENDA RETIRADA: data formatada se existir, senão vazio
       const agenda = s.agendaRetirada
         ? formatarDataCompleta(s.agendaRetirada)
-        : s.retiradaTexto?.includes("Sem") ? "Sem retirada" : "";
-      const retirada = s.retiradaTexto && !s.retiradaTexto.includes("Sem") ? s.retiradaTexto : "";
+        : "";
+      // RETIRADA: texto livre sempre exportado na coluna correta
+      const retirada = s.retiradaTexto ?? "";
 
       linhas.push(
         [
