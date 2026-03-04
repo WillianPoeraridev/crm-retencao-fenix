@@ -199,28 +199,34 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Padrões que indicam leitura errada de Windows-1252 como UTF-8.
+    // Ex: "ã" (C3 A3) lido como "Ã£", "é" (C3 A9) como "Ã©", etc.
+    function pareceMalLido(texto: string): boolean {
+      return (
+        texto.includes("\uFFFD") ||   // caractere de substituição explícito
+        /Ã[£¢¡§©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ]/.test(texto) // sequências típicas de double-encoding
+      );
+    }
+
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const texto = ev.target?.result as string;
+      const textoUTF8 = ev.target?.result as string;
 
-      // Se veio com caractere de substituição (�), o encoding estava errado
-      // Tenta re-ler como windows-1252 (padrão do Excel/OneDrive)
-      if (texto.includes("\uFFFD")) {
+      if (pareceMalLido(textoUTF8)) {
+        // Re-lê como Windows-1252 (encoding padrão do Excel no Windows/OneDrive)
         const reader2 = new FileReader();
         reader2.onload = (ev2) => {
-          const texto2 = ev2.target?.result as string;
-          const linhas = parsearCSV(texto2, ano);
-          setPreview(linhas);
+          const texto1252 = ev2.target?.result as string;
+          setPreview(parsearCSV(texto1252, ano));
         };
         reader2.readAsText(file, "windows-1252");
       } else {
-        const linhas = parsearCSV(texto, ano);
-        setPreview(linhas);
+        setPreview(parsearCSV(textoUTF8, ano));
       }
     };
     reader.readAsText(file, "utf-8");
 
-    // Reset input para poder selecionar o mesmo arquivo de novo
+    // Reset para permitir selecionar o mesmo arquivo novamente
     e.target.value = "";
   }
 
