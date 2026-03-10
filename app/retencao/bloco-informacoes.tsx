@@ -286,6 +286,9 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
                 <div style={{ display: "flex", gap: 14, fontSize: 12 }}>
                   <span style={{ color: "#b91c1c", fontWeight: 700 }}>{totalCancelados} cancel.</span>
                   <span style={{ color: "#15803d", fontWeight: 700 }}>{totalRetidos} retidos</span>
+                  {totalInadimplencia > 0 && (
+                    <span style={{ color: "#b45309", fontWeight: 700 }}>{totalInadimplencia} inadimpl.</span>
+                  )}
                   <span style={{ color: "#6b7280" }}>{pct(totalRetidos, totalAtendidos)} ret.</span>
                 </div>
               </div>
