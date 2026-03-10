@@ -12,7 +12,7 @@ const STATUS_OPCOES = [
 ] as const;
 
 const INPUT: React.CSSProperties = {
-  padding: "7px 10px",
+  padding: "6px 10px",
   border: "1px solid #d1d5db",
   borderRadius: 6,
   fontSize: 13,
@@ -66,7 +66,7 @@ export function FiltrosTabela({ solicitacoes, cidades }: Props) {
           flexWrap: "wrap",
           alignItems: "center",
           marginBottom: 12,
-          padding: "10px 14px",
+          padding: "6px 14px",
           backgroundColor: "#f9fafb",
           border: "1px solid #e5e7eb",
           borderRadius: 8,

@@ -14,7 +14,7 @@ export function AbasRetencao({ children }: Props) {
   return (
     <div>
       {/* Botões de aba */}
-      <div style={{ display: "flex", gap: 4, borderBottom: "2px solid #e5e7eb", marginBottom: 20 }}>
+      <div style={{ display: "flex", gap: 4, borderBottom: "2px solid #e5e7eb", marginBottom: 10 }}>
         <BotaoAba
           label="Tabela"
           ativa={aba === "tabela"}
