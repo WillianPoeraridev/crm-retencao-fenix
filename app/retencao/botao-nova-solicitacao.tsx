@@ -31,20 +31,22 @@ const RASCUNHO_VAZIO: RascunhoSolicitacao = {
   observacoes: "",
   retiradaTexto: "",
   agendaRetirada: "",
-  registradoIXC: "",
+  registradoIXC: "true", // marcado por padrão
   transbordo: "",
 };
 
 function rascunhoTemDados(r: RascunhoSolicitacao): boolean {
-  return Object.values(r).some((v) => v.trim() !== "");
+  return Object.values(r).some((v) => v.trim() !== "" && v !== "true");
 }
 
 interface Props {
   competenciaId: string | null;
   cidades: CidadeOption[];
+  ano: number;
+  mes: number;
 }
 
-export function BotaoNovaSolicitacao({ competenciaId, cidades }: Props) {
+export function BotaoNovaSolicitacao({ competenciaId, cidades, ano, mes }: Props) {
   const [aberto, setAberto] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [rascunho, setRascunho] = useState<RascunhoSolicitacao>(RASCUNHO_VAZIO);
@@ -55,13 +57,11 @@ export function BotaoNovaSolicitacao({ competenciaId, cidades }: Props) {
     setToast("Solicitação criada com sucesso!");
   }
 
-  // Salva o estado atual do form antes de fechar
   const handleFechar = useCallback((formAtual: RascunhoSolicitacao) => {
     setRascunho(formAtual);
     setAberto(false);
   }, []);
 
-  // Descarta o rascunho e fecha
   const handleDescartar = useCallback(() => {
     setRascunho(RASCUNHO_VAZIO);
     setAberto(false);
@@ -101,6 +101,8 @@ export function BotaoNovaSolicitacao({ competenciaId, cidades }: Props) {
           competenciaId={competenciaId}
           cidades={cidades}
           rascunho={rascunho}
+          ano={ano}
+          mes={mes}
           onSucesso={handleSucesso}
           onFechar={handleFechar}
           onDescartar={handleDescartar}

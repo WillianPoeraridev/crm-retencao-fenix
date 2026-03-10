@@ -62,10 +62,19 @@ interface Props {
   cidades: CidadeOption[];
   rascunho?: RascunhoSolicitacao;
   solicitacao?: Solicitacao;
+  ano?: number;
+  mes?: number;
   onSucesso: () => void;
-  onFechar?: (formAtual: RascunhoSolicitacao) => void;  // criação: salva rascunho
-  onDescartar?: () => void;                               // criação: descarta rascunho
-  onCancelar?: () => void;                                // edição: fecha simples
+  onFechar?: (formAtual: RascunhoSolicitacao) => void;
+  onDescartar?: () => void;
+  onCancelar?: () => void;
+}
+
+const MESES_ABREV = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+
+function mesAnteriorLabel(ano: number, mes: number): string {
+  if (mes === 1) return `transbordo DEZ/${ano - 1}`;
+  return `transbordo ${MESES_ABREV[mes - 2]}`;
 }
 
 function formatarDataParaInput(data: Date | null): string {
@@ -75,7 +84,7 @@ function formatarDataParaInput(data: Date | null): string {
 }
 
 function formTemDados(f: RascunhoSolicitacao): boolean {
-  return Object.values(f).some((v) => v.trim() !== "");
+  return Object.values(f).some((v) => v.trim() !== "" && v !== "true");
 }
 
 export function FormNovaSolicitacao({
@@ -83,6 +92,8 @@ export function FormNovaSolicitacao({
   cidades,
   rascunho,
   solicitacao,
+  ano,
+  mes,
   onSucesso,
   onFechar,
   onDescartar,
@@ -104,7 +115,9 @@ export function FormNovaSolicitacao({
     agendaRetirada: solicitacao
       ? formatarDataParaInput(solicitacao.agendaRetirada)
       : rascunho?.agendaRetirada ?? "",
-    registradoIXC: solicitacao?.registradoIXC ? "true" : rascunho?.registradoIXC ?? "",
+    registradoIXC: solicitacao
+      ? (solicitacao.registradoIXC ? "true" : "")
+      : (rascunho?.registradoIXC ?? "true"),
     transbordo: solicitacao?.transbordo ?? rascunho?.transbordo ?? "",
   });
 
@@ -119,6 +132,17 @@ export function FormNovaSolicitacao({
           next.motivo = "INADIMPLENCIA_90";
         } else if (prev.status === "INADIMPLENCIA") {
           next.motivo = "";
+        }
+      }
+      // Quando desmarca IXC → preenche transbordo automaticamente
+      if (field === "registradoIXC") {
+        if (value === "" && ano && mes) {
+          next.transbordo = mesAnteriorLabel(ano, mes);
+        } else if (value === "true") {
+          // Limpa transbordo automático ao remarcar (só se ainda for o label gerado)
+          if (ano && mes && next.transbordo === mesAnteriorLabel(ano, mes)) {
+            next.transbordo = "";
+          }
         }
       }
       return next;
@@ -332,12 +356,15 @@ export function FormNovaSolicitacao({
           <div style={GRID2}>
             <div style={CAMPO}>
               <label style={LABEL}>Situação da retirada</label>
-              <input
+              <select
                 style={INPUT}
                 value={form.retiradaTexto}
                 onChange={(e) => set("retiradaTexto", e.target.value)}
-                placeholder="Ex: Sem retirada, Entregou em loja..."
-              />
+              >
+                <option value="">—</option>
+                <option value="Retirar">Retirar</option>
+                <option value="Sem retirada">Sem retirada</option>
+              </select>
             </div>
             <div style={CAMPO}>
               <label style={LABEL}>Agenda de retirada</label>
