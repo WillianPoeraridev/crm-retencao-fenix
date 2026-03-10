@@ -53,6 +53,8 @@ interface Solicitacao {
   observacoes: string | null;
   retiradaTexto: string | null;
   agendaRetirada: Date | null;
+  registradoIXC: boolean;
+  transbordo: string | null;
 }
 
 interface Props {
@@ -102,6 +104,8 @@ export function FormNovaSolicitacao({
     agendaRetirada: solicitacao
       ? formatarDataParaInput(solicitacao.agendaRetirada)
       : rascunho?.agendaRetirada ?? "",
+    registradoIXC: solicitacao?.registradoIXC ? "true" : rascunho?.registradoIXC ?? "",
+    transbordo: solicitacao?.transbordo ?? rascunho?.transbordo ?? "",
   });
 
   const [enviando, setEnviando] = useState(false);
@@ -166,6 +170,7 @@ export function FormNovaSolicitacao({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          registradoIXC: form.registradoIXC === "true",
           ...(ehEdicao ? {} : { competenciaId }),
         }),
       });
@@ -353,6 +358,30 @@ export function FormNovaSolicitacao({
               onChange={(e) => set("observacoes", e.target.value)}
               placeholder="Detalhes relevantes sobre o caso..."
             />
+          </div>
+
+          <div style={GRID2}>
+            <div style={CAMPO}>
+              <label style={LABEL}>Transbordo</label>
+              <input
+                style={INPUT}
+                value={form.transbordo}
+                onChange={(e) => set("transbordo", e.target.value)}
+                placeholder="Ex: transbordo FEV"
+              />
+            </div>
+            <div style={{ ...CAMPO, justifyContent: "flex-end" }}>
+              <label style={LABEL}>Registrado IXC</label>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginTop: 4 }}>
+                <input
+                  type="checkbox"
+                  checked={form.registradoIXC === "true"}
+                  onChange={(e) => set("registradoIXC", e.target.checked ? "true" : "")}
+                  style={{ width: 16, height: 16, cursor: "pointer" }}
+                />
+                <span style={{ fontSize: 14, color: "#374151" }}>SIM</span>
+              </label>
+            </div>
           </div>
 
           {erro && (

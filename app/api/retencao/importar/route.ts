@@ -17,6 +17,8 @@ interface LinhaImportacao {
   atendenteNome: string;
   motivo: string | null;
   observacoes: string | null;
+  registradoIXC: boolean;
+  transbordo: string | null;
 }
 
 // POST — importa linhas validadas pelo frontend
@@ -157,6 +159,8 @@ export async function POST(req: NextRequest) {
         observacoes: l.observacoes?.trim() || null,
         retiradaTexto: l.retiradaTexto?.trim() || null,
         agendaRetirada,
+        registradoIXC: l.registradoIXC === true,
+        transbordo: l.transbordo?.trim() || null,
       });
     }
 

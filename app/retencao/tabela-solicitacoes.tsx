@@ -30,7 +30,10 @@ const MOTIVO_LABEL: Record<string, string> = {
 };
 
 function formatarData(data: Date) {
-  return new Intl.DateTimeFormat("pt-BR").format(new Date(data));
+  const d = new Date(data);
+  const dia = d.getDate().toString().padStart(2, "0");
+  const mes = (d.getMonth() + 1).toString().padStart(2, "0");
+  return `${dia}/${mes}`;
 }
 
 interface Props {
@@ -96,6 +99,7 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>Motivo</th>
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>Atendente</th>
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>Observações</th>
+              <th style={{ padding: "8px 12px", fontWeight: 600 }}>IXC</th>
               <th style={{ padding: "8px 12px" }}></th>
             </tr>
           </thead>
@@ -118,7 +122,12 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
                     <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 400 }}>{s.contato}</div>
                   )}
                 </td>
-                <td style={{ padding: "8px 12px", color: "#111827" }}>{s.cidadeInfo.nome}</td>
+                <td style={{ padding: "8px 12px", color: "#111827" }}>
+                  {s.cidadeInfo.nome}
+                  {s.bairro && (
+                    <div style={{ fontSize: 12, color: "#6b7280" }}>{s.bairro}</div>
+                  )}
+                </td>
                 <td style={{ padding: "8px 12px", color: "#111827" }}>{s.regiao}</td>
                 <td style={{ padding: "8px 12px" }}>
                   <span style={{ fontWeight: 600, color: STATUS_COR[s.status] ?? "#111827" }}>
@@ -131,6 +140,12 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
                 <td style={{ padding: "8px 12px", color: "#111827" }}>{s.atendente.name}</td>
                 <td style={{ padding: "8px 12px", color: "#6b7280", maxWidth: 200 }}>
                   {s.observacoes ?? "—"}
+                  {s.transbordo && (
+                    <div style={{ fontSize: 11, color: "#b45309", marginTop: 2 }}>{s.transbordo}</div>
+                  )}
+                </td>
+                <td style={{ padding: "8px 12px", textAlign: "center", color: s.registradoIXC ? "#15803d" : "#d1d5db", fontWeight: 600, fontSize: 13 }}>
+                  {s.registradoIXC ? "SIM" : "—"}
                 </td>
                 <td style={{ padding: "8px 12px", whiteSpace: "nowrap" }}>
                   <button

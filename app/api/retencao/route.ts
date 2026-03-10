@@ -27,6 +27,8 @@ export async function POST(req: NextRequest) {
       observacoes,
       retiradaTexto,
       agendaRetirada,
+      registradoIXC,
+      transbordo,
     } = body;
 
     // 3. Validação da competência
@@ -97,6 +99,8 @@ export async function POST(req: NextRequest) {
         observacoes: observacoes?.trim() || null,
         retiradaTexto: retiradaTexto?.trim() || null,
         agendaRetirada: agendaRetirada ? new Date(agendaRetirada) : null,
+        registradoIXC: registradoIXC === true,
+        transbordo: transbordo?.trim() || null,
       },
     });
 

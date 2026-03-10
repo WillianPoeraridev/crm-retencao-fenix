@@ -16,6 +16,8 @@ export interface RascunhoSolicitacao {
   observacoes: string;
   retiradaTexto: string;
   agendaRetirada: string;
+  registradoIXC: string; // "true" | ""
+  transbordo: string;
 }
 
 const RASCUNHO_VAZIO: RascunhoSolicitacao = {
@@ -29,6 +31,8 @@ const RASCUNHO_VAZIO: RascunhoSolicitacao = {
   observacoes: "",
   retiradaTexto: "",
   agendaRetirada: "",
+  registradoIXC: "",
+  transbordo: "",
 };
 
 function rascunhoTemDados(r: RascunhoSolicitacao): boolean {

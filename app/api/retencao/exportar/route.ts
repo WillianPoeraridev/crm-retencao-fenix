@@ -90,20 +90,21 @@ export async function GET(req: NextRequest) {
     const wsDados = wb.addWorksheet("Dados");
 
     wsDados.columns = [
-      { key: "qnt",      width: 5  },
-      { key: "data",     width: 10 },
-      { key: "status",   width: 14 },
-      { key: "nome",     width: 30 },
-      { key: "bairro",   width: 18 },
-      { key: "contato",  width: 16 },
-      { key: "cidade",   width: 18 },
-      { key: "regiao",   width: 10 },
-      { key: "agenda",   width: 16 },
-      { key: "retirada", width: 20 },
-      { key: "atend",    width: 20 },
-      { key: "motivo",   width: 28 },
-      { key: "obs",      width: 40 },
-      { key: "ixc",      width: 14 },
+      { key: "qnt",        width: 5  },
+      { key: "data",       width: 10 },
+      { key: "status",     width: 14 },
+      { key: "nome",       width: 30 },
+      { key: "bairro",     width: 18 },
+      { key: "contato",    width: 16 },
+      { key: "cidade",     width: 18 },
+      { key: "regiao",     width: 10 },
+      { key: "agenda",     width: 16 },
+      { key: "retirada",   width: 20 },
+      { key: "atend",      width: 20 },
+      { key: "motivo",     width: 28 },
+      { key: "obs",        width: 40 },
+      { key: "ixc",        width: 14 },
+      { key: "transbordo", width: 16 },
     ];
 
     // Linha 1 — cabeçalho resumo
@@ -140,7 +141,7 @@ export async function GET(req: NextRequest) {
       "QNT", "DATA", "STATUS", "NOME COMPLETO CLIENTE",
       "BAIRRO", "CONTATO", "CIDADE", "REGIÃO",
       "AGENDA RETIRADA", "RETIRADA", "ATENDENTE",
-      "MOTIVO", "OBSERVAÇÕES", "REGISTRADO IXC",
+      "MOTIVO", "OBSERVAÇÕES", "REGISTRADO IXC", "TRANSBORDO",
     ]);
     rowDadosH.height = 22;
     estilizarLinhaHeader(rowDadosH, COR_HEADER_ESCURO);
@@ -166,7 +167,8 @@ export async function GET(req: NextRequest) {
         s.atendente.name.toUpperCase(),
         s.motivo ? (MOTIVO_SYSTEM_TO_CSV[s.motivo] ?? s.motivo) : "",
         s.observacoes ?? "",
-        "",
+        s.registradoIXC ? "SIM" : "",
+        s.transbordo ?? "",
       ]);
 
       row.height = 18;

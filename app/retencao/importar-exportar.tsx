@@ -29,6 +29,8 @@ interface LinhaPreview {
   motivo: string | null;
   motivoOriginal: string;
   observacoes: string | null;
+  registradoIXC: boolean;
+  transbordo: string | null;
   erro: string | null;
 }
 
@@ -133,6 +135,8 @@ function parsearCSV(texto: string, anoBase: number): LinhaPreview[] {
       motivo,
       motivoOriginal: motivoRaw,
       observacoes: (campos[12] ?? "").trim() || null,
+      registradoIXC: (campos[13] ?? "").trim().toUpperCase() === "SIM",
+      transbordo: (campos[14] ?? "").trim() || null,
       erro,
     });
   }
@@ -259,6 +263,8 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
             atendenteNome: l.atendenteNome,
             motivo: l.motivo,
             observacoes: l.observacoes,
+            registradoIXC: l.registradoIXC,
+            transbordo: l.transbordo,
           })),
         }),
       });
