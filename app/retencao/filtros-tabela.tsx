@@ -40,8 +40,18 @@ export function FiltrosTabela({ solicitacoes, cidades }: Props) {
   }, [solicitacoes]);
 
   const filtradas = useMemo(() => {
+    const buscaLower = busca.toLowerCase();
+    const buscaDigitos = busca.replace(/\D/g, "");
+    const ehBuscaTelefone = buscaDigitos.length >= 6;
+
     return solicitacoes.filter((s) => {
-      if (busca && !s.nomeCliente.toLowerCase().includes(busca.toLowerCase())) return false;
+      if (busca) {
+        const nomeOk = s.nomeCliente.toLowerCase().includes(buscaLower);
+        const telefoneOk = ehBuscaTelefone && s.contato
+          ? s.contato.replace(/\D/g, "").includes(buscaDigitos)
+          : false;
+        if (!nomeOk && !telefoneOk) return false;
+      }
       if (status && s.status !== status) return false;
       if (atendenteId && s.atendente.id !== atendenteId) return false;
       return true;
@@ -74,7 +84,7 @@ export function FiltrosTabela({ solicitacoes, cidades }: Props) {
       >
         <input
           style={{ ...INPUT, minWidth: 200, flex: 1 }}
-          placeholder="Buscar por nome do cliente..."
+          placeholder="Buscar por nome ou telefone..."
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
         />
