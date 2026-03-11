@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
       agendaRetirada,
       registradoIXC,
       transbordo,
+      dataRegistro,
     } = body;
 
     // 3. Validação da competência
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
       data: {
         competenciaId: competencia.id,
         atendenteId: session.user.id,
-        dataRegistro: new Date(),
+        dataRegistro: dataRegistro ? new Date(dataRegistro) : new Date(),
         nomeCliente: nomeCliente.trim(),
         contato: contato?.trim() || null,
         bairro: bairro?.trim() || null,

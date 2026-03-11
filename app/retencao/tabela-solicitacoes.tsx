@@ -23,6 +23,7 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
   const router = useRouter();
   const [editando, setEditando] = useState<SolicitacaoComAtendente | null>(null);
   const [excluindo, setExcluindo] = useState<string | null>(null);
+  const [confirmarExclusaoId, setConfirmarExclusaoId] = useState<string | null>(null);
   const [erroExclusao, setErroExclusao] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -31,9 +32,10 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
     setToast("Solicitação atualizada com sucesso!");
   }
 
-  async function handleExcluir(id: string) {
-    if (!confirm("Tem certeza que deseja excluir esta solicitação? Esta ação não pode ser desfeita.")) return;
-
+  async function handleExcluirConfirmado() {
+    if (!confirmarExclusaoId) return;
+    const id = confirmarExclusaoId;
+    setConfirmarExclusaoId(null);
     setExcluindo(id);
     setErroExclusao(null);
 
@@ -142,7 +144,7 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
                     Editar
                   </button>
                   <button
-                    onClick={() => handleExcluir(s.id)}
+                    onClick={() => setConfirmarExclusaoId(s.id)}
                     disabled={excluindo === s.id}
                     title="Excluir solicitação"
                     style={{
@@ -177,6 +179,71 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
           onSucesso={handleEditSucesso}
           onCancelar={() => setEditando(null)}
         />
+      )}
+
+      {confirmarExclusaoId && (
+        <div
+          onClick={() => setConfirmarExclusaoId(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 50,
+            padding: 16,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 10,
+              padding: 28,
+              width: "100%",
+              maxWidth: 400,
+            }}
+          >
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: "#111827", marginBottom: 8 }}>
+              Excluir solicitação
+            </h2>
+            <p style={{ fontSize: 14, color: "#6b7280", marginBottom: 24 }}>
+              Tem certeza? Esta ação não pode ser desfeita.
+            </p>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setConfirmarExclusaoId(null)}
+                style={{
+                  padding: "8px 18px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: 6,
+                  background: "#fff",
+                  color: "#374151",
+                  cursor: "pointer",
+                  fontSize: 14,
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleExcluirConfirmado}
+                style={{
+                  padding: "8px 18px",
+                  border: "none",
+                  borderRadius: 6,
+                  background: "#b91c1c",
+                  color: "#fff",
+                  cursor: "pointer",
+                  fontSize: 14,
+                  fontWeight: 600,
+                }}
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {toast && <Toast mensagem={toast} onClose={() => setToast(null)} />}

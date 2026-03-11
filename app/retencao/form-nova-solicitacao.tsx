@@ -53,6 +53,7 @@ interface Solicitacao {
   observacoes: string | null;
   retiradaTexto: string | null;
   agendaRetirada: Date | null;
+  dataRegistro: Date;
   registradoIXC: boolean;
   transbordo: string | null;
 }
@@ -119,6 +120,9 @@ export function FormNovaSolicitacao({
       ? (solicitacao.registradoIXC ? "true" : "")
       : (rascunho?.registradoIXC ?? "true"),
     transbordo: solicitacao?.transbordo ?? rascunho?.transbordo ?? "",
+    dataRegistro: solicitacao
+      ? formatarDataParaInput(solicitacao.dataRegistro)
+      : rascunho?.dataRegistro ?? new Date().toISOString().split("T")[0],
   });
 
   const [enviando, setEnviando] = useState(false);
@@ -252,6 +256,17 @@ export function FormNovaSolicitacao({
               value={form.nomeCliente}
               onChange={(e) => set("nomeCliente", e.target.value)}
               placeholder="Nome completo"
+              required
+            />
+          </div>
+
+          <div style={CAMPO}>
+            <label style={LABEL}>Data do atendimento *</label>
+            <input
+              style={INPUT}
+              type="date"
+              value={form.dataRegistro}
+              onChange={(e) => set("dataRegistro", e.target.value)}
               required
             />
           </div>

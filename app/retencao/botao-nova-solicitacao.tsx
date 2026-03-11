@@ -18,6 +18,7 @@ export interface RascunhoSolicitacao {
   agendaRetirada: string;
   registradoIXC: string; // "true" | ""
   transbordo: string;
+  dataRegistro: string; // formato yyyy-mm-dd
 }
 
 const RASCUNHO_VAZIO: RascunhoSolicitacao = {
@@ -31,8 +32,9 @@ const RASCUNHO_VAZIO: RascunhoSolicitacao = {
   observacoes: "",
   retiradaTexto: "",
   agendaRetirada: "",
-  registradoIXC: "true", // marcado por padrão
+  registradoIXC: "true",
   transbordo: "",
+  dataRegistro: new Date().toISOString().split("T")[0],
 };
 
 function rascunhoTemDados(r: RascunhoSolicitacao): boolean {
