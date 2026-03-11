@@ -198,7 +198,7 @@ export function cidadeIdParaNome(id: string, nome: string): string {
 // ═══════════════════════════════════════════════════
 
 export function normalizarCidade(textoOriginal: string): string | null {
-  const limpo = textoOriginal.trim().toLowerCase().replace(/\s+/g, " ");
+  const limpo = textoOriginal.trim().toLowerCase().replace(/\s+/g, " ").replace(/\u00ad/g, "");
   if (!limpo) return null;
   return CIDADE_CSV_TO_SYSTEM[limpo] ?? null;
 }
