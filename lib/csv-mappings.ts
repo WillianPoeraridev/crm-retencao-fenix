@@ -107,12 +107,11 @@ export const CIDADE_CSV_TO_SYSTEM: Record<string, string> = {
   // Osório
   osório: "OSORIO",
   osorio: "OSORIO",
-  "osã³rio": "OSORIO",
-  "osã³rio - rs": "OSORIO",
 
   // São Leopoldo
   "são leopoldo": "SAO_LEOPOLDO",
   "sao leopoldo": "SAO_LEOPOLDO",
+  "sã£o leopoldo": "SAO_LEOPOLDO",
 
   // Novo Hamburgo e variantes
   "novo hamburgo": "NOVO_HAMBURGO",
@@ -154,8 +153,6 @@ export const CIDADE_CSV_TO_SYSTEM: Record<string, string> = {
   "dois irmãos": "DOIS_IRMAOS",
   "dois irmaos": "DOIS_IRMAOS",
   "dois irmãos - rs": "DOIS_IRMAOS",
-  "dois irmã£os": "DOIS_IRMAOS",
-  "dois irmã£os - rs": "DOIS_IRMAOS",
 
   // Campo Bom
   "campo bom": "CAMPO_BOM",
@@ -177,8 +174,6 @@ export const CIDADE_CSV_TO_SYSTEM: Record<string, string> = {
   // Viamão
   viamão: "VIAMAO",
   viamao: "VIAMAO",
-  "viamã£o": "VIAMAO",
-  "viamã£o - rs": "VIAMAO",
 
   // Alvorada
   alvorada: "ALVORADA",
