@@ -79,7 +79,7 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>Motivo</th>
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>Atendente</th>
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>Observações</th>
-              <th style={{ padding: "8px 12px", fontWeight: 600 }}>IXC</th>
+              <th style={{ padding: "8px 12px", fontWeight: 600, textAlign: "center" }}>IXC</th>
               <th style={{ padding: "8px 12px", width: "1%" }}></th>
             </tr>
           </thead>
