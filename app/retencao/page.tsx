@@ -54,7 +54,7 @@ export default async function RetencaoPage({
       {/* Header: linha 1 - seletor + botões */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 8 }}>
         <SeletorCompetencia ano={ano} mes={mes} temCompetencia={!!competencia} />
-        <div style={{ display: "flex", gap: 8, alignItems: "center", marginLeft: "auto" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", marginLeft: "auto", alignSelf: "flex-start" }}>
           <ImportarExportar competenciaId={competencia?.id ?? null} ano={ano} isAdmin={isAdmin} />
           <BotaoNovaSolicitacao competenciaId={competencia?.id ?? null} cidades={cidades} ano={ano} mes={mes} />
         </div>
