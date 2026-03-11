@@ -39,16 +39,16 @@ export function SeletorCompetencia({ ano, mes, temCompetencia }: Props) {
       </button>
 
       <div style={{ textAlign: "center", minWidth: 180 }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: "#111827" }}>
           {MESES[mes - 1]} {ano}
         </div>
         {!temCompetencia && (
-          <div style={{ fontSize: 11, color: "#b45309", marginTop: 2 }}>
+          <div style={{ fontSize: 13, color: "#b45309", marginTop: 2 }}>
             sem dados cadastrados
           </div>
         )}
         {ehMesAtual && (
-          <div style={{ fontSize: 11, color: "#2563eb", marginTop: 2 }}>
+          <div style={{ fontSize: 13, color: "#2563eb", marginTop: 2 }}>
             mês atual
           </div>
         )}
