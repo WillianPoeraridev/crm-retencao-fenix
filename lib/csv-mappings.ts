@@ -83,17 +83,23 @@ export const CIDADE_CSV_TO_SYSTEM: Record<string, string> = {
   gravataí: "GRAVATAI",
   "gravataí - rs": "GRAVATAI",
   "gravatai - rs": "GRAVATAI",
+  "gravataã­": "GRAVATAI",
+  "gravataã­ - rs": "GRAVATAI",
 
   // Tramandaí
   tramandai: "TRAMANDAI",
   tramandaí: "TRAMANDAI",
   "tramandaí - rs": "TRAMANDAI",
   "tramandai - rs": "TRAMANDAI",
+  "tramandaã­": "TRAMANDAI",
+  "tramandaã­ - rs": "TRAMANDAI",
 
   // Imbé
   imbé: "IMBE",
   imbe: "IMBE",
   "imbé - rs": "IMBE",
+  "imbã©": "IMBE",
+  "imbã© - rs": "IMBE",
 
   // Cidreira
   cidreira: "CIDREIRA",
@@ -101,6 +107,8 @@ export const CIDADE_CSV_TO_SYSTEM: Record<string, string> = {
   // Osório
   osório: "OSORIO",
   osorio: "OSORIO",
+  "osã³rio": "OSORIO",
+  "osã³rio - rs": "OSORIO",
 
   // São Leopoldo
   "são leopoldo": "SAO_LEOPOLDO",
@@ -130,6 +138,8 @@ export const CIDADE_CSV_TO_SYSTEM: Record<string, string> = {
   parobe: "PAROBE",
   "parobé - rs": "PAROBE",
   parpobé: "PAROBE",
+  "parobã©": "PAROBE",
+  "parobã© - rs": "PAROBE",
 
   // Estância Velha
   "estância velha": "ESTANCIA_VELHA",
@@ -137,11 +147,15 @@ export const CIDADE_CSV_TO_SYSTEM: Record<string, string> = {
   "estância velha - rs": "ESTANCIA_VELHA",
   "estancia velha.": "ESTANCIA_VELHA",
   estancia: "ESTANCIA_VELHA",
+  "estã¢ncia velha": "ESTANCIA_VELHA",
+  "estã¢ncia velha - rs": "ESTANCIA_VELHA",
 
   // Dois Irmãos
   "dois irmãos": "DOIS_IRMAOS",
   "dois irmaos": "DOIS_IRMAOS",
   "dois irmãos - rs": "DOIS_IRMAOS",
+  "dois irmã£os": "DOIS_IRMAOS",
+  "dois irmã£os - rs": "DOIS_IRMAOS",
 
   // Campo Bom
   "campo bom": "CAMPO_BOM",
@@ -163,6 +177,8 @@ export const CIDADE_CSV_TO_SYSTEM: Record<string, string> = {
   // Viamão
   viamão: "VIAMAO",
   viamao: "VIAMAO",
+  "viamã£o": "VIAMAO",
+  "viamã£o - rs": "VIAMAO",
 
   // Alvorada
   alvorada: "ALVORADA",
