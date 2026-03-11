@@ -55,8 +55,8 @@ export default async function RetencaoPage({
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12, flexWrap: "wrap" }}>
         <SeletorCompetencia ano={ano} mes={mes} temCompetencia={!!competencia} />
 
-        {competencia && (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", flex: 1 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", flex: 1, minHeight: 80 }}>
+          {competencia && <>
             <CardResumo label="Cancelados" valor={totalCancelados} meta={competencia.metaCancelamentos} cor="#b91c1c" />
             <CardResumo label="Retidos" valor={totalRetidos} cor="#15803d" />
             <CardResumo label="Inadimplência" valor={totalInadimplencia} cor="#b45309" />
@@ -64,8 +64,8 @@ export default async function RetencaoPage({
             {saldo !== null && (
               <CardResumo label="Saldo" valor={saldo} cor={saldo >= 0 ? "#15803d" : "#b91c1c"} />
             )}
-          </div>
-        )}
+          </>}
+        </div>
 
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginLeft: "auto", alignSelf: "flex-start" }}>
           <ImportarExportar competenciaId={competencia?.id ?? null} ano={ano} isAdmin={isAdmin} />
