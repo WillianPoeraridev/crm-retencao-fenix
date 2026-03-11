@@ -55,7 +55,7 @@ export default async function RetencaoPage({
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12, flexWrap: "wrap" }}>
         <SeletorCompetencia ano={ano} mes={mes} temCompetencia={!!competencia} />
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", flex: 1, minHeight: 80 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", flex: 1, minHeight: 80, marginLeft: 16 }}>
           {competencia && <>
             <CardResumo label="Cancelados" valor={totalCancelados} meta={competencia.metaCancelamentos} cor="#b91c1c" />
             <CardResumo label="Retidos" valor={totalRetidos} cor="#15803d" />
