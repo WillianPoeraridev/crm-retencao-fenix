@@ -2,7 +2,7 @@ import "dotenv/config";
 import bcrypt from "bcrypt";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient, Role, StatusRetencao, Regiao, Cidade, MotivoCancelamento } from "@prisma/client";
+import { PrismaClient, Role, StatusRetencao, Regiao, MotivoCancelamento } from "@prisma/client";
 
 function mustEnv(name: string) {
   const v = process.env[name];
@@ -110,7 +110,7 @@ async function main() {
         nomeCliente: "Cliente Exemplo 1",
         bairro: "Centro",
         contato: "(51) 99999-0001",
-        cidade: Cidade.CACHOEIRINHA,
+        cidade: "CACHOEIRINHA",
         regiao: Regiao.MATRIZ,
         motivo: MotivoCancelamento.INSATISFACAO_SERVICO,
         observacoes: "Sem sinal - CTO.",
@@ -124,7 +124,7 @@ async function main() {
         nomeCliente: "Cliente Exemplo 2",
         bairro: "Lago Azul",
         contato: "(51) 99999-0002",
-        cidade: Cidade.TRAMANDAI,
+        cidade: "TRAMANDAI",
         regiao: Regiao.LITORAL,
         observacoes: "Retido com 50% OFF na próxima fatura.",
         retiradaTexto: "Entregou em loja",
