@@ -51,26 +51,26 @@ export default async function RetencaoPage({
         </div>
       )}
 
-      {/* Header: seletor + cards + botões numa linha só */}
-      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12, flexWrap: "wrap" }}>
+      {/* Header: linha 1 - seletor + botões */}
+      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 8 }}>
         <SeletorCompetencia ano={ano} mes={mes} temCompetencia={!!competencia} />
-
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", flex: 1, minHeight: 80, marginLeft: 16 }}>
-          {competencia && <>
-            <CardResumo label="Cancelados" valor={totalCancelados} meta={competencia.metaCancelamentos} cor="#b91c1c" />
-            <CardResumo label="Retidos" valor={totalRetidos} cor="#15803d" />
-            <CardResumo label="Inadimplência" valor={totalInadimplencia} cor="#b45309" />
-            <CardResumo label="Total Empresa" valor={totalEmpresa} />
-            {saldo !== null && (
-              <CardResumo label="Saldo" valor={saldo} cor={saldo >= 0 ? "#15803d" : "#b91c1c"} />
-            )}
-          </>}
-        </div>
-
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginLeft: "auto", alignSelf: "flex-start" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", marginLeft: "auto" }}>
           <ImportarExportar competenciaId={competencia?.id ?? null} ano={ano} isAdmin={isAdmin} />
           <BotaoNovaSolicitacao competenciaId={competencia?.id ?? null} cidades={cidades} ano={ano} mes={mes} />
         </div>
+      </div>
+
+      {/* Header: linha 2 - cards */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        {competencia && <>
+          <CardResumo label="Cancelados" valor={totalCancelados} meta={competencia.metaCancelamentos} cor="#b91c1c" />
+          <CardResumo label="Retidos" valor={totalRetidos} cor="#15803d" />
+          <CardResumo label="Inadimplência" valor={totalInadimplencia} cor="#b45309" />
+          <CardResumo label="Total Empresa" valor={totalEmpresa} />
+          {saldo !== null && (
+            <CardResumo label="Saldo" valor={saldo} cor={saldo >= 0 ? "#15803d" : "#b91c1c"} />
+          )}
+        </>}
       </div>
 
       {competencia ? (
