@@ -80,7 +80,7 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>Atendente</th>
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>Observações</th>
               <th style={{ padding: "8px 12px", fontWeight: 600 }}>IXC</th>
-              <th style={{ padding: "8px 12px" }}></th>
+              <th style={{ padding: "8px 12px", width: "1%" }}></th>
             </tr>
           </thead>
           <tbody>
@@ -127,7 +127,7 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
                 <td style={{ padding: "8px 12px", textAlign: "center", color: s.registradoIXC ? "#15803d" : "#d1d5db", fontWeight: 600, fontSize: 13 }}>
                   {s.registradoIXC ? "SIM" : "—"}
                 </td>
-                <td style={{ padding: "8px 12px", whiteSpace: "nowrap" }}>
+                <td style={{ padding: "8px 12px", whiteSpace: "nowrap", width: "1%", textAlign: "right" }}>
                   <button
                     onClick={() => setEditando(s)}
                     style={{
