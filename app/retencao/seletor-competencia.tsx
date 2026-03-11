@@ -29,7 +29,7 @@ export function SeletorCompetencia({ ano, mes, temCompetencia }: Props) {
   const ehMesAtual = ano === agora.getFullYear() && mes === agora.getMonth() + 1;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
       <button
         onClick={() => navegar(-1)}
         title="Mês anterior"
@@ -38,20 +38,18 @@ export function SeletorCompetencia({ ano, mes, temCompetencia }: Props) {
         ←
       </button>
 
-      <div style={{ textAlign: "center", minWidth: 180 }}>
+      <div style={{ textAlign: "center", width: 200 }}>
         <div style={{ fontSize: 22, fontWeight: 700, color: "#111827" }}>
           {MESES[mes - 1]} {ano}
         </div>
-        {!temCompetencia && (
-          <div style={{ fontSize: 13, color: "#b45309", marginTop: 2 }}>
-            sem dados cadastrados
-          </div>
-        )}
-        {ehMesAtual && (
-          <div style={{ fontSize: 13, color: "#2563eb", marginTop: 2 }}>
-            mês atual
-          </div>
-        )}
+        <div style={{ fontSize: 13, marginTop: 2, height: 18 }}>
+          {!temCompetencia && (
+            <span style={{ color: "#b45309" }}>sem dados cadastrados</span>
+          )}
+          {ehMesAtual && (
+            <span style={{ color: "#2563eb" }}>mês atual</span>
+          )}
+        </div>
       </div>
 
       <button
