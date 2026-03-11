@@ -67,7 +67,7 @@ export default async function RetencaoPage({
           </div>
         )}
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginLeft: "auto" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginLeft: "auto", alignSelf: "flex-start" }}>
           <ImportarExportar competenciaId={competencia?.id ?? null} ano={ano} isAdmin={isAdmin} />
           <BotaoNovaSolicitacao competenciaId={competencia?.id ?? null} cidades={cidades} ano={ano} mes={mes} />
         </div>
