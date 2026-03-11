@@ -64,7 +64,7 @@ export function SeletorCompetencia({ ano, mes, temCompetencia }: Props) {
         <button
           onClick={() => router.push(pathname)}
           title="Voltar ao mês atual"
-          style={{ ...estiloBtn, fontSize: 11, padding: "4px 10px", color: "#2563eb", borderColor: "#2563eb" }}
+          style={{ ...estiloBtn, fontSize: 11, padding: "4px 10px", color: "#2563eb", borderColor: "#2563eb", alignSelf: "flex-start", marginTop: 1 }}
         >
           hoje
         </button>
