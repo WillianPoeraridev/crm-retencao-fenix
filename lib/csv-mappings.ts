@@ -183,7 +183,9 @@ export const CIDADE_CSV_TO_SYSTEM: Record<string, string> = {
   "nova hartz": "NOVA_HARTZ",
   "araricá - rs": "ARARICA",
   araricá: "ARARICA",
+  ararica: "ARARICA",
   indianópolis: "INDIANOPOLIS",
+  indianopolis: "INDIANOPOLIS",
 };
 
 // Mapa inverso — usado na exportação
@@ -197,10 +199,46 @@ export function cidadeIdParaNome(id: string, nome: string): string {
 // HELPERS
 // ═══════════════════════════════════════════════════
 
+/**
+ * Tenta desfazer mojibake (double-encoding UTF-8 → Latin-1 → UTF-8).
+ * Ex: "GravataÃ­" → trata cada char como byte Latin-1 → decodifica como UTF-8 → "Gravataí"
+ */
+function tentarFixMojibake(texto: string): string {
+  try {
+    // Só tenta se parecer ter mojibake (chars acima de U+007F que formam sequências UTF-8 válidas)
+    if (!/[\u00c0-\u00ff]/.test(texto)) return texto;
+    const bytes = new Uint8Array([...texto].map((c) => c.charCodeAt(0)));
+    const decoded = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    return decoded;
+  } catch {
+    return texto;
+  }
+}
+
 export function normalizarCidade(textoOriginal: string): string | null {
-  const limpo = textoOriginal.trim().toLowerCase().replace(/\s+/g, " ").replace(/\u00ad/g, "");
-  if (!limpo) return null;
-  return CIDADE_CSV_TO_SYSTEM[limpo] ?? null;
+  const base = textoOriginal.trim().toLowerCase().replace(/\s+/g, " ");
+  if (!base) return null;
+
+  // 1) Tenta match direto (com soft-hyphen intacto — bate com chaves mojibake existentes)
+  const match1 = CIDADE_CSV_TO_SYSTEM[base];
+  if (match1) return match1;
+
+  // 2) Tenta sem soft-hyphen (para nomes colados de fontes que inserem \u00ad)
+  const semSH = base.replace(/\u00ad/g, "");
+  if (semSH !== base) {
+    const match2 = CIDADE_CSV_TO_SYSTEM[semSH];
+    if (match2) return match2;
+  }
+
+  // 3) Tenta desfazer mojibake e re-normalizar
+  const fixado = tentarFixMojibake(base);
+  if (fixado !== base) {
+    const limpoFix = fixado.trim().toLowerCase().replace(/\s+/g, " ");
+    const match3 = CIDADE_CSV_TO_SYSTEM[limpoFix];
+    if (match3) return match3;
+  }
+
+  return null;
 }
 
 export function normalizarRegiao(textoOriginal: string): string | null {
