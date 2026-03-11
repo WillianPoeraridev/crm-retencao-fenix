@@ -5,29 +5,7 @@ import { useRouter } from "next/navigation";
 import type { SolicitacaoComAtendente, CidadeOption } from "@/lib/retencao";
 import { FormNovaSolicitacao } from "./form-nova-solicitacao";
 import { Toast } from "@/app/toast";
-
-const STATUS_LABEL: Record<string, string> = {
-  CANCELADO: "Cancelado",
-  RETIDO: "Retido",
-  INADIMPLENCIA: "Inadimplência",
-};
-
-const STATUS_COR: Record<string, string> = {
-  CANCELADO: "#b91c1c",
-  RETIDO: "#15803d",
-  INADIMPLENCIA: "#b45309",
-};
-
-const MOTIVO_LABEL: Record<string, string> = {
-  INSATISFACAO_ATD: "Insatisfação Atendimento",
-  INSATISFACAO_SERVICO: "Insatisfação Serviço",
-  MUDANCA_ENDERECO: "Mudança de Endereço",
-  MOTIVOS_PESSOAIS: "Motivos Pessoais",
-  TROCA_PROVEDOR: "Troca de Provedor",
-  PROBLEMAS_FINANC: "Problemas Financeiros",
-  OUTROS: "Outros",
-  INADIMPLENCIA_90: "90 + Inadimplência",
-};
+import { STATUS_LABEL, STATUS_COR, MOTIVO_LABEL } from "@/lib/labels";
 
 function formatarData(data: Date) {
   const d = new Date(data);

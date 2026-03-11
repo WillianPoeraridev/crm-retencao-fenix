@@ -1,4 +1,5 @@
 import type { SolicitacaoComAtendente } from "@/lib/retencao";
+import { MOTIVO_LABEL, REGIAO_LABEL } from "@/lib/labels";
 
 interface Competencia {
   metaCancelamentos: number | null;
@@ -13,22 +14,6 @@ interface Props {
   solicitacoes: SolicitacaoComAtendente[];
   competencia: Competencia;
 }
-
-const MOTIVO_LABEL: Record<string, string> = {
-  INSATISFACAO_ATD: "Insatisfação c/ Atendimento",
-  INSATISFACAO_SERVICO: "Insatisfação c/ Serviço",
-  MUDANCA_ENDERECO: "Mudança de Endereço",
-  MOTIVOS_PESSOAIS: "Motivos Pessoais",
-  TROCA_PROVEDOR: "Troca de Provedor",
-  PROBLEMAS_FINANC: "Problemas Financeiros",
-  OUTROS: "Outros",
-};
-
-const REGIAO_LABEL: Record<string, string> = {
-  SINOS: "Sinos",
-  LITORAL: "Litoral",
-  MATRIZ: "Matriz",
-};
 
 function pct(valor: number, total: number) {
   if (total === 0) return "0,00%";

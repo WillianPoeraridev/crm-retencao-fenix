@@ -81,6 +81,8 @@ export async function POST(req: NextRequest) {
       observacoes: string | null;
       retiradaTexto: string | null;
       agendaRetirada: Date | null;
+      registradoIXC: boolean;
+      transbordo: string | null;
     }> = [];
 
     for (let i = 0; i < linhas.length; i++) {
@@ -171,9 +173,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Proteção contra duplicata: busca registros já existentes nesta competência
+    // e filtra qualquer linha com mesmo nomeCliente + mesma data de registro.
+    const existentes = await prisma.solicitacaoRetencao.findMany({
+      where: { competenciaId },
+      select: { nomeCliente: true, dataRegistro: true },
+    });
+
+    const chaveExistente = new Set(
+      existentes.map((r) =>
+        `${r.nomeCliente.trim().toUpperCase()}|${r.dataRegistro.toISOString().slice(0, 10)}`
+      )
+    );
+
+    const semDuplicata = dadosValidos.filter((d) => {
+      const chave = `${d.nomeCliente.trim().toUpperCase()}|${d.dataRegistro.toISOString().slice(0, 10)}`;
+      return !chaveExistente.has(chave);
+    });
+
+    const duplicatasIgnoradas = dadosValidos.length - semDuplicata.length;
+    if (duplicatasIgnoradas > 0) {
+      erros.push(
+        `${duplicatasIgnoradas} linha(s) ignorada(s) por já existir registro com mesmo cliente e data nesta competência.`
+      );
+    }
+
+    if (semDuplicata.length === 0) {
+      return NextResponse.json(
+        { error: "Todas as linhas já existem nesta competência.", erros },
+        { status: 400 }
+      );
+    }
+
     // Cria tudo de uma vez
     const resultado = await prisma.solicitacaoRetencao.createMany({
-      data: dadosValidos,
+      data: semDuplicata,
       skipDuplicates: false,
     });
 

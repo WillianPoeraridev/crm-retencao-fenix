@@ -9,6 +9,7 @@ import {
   REGIAO_SYSTEM_TO_CSV,
   MESES_PT,
 } from "@/lib/csv-mappings";
+import { MOTIVO_LABEL } from "@/lib/labels";
 
 const COR_HEADER_ESCURO = "FF111827";
 const COR_HEADER_MEDIO  = "FF1E3A5F";
@@ -236,16 +237,6 @@ export async function GET(req: NextRequest) {
     wsInfo.addRow([]);
 
     // Motivos
-    const MOTIVO_LABEL: Record<string, string> = {
-      INSATISFACAO_ATD:     "Insatisfação c/ Atendimento",
-      INSATISFACAO_SERVICO: "Insatisfação c/ Serviço",
-      MUDANCA_ENDERECO:     "Mudança de Endereço",
-      MOTIVOS_PESSOAIS:     "Motivos Pessoais",
-      TROCA_PROVEDOR:       "Troca de Provedor",
-      PROBLEMAS_FINANC:     "Problemas Financeiros",
-      OUTROS:               "Outros",
-    };
-
     const motivosCount: Record<string, number> = {};
     for (const s of solicitacoes) {
       if (s.status === "CANCELADO" && s.motivo && s.motivo !== "INADIMPLENCIA_90") {
