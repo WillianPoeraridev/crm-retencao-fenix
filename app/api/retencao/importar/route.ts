@@ -174,20 +174,20 @@ export async function POST(req: NextRequest) {
     }
 
     // Proteção contra duplicata: busca registros já existentes nesta competência
-    // e filtra qualquer linha com mesmo nomeCliente + mesma data de registro.
+    // e filtra qualquer linha com mesmo nomeCliente + data + status.
     const existentes = await prisma.solicitacaoRetencao.findMany({
       where: { competenciaId },
-      select: { nomeCliente: true, dataRegistro: true },
+      select: { nomeCliente: true, dataRegistro: true, status: true },
     });
 
     const chaveExistente = new Set(
       existentes.map((r) =>
-        `${r.nomeCliente.trim().toUpperCase()}|${r.dataRegistro.toISOString().slice(0, 10)}`
+        `${r.nomeCliente.trim().toUpperCase()}|${r.dataRegistro.toISOString().slice(0, 10)}|${r.status}`
       )
     );
 
     const semDuplicata = dadosValidos.filter((d) => {
-      const chave = `${d.nomeCliente.trim().toUpperCase()}|${d.dataRegistro.toISOString().slice(0, 10)}`;
+      const chave = `${d.nomeCliente.trim().toUpperCase()}|${d.dataRegistro.toISOString().slice(0, 10)}|${d.status}`;
       return !chaveExistente.has(chave);
     });
 
