@@ -29,11 +29,11 @@ export function SeletorCompetencia({ ano, mes, temCompetencia }: Props) {
   const ehMesAtual = ano === agora.getFullYear() && mes === agora.getMonth() + 1;
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <button
         onClick={() => navegar(-1)}
         title="Mês anterior"
-        style={estiloBtn}
+        style={{ ...estiloBtn, alignSelf: "flex-start" }}
       >
         ←
       </button>
@@ -55,7 +55,7 @@ export function SeletorCompetencia({ ano, mes, temCompetencia }: Props) {
       <button
         onClick={() => navegar(+1)}
         title="Próximo mês"
-        style={estiloBtn}
+        style={{ ...estiloBtn, alignSelf: "flex-start" }}
       >
         →
       </button>
