@@ -34,7 +34,7 @@ export default async function RetencaoPage({
     : null;
 
   return (
-    <main style={{ padding: "12px 24px", maxWidth: 1200, margin: "0 auto" }}>
+    <main style={{ padding: "12px 64px" }}>
       {params.forbidden && (
         <div
           style={{
