@@ -45,7 +45,7 @@ function LoginForm() {
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: "#f3f4f6",
+        background: "linear-gradient(135deg, #1e2530 0%, #0f1419 100%)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -66,11 +66,8 @@ function LoginForm() {
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>🔥</div>
           <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>
-            Fênix CRM
+            Fênix CRM Retenção
           </h1>
-          <p style={{ fontSize: 13, color: "#6b7280", marginTop: 4 }}>
-            Sistema de Retenção
-          </p>
         </div>
 
         <form onSubmit={onSubmit}>
@@ -148,7 +145,7 @@ function LoginForm() {
               padding: "10px",
               border: "none",
               borderRadius: 6,
-              backgroundColor: carregando ? "#9ca3af" : "#111827",
+              backgroundColor: carregando ? "#9ca3af" : "#f97316",
               color: "#fff",
               fontSize: 14,
               fontWeight: 600,

@@ -1,4 +1,5 @@
 import { getCompetenciaByAnoMes, getSolicitacoesByCompetencia, getCidadesAtivas, resolverAnoMes } from "@/lib/retencao";
+import { RetencaoRealtime } from "./retencao-realtime";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { FiltrosTabela } from "./filtros-tabela";
@@ -35,6 +36,7 @@ export default async function RetencaoPage({
 
   return (
     <main style={{ padding: "12px 64px" }}>
+      <RetencaoRealtime />
       {params.forbidden && (
         <div
           style={{
