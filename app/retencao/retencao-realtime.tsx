@@ -8,6 +8,8 @@ export function RetencaoRealtime() {
   const router = useRouter();
 
   useEffect(() => {
+    if (!supabase) return;
+
     const channel = supabase
       .channel("retencao-changes")
       .on(
@@ -20,7 +22,7 @@ export function RetencaoRealtime() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase?.removeChannel(channel);
     };
   }, [router]);
 
