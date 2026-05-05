@@ -55,10 +55,6 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
     }
   }
 
-  if (solicitacoes.length === 0) {
-    return <p style={{ color: "#6b7280", marginTop: 16 }}>Nenhuma solicitação registrada neste mês.</p>;
-  }
-
   return (
     <>
       {erroExclusao && (
@@ -67,20 +63,15 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
         </div>
       )}
 
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+      <div style={{ overflowX: "auto", border: "1px solid #e5e7eb", borderRadius: 8, backgroundColor: "#fff" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
           <thead>
-            <tr style={{ textAlign: "left", backgroundColor: "#1e2530", color: "#ffffff", borderBottom: "1px solid #2a3340" }}>
-              <th style={{ padding: "8px 12px", fontWeight: 600 }}>Data</th>
-              <th style={{ padding: "8px 12px", fontWeight: 600 }}>Cliente</th>
-              <th style={{ padding: "8px 12px", fontWeight: 600 }}>Cidade</th>
-              <th style={{ padding: "8px 12px", fontWeight: 600 }}>Região</th>
-              <th style={{ padding: "8px 12px", fontWeight: 600 }}>Status</th>
-              <th style={{ padding: "8px 12px", fontWeight: 600 }}>Motivo</th>
-              <th style={{ padding: "8px 12px", fontWeight: 600 }}>Atendente</th>
-              <th style={{ padding: "8px 12px", fontWeight: 600 }}>Observações</th>
-              <th style={{ padding: "8px 12px", fontWeight: 600, textAlign: "center" }}>IXC</th>
-              <th style={{ padding: "8px 12px", width: "1%" }}></th>
+            <tr style={{ textAlign: "left", backgroundColor: "#f9fafb", borderBottom: "2px solid #e5e7eb" }}>
+              {["Data", "Cliente", "Cidade", "Região", "Status", "Motivo", "Atendente", "Observações"].map((h) => (
+                <th key={h} style={{ padding: "8px 10px", color: "#6b7280", fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
+              ))}
+              <th style={{ padding: "8px 10px", color: "#6b7280", fontWeight: 600, textAlign: "center" }}>IXC</th>
+              <th style={{ padding: "8px 10px", width: "1%" }}></th>
             </tr>
           </thead>
           <tbody>
@@ -88,46 +79,57 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
               <tr
                 key={s.id}
                 style={{
-                  borderBottom: "1px solid #e5e7eb",
-                  backgroundColor: i % 2 === 0 ? "#ffffff" : "#f9fafb",
+                  borderBottom: "1px solid #f3f4f6",
+                  backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb",
                   opacity: excluindo === s.id ? 0.5 : 1,
                 }}
               >
-                <td style={{ padding: "8px 12px", whiteSpace: "nowrap", color: "#111827" }}>
+                <td style={{ padding: "7px 10px", whiteSpace: "nowrap", color: "#111827" }}>
                   {formatarData(s.dataRegistro)}
                 </td>
-                <td style={{ padding: "8px 12px", fontWeight: 500, color: "#111827" }}>
-                  {s.nomeCliente}
+                <td style={{ padding: "7px 10px", fontWeight: 500, color: "#111827", maxWidth: 220 }}>
+                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.nomeCliente}</div>
                   {s.contato && (
-                    <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 400 }}>{s.contato}</div>
+                    <div style={{ fontSize: 11, color: "#6b7280", fontWeight: 400 }}>{s.contato}</div>
                   )}
                 </td>
-                <td style={{ padding: "8px 12px", color: "#111827" }}>
-                  {s.cidadeInfo.nome}
+                <td style={{ padding: "7px 10px", color: "#111827", maxWidth: 160 }}>
+                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.cidadeInfo.nome}</div>
                   {s.bairro && (
-                    <div style={{ fontSize: 12, color: "#6b7280" }}>{s.bairro}</div>
+                    <div style={{ fontSize: 11, color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.bairro}</div>
                   )}
                 </td>
-                <td style={{ padding: "8px 12px", color: "#111827" }}>{s.regiao}</td>
-                <td style={{ padding: "8px 12px" }}>
-                  <span style={{ fontWeight: 600, color: STATUS_COR[s.status] ?? "#111827" }}>
+                <td style={{ padding: "7px 10px" }}>
+                  <span style={{
+                    fontSize: 11, fontWeight: 600,
+                    color: s.regiao === "MATRIZ" ? "#0369a1" : s.regiao === "LITORAL" ? "#0891b2" : "#7c3aed",
+                  }}>
+                    {s.regiao}
+                  </span>
+                </td>
+                <td style={{ padding: "7px 10px" }}>
+                  <span style={{
+                    padding: "2px 6px", borderRadius: 4, fontSize: 11, fontWeight: 600,
+                    color: STATUS_COR[s.status] ?? "#111827",
+                    backgroundColor: `${STATUS_COR[s.status] ?? "#111827"}15`,
+                  }}>
                     {STATUS_LABEL[s.status] ?? s.status}
                   </span>
                 </td>
-                <td style={{ padding: "8px 12px", color: "#111827" }}>
+                <td style={{ padding: "7px 10px", color: "#6b7280", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {s.motivo ? MOTIVO_LABEL[s.motivo] ?? s.motivo : "—"}
                 </td>
-                <td style={{ padding: "8px 12px", color: "#111827" }}>{s.atendente.name}</td>
-                <td style={{ padding: "8px 12px", color: "#6b7280", maxWidth: 200 }}>
-                  {s.observacoes ?? "—"}
+                <td style={{ padding: "7px 10px", fontWeight: 500, color: "#111827" }}>{s.atendente.name.split(" ")[0]}</td>
+                <td style={{ padding: "7px 10px", color: "#6b7280", maxWidth: 220 }}>
+                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.observacoes ?? "—"}</div>
                   {s.transbordo && (
                     <div style={{ fontSize: 11, color: "#b45309", marginTop: 2 }}>{s.transbordo}</div>
                   )}
                 </td>
-                <td style={{ padding: "8px 12px", textAlign: "center", color: s.registradoIXC ? "#15803d" : "#d1d5db", fontWeight: 600, fontSize: 13 }}>
+                <td style={{ padding: "7px 10px", textAlign: "center", color: s.registradoIXC ? "#15803d" : "#d1d5db", fontWeight: 600, fontSize: 11 }}>
                   {s.registradoIXC ? "SIM" : "—"}
                 </td>
-                <td style={{ padding: "8px 12px", whiteSpace: "nowrap", width: "1%", textAlign: "right" }}>
+                <td style={{ padding: "7px 10px", whiteSpace: "nowrap", width: "1%", textAlign: "right" }}>
                   <button
                     onClick={() => setEditando(s)}
                     style={{
@@ -170,6 +172,9 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
             ))}
           </tbody>
         </table>
+        {solicitacoes.length === 0 && (
+          <div style={{ padding: 24, textAlign: "center", color: "#9ca3af", fontSize: 13 }}>Nenhuma solicitação encontrada.</div>
+        )}
       </div>
 
       {editando && (

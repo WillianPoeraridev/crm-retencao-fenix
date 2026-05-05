@@ -35,7 +35,7 @@ export default async function RetencaoPage({
     : null;
 
   return (
-    <main style={{ padding: "12px 64px" }}>
+    <main style={{ padding: "12px 40px" }}>
       <RetencaoRealtime />
       {params.forbidden && (
         <div
@@ -63,12 +63,12 @@ export default async function RetencaoPage({
       </div>
 
       {/* Header: linha 2 - cards */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
         {competencia && <>
           <CardResumo label="Cancelados" valor={totalCancelados} meta={competencia.metaCancelamentos} cor="#b91c1c" />
           <CardResumo label="Retidos" valor={totalRetidos} cor="#15803d" />
           <CardResumo label="Inadimplência" valor={totalInadimplencia} cor="#b45309" />
-          <CardResumo label="Total Empresa" valor={totalEmpresa} />
+          <CardResumo label="Total Empresa" valor={totalEmpresa} cor="#111827" />
           {saldo !== null && (
             <CardResumo label="Saldo" valor={saldo} cor={saldo >= 0 ? "#15803d" : "#b91c1c"} />
           )}
@@ -120,13 +120,13 @@ function CardResumo({
         borderRadius: 8,
         padding: "10px 16px",
         minWidth: 120,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#fff",
       }}
     >
-      <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 22, fontWeight: 700, color: cor }}>{valor}</div>
+      <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 20, fontWeight: 700, color: cor }}>{valor}</div>
       {meta != null && (
-        <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>
+        <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2 }}>
           meta: {meta}
         </div>
       )}

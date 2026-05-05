@@ -310,7 +310,7 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
             fontWeight: 500,
           }}
         >
-          ↓ Exportar CSV
+          ↓ Exportar Excel
         </button>
 
         {/* Importar — só admin */}

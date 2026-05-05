@@ -17,7 +17,7 @@ export function Navbar() {
     <nav style={{
       backgroundColor: "#1e2530",
       borderBottom: "1px solid #2a3340",
-      padding: "0 64px",
+      padding: "0 40px",
       height: 52,
       display: "flex",
       alignItems: "center",
@@ -28,7 +28,7 @@ export function Navbar() {
       boxShadow: "0 1px 0 var(--border)",
     }}>
       {/* Esquerda */}
-      <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
         <Link href="/retencao" style={{
           display: "flex",
           alignItems: "center",
@@ -37,9 +37,10 @@ export function Navbar() {
           fontSize: 14,
           color: "#fff",
           letterSpacing: "-0.01em",
+          textDecoration: "none",
         }}>
           <span style={{ fontSize: 18 }}>🔥</span>
-          <span>Fênix CRM</span>
+          <span>Fênix Retenção</span>
         </Link>
 
         <div style={{ display: "flex", gap: 2 }}>
