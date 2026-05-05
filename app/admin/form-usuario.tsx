@@ -74,6 +74,7 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
       }}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: "#fff",
           borderRadius: 10,

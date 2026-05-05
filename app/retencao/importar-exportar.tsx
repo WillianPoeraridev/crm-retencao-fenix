@@ -359,6 +359,7 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
           }}
         >
           <div
+            onClick={(e) => e.stopPropagation()}
             style={{
               backgroundColor: "#fff",
               borderRadius: 10,

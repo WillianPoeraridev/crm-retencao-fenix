@@ -234,6 +234,7 @@ export function FormNovaSolicitacao({
       }}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: "#fff",
           borderRadius: 10,
