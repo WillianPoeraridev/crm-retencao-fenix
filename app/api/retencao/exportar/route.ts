@@ -10,6 +10,7 @@ import {
   MESES_PT,
 } from "@/lib/csv-mappings";
 import { MOTIVO_LABEL } from "@/lib/labels";
+import { fmtBRL, shortName } from "@/lib/format";
 
 const COR_HEADER_ESCURO = "FF111827";
 const COR_HEADER_MEDIO  = "FF1E3A5F";
@@ -63,9 +64,17 @@ export async function GET(req: NextRequest) {
       orderBy: [{ status: "asc" }, { dataRegistro: "asc" }],
     });
 
-    const cancelados     = solicitacoes.filter((s) => s.status === "CANCELADO").length;
-    const retidos        = solicitacoes.filter((s) => s.status === "RETIDO").length;
+    const cancelList     = solicitacoes.filter((s) => s.status === "CANCELADO");
+    const retidoList     = solicitacoes.filter((s) => s.status === "RETIDO");
+    const cancelados     = cancelList.length;
+    const retidos        = retidoList.length;
     const inadimplencia  = solicitacoes.filter((s) => s.status === "INADIMPLENCIA").length;
+    const mrrCanceladoCents = cancelList.reduce((s, x) => s + (x.ticketCents ?? 0), 0);
+    const mrrRetidoCents    = retidoList.reduce((s, x) => s + (x.ticketCents ?? 0), 0);
+    const ticketsCancComValor = cancelList.filter((x) => x.ticketCents != null).length;
+    const ticketsRetComValor  = retidoList.filter((x) => x.ticketCents != null).length;
+    const ticketMedioCancCents = ticketsCancComValor > 0 ? Math.round(mrrCanceladoCents / ticketsCancComValor) : 0;
+    const ticketMedioRetCents  = ticketsRetComValor > 0 ? Math.round(mrrRetidoCents / ticketsRetComValor) : 0;
     const totalEmpresa   = cancelados + inadimplencia;
     const totalAtendidos = cancelados + retidos;
     const meta           = competencia.metaCancelamentos ?? 0;
@@ -101,6 +110,7 @@ export async function GET(req: NextRequest) {
       { key: "regiao",     width: 10 },
       { key: "agenda",     width: 16 },
       { key: "retirada",   width: 20 },
+      { key: "ticket",     width: 12 },
       { key: "atend",      width: 20 },
       { key: "motivo",     width: 28 },
       { key: "obs",        width: 40 },
@@ -141,7 +151,7 @@ export async function GET(req: NextRequest) {
     const rowDadosH = wsDados.addRow([
       "QNT", "DATA", "STATUS", "NOME COMPLETO CLIENTE",
       "BAIRRO", "CONTATO", "CIDADE", "REGIÃO",
-      "AGENDA RETIRADA", "RETIRADA", "ATENDENTE",
+      "AGENDA RETIRADA", "RETIRADA", "TICKET CLIENTE", "ATENDENTE",
       "MOTIVO", "OBSERVAÇÕES", "REGISTRADO IXC", "TRANSBORDO",
     ]);
     rowDadosH.height = 22;
@@ -165,6 +175,7 @@ export async function GET(req: NextRequest) {
         REGIAO_SYSTEM_TO_CSV[s.regiao] ?? s.regiao,
         s.agendaRetirada ? formatarDataCompleta(s.agendaRetirada) : "",
         s.retiradaTexto ?? "",
+        s.ticketCents != null ? (s.ticketCents / 100).toFixed(2).replace(".", ",") : "",
         s.atendente.name.toUpperCase(),
         s.motivo ? (MOTIVO_SYSTEM_TO_CSV[s.motivo] ?? s.motivo) : "",
         s.observacoes ?? "",
@@ -183,7 +194,8 @@ export async function GET(req: NextRequest) {
         bold: true, size: 10,
         color: { argb: COR_STATUS[s.status] ?? COR_HEADER_ESCURO },
       };
-      row.getCell(13).alignment = { vertical: "middle", wrapText: true };
+      // Observações agora é coluna 14 (após inserir ticket na 11)
+      row.getCell(14).alignment = { vertical: "middle", wrapText: true };
     });
 
     wsDados.views = [{ state: "frozen", ySplit: 4 }];
@@ -234,6 +246,14 @@ export async function GET(req: NextRequest) {
     }
     addLinha(["Churn geral fulltime", churnStr]);
     addLinha(["Taxa de retenção", txRetencaoStr]);
+    if (mrrCanceladoCents > 0 || mrrRetidoCents > 0) {
+      const rowMrrCanc = addLinha(["MRR perdido (cancelados)", fmtBRL(mrrCanceladoCents / 100)], true);
+      rowMrrCanc.getCell(2).font = { bold: true, size: 10, color: { argb: COR_CANCELADO } };
+      const rowMrrRet = addLinha(["MRR retido", fmtBRL(mrrRetidoCents / 100)], true);
+      rowMrrRet.getCell(2).font = { bold: true, size: 10, color: { argb: COR_RETIDO } };
+      if (ticketMedioCancCents > 0) addLinha(["Ticket médio cancelado", fmtBRL(ticketMedioCancCents / 100)]);
+      if (ticketMedioRetCents > 0) addLinha(["Ticket médio retido", fmtBRL(ticketMedioRetCents / 100)]);
+    }
     wsInfo.addRow([]);
 
     // Motivos
@@ -254,35 +274,40 @@ export async function GET(req: NextRequest) {
     wsInfo.addRow([]);
 
     // Ranking
-    const atendentesMap: Record<string, { nome: string; total: number; cancelados: number; retidos: number }> = {};
+    const atendentesMap: Record<string, { nome: string; total: number; cancelados: number; retidos: number; mrrPerdidoCents: number }> = {};
     for (const s of solicitacoes) {
       if (s.status === "INADIMPLENCIA") continue;
       if (!atendentesMap[s.atendenteId]) {
-        atendentesMap[s.atendenteId] = { nome: s.atendente.name, total: 0, cancelados: 0, retidos: 0 };
+        atendentesMap[s.atendenteId] = { nome: s.atendente.name, total: 0, cancelados: 0, retidos: 0, mrrPerdidoCents: 0 };
       }
       atendentesMap[s.atendenteId].total++;
-      if (s.status === "CANCELADO") atendentesMap[s.atendenteId].cancelados++;
-      if (s.status === "RETIDO")    atendentesMap[s.atendenteId].retidos++;
+      if (s.status === "CANCELADO") {
+        atendentesMap[s.atendenteId].cancelados++;
+        atendentesMap[s.atendenteId].mrrPerdidoCents += s.ticketCents ?? 0;
+      }
+      if (s.status === "RETIDO") atendentesMap[s.atendenteId].retidos++;
     }
 
     addSecaoHeader("RANKING POR ATENDENTE");
-    addSubHeader(["Atendente", "Total", "Cancelados", "Retidos", "Tx. Retenção", "Tx. Part.", "Proj. Comissão"]);
+    addSubHeader(["Atendente", "Total", "Cancelados", "Retidos", "Tx. Retenção", "MRR Perdido", "Proj. Comissão"]);
 
     Object.values(atendentesMap)
       .sort((a, b) => b.retidos - a.retidos)
       .forEach((a) => {
         const projComissao = competencia.orcamentoComissaoCents && retidos > 0
-          ? "R$ " + ((competencia.orcamentoComissaoCents * a.retidos / retidos) / 100).toFixed(2).replace(".", ",")
+          ? fmtBRL((competencia.orcamentoComissaoCents * a.retidos / retidos) / 100)
           : "—";
-        const row = addLinha([a.nome, a.total, a.cancelados, a.retidos, pct(a.retidos, a.total), pct(a.retidos, retidos), projComissao]);
+        const mrrPerdidoStr = a.mrrPerdidoCents > 0 ? fmtBRL(a.mrrPerdidoCents / 100) : "—";
+        const row = addLinha([shortName(a.nome), a.total, a.cancelados, a.retidos, pct(a.retidos, a.total), mrrPerdidoStr, projComissao]);
         row.getCell(3).font = { size: 10, color: { argb: COR_CANCELADO } };
         row.getCell(4).font = { size: 10, color: { argb: COR_RETIDO } };
+        row.getCell(6).font = { size: 10, bold: a.mrrPerdidoCents > 0, color: { argb: a.mrrPerdidoCents > 0 ? COR_CANCELADO : COR_HEADER_ESCURO } };
         row.getCell(7).font = { size: 10, bold: true, color: { argb: COR_RETIDO } };
       });
 
     if (competencia.orcamentoComissaoCents) {
       wsInfo.addRow([]);
-      const orcamento = "R$ " + (competencia.orcamentoComissaoCents / 100).toFixed(2).replace(".", ",");
+      const orcamento = fmtBRL(competencia.orcamentoComissaoCents / 100);
       const rowOrc = addLinha(["Orçamento total", "", "", "", "", "", orcamento], true);
       rowOrc.getCell(7).font = { bold: true, size: 11, color: { argb: COR_HEADER_ESCURO } };
     }

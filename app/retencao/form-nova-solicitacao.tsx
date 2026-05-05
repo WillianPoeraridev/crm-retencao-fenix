@@ -56,6 +56,7 @@ interface Solicitacao {
   dataRegistro: Date;
   registradoIXC: boolean;
   transbordo: string | null;
+  ticketCents: number | null;
 }
 
 interface Props {
@@ -123,6 +124,9 @@ export function FormNovaSolicitacao({
     dataRegistro: solicitacao
       ? formatarDataParaInput(solicitacao.dataRegistro)
       : rascunho?.dataRegistro ?? new Date().toISOString().split("T")[0],
+    ticket: solicitacao?.ticketCents != null
+      ? (solicitacao.ticketCents / 100).toFixed(2).replace(".", ",")
+      : (rascunho?.ticket ?? ""),
   });
 
   const [enviando, setEnviando] = useState(false);
@@ -193,12 +197,18 @@ export function FormNovaSolicitacao({
       const url = ehEdicao ? `/api/retencao/${solicitacao.id}` : "/api/retencao";
       const method = ehEdicao ? "PATCH" : "POST";
 
+      // Converte "99,90" / "99.90" → 9990 (centavos). Vazio/inválido = null.
+      const ticketLimpo = form.ticket.replace(/[R$\s]/g, "").replace(",", ".");
+      const ticketNum = parseFloat(ticketLimpo);
+      const ticketCents = ticketLimpo && !isNaN(ticketNum) ? Math.round(ticketNum * 100) : null;
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
           registradoIXC: form.registradoIXC === "true",
+          ticketCents,
           ...(ehEdicao ? {} : { competenciaId }),
         }),
       });
@@ -369,7 +379,17 @@ export function FormNovaSolicitacao({
             )}
           </div>
 
-          <div style={GRID2}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+            <div style={CAMPO}>
+              <label style={LABEL}>Ticket do cliente (R$)</label>
+              <input
+                style={INPUT}
+                value={form.ticket}
+                onChange={(e) => set("ticket", e.target.value)}
+                placeholder="99,90"
+                inputMode="decimal"
+              />
+            </div>
             <div style={CAMPO}>
               <label style={LABEL}>Situação da retirada</label>
               <select

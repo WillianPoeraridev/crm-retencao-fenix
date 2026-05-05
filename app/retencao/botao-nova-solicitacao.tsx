@@ -19,6 +19,7 @@ export interface RascunhoSolicitacao {
   registradoIXC: string; // "true" | ""
   transbordo: string;
   dataRegistro: string; // formato yyyy-mm-dd
+  ticket: string; // valor do plano em R$ (ex: "99,90")
 }
 
 const RASCUNHO_VAZIO: RascunhoSolicitacao = {
@@ -35,6 +36,7 @@ const RASCUNHO_VAZIO: RascunhoSolicitacao = {
   registradoIXC: "true",
   transbordo: "",
   dataRegistro: new Date().toISOString().split("T")[0],
+  ticket: "",
 };
 
 function rascunhoTemDados(r: RascunhoSolicitacao): boolean {

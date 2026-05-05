@@ -1,5 +1,6 @@
 import type { SolicitacaoComAtendente } from "@/lib/retencao";
 import { MOTIVO_LABEL, REGIAO_LABEL } from "@/lib/labels";
+import { shortName } from "@/lib/format";
 
 interface Competencia {
   metaCancelamentos: number | null;
@@ -51,6 +52,18 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
       ? totalEmpresa / competencia.baseAtivosTotal
       : null;
 
+  // MRR perdido (soma dos tickets dos cancelados) e MRR retido (dos retidos)
+  const mrrCanceladoCents = cancelados.reduce((s, x) => s + (x.ticketCents ?? 0), 0);
+  const mrrRetidoCents = retidos.reduce((s, x) => s + (x.ticketCents ?? 0), 0);
+  const ticketsCanceladosComValor = cancelados.filter((c) => c.ticketCents != null).length;
+  const ticketsRetidosComValor = retidos.filter((c) => c.ticketCents != null).length;
+  const ticketMedioCanceladoCents = ticketsCanceladosComValor > 0
+    ? Math.round(mrrCanceladoCents / ticketsCanceladosComValor)
+    : null;
+  const ticketMedioRetidoCents = ticketsRetidosComValor > 0
+    ? Math.round(mrrRetidoCents / ticketsRetidosComValor)
+    : null;
+
   const motivosCount: Record<string, number> = {};
   for (const s of cancelados) {
     if (s.motivo && s.motivo !== "INADIMPLENCIA_90") {
@@ -61,17 +74,23 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
 
   const atendentesMap: Record<
     string,
-    { nome: string; total: number; cancelados: number; retidos: number }
+    { nome: string; total: number; cancelados: number; retidos: number; mrrPerdidoCents: number; mrrRetidoCents: number }
   > = {};
   for (const s of solicitacoes) {
     if (s.status === "INADIMPLENCIA") continue;
     const id = s.atendente.id;
     if (!atendentesMap[id]) {
-      atendentesMap[id] = { nome: s.atendente.name, total: 0, cancelados: 0, retidos: 0 };
+      atendentesMap[id] = { nome: s.atendente.name, total: 0, cancelados: 0, retidos: 0, mrrPerdidoCents: 0, mrrRetidoCents: 0 };
     }
     atendentesMap[id].total++;
-    if (s.status === "CANCELADO") atendentesMap[id].cancelados++;
-    if (s.status === "RETIDO") atendentesMap[id].retidos++;
+    if (s.status === "CANCELADO") {
+      atendentesMap[id].cancelados++;
+      atendentesMap[id].mrrPerdidoCents += s.ticketCents ?? 0;
+    }
+    if (s.status === "RETIDO") {
+      atendentesMap[id].retidos++;
+      atendentesMap[id].mrrRetidoCents += s.ticketCents ?? 0;
+    }
   }
   const ranking = Object.values(atendentesMap).sort((a, b) => b.retidos - a.retidos);
 
@@ -127,6 +146,18 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
                 label="Churn geral fulltime"
                 valorStr={(churnGeral * 100).toFixed(2).replace(".", ",") + "%"}
               />
+            )}
+            {(mrrCanceladoCents > 0 || mrrRetidoCents > 0) && (
+              <>
+                <LinhaInfo label="MRR perdido (cancelados)" valorStr={formatarReais(mrrCanceladoCents)} cor="#b91c1c" />
+                <LinhaInfo label="MRR retido" valorStr={formatarReais(mrrRetidoCents)} cor="#15803d" />
+                {ticketMedioCanceladoCents !== null && (
+                  <LinhaInfo label="Ticket médio cancelado" valorStr={formatarReais(ticketMedioCanceladoCents)} />
+                )}
+                {ticketMedioRetidoCents !== null && (
+                  <LinhaInfo label="Ticket médio retido" valorStr={formatarReais(ticketMedioRetidoCents)} />
+                )}
+              </>
             )}
           </Secao>
 
@@ -184,7 +215,7 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
                   <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Cancel.</th>
                   <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Retidos</th>
                   <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Tx. Ret.</th>
-                  <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Tx. Part.</th>
+                  <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>MRR Perdido</th>
                   <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Proj. Comissão</th>
                 </tr>
               </thead>
@@ -202,12 +233,14 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
                         backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb",
                       }}
                     >
-                      <td style={{ padding: "8px 8px", fontWeight: 600, color: "#111827" }}>{a.nome}</td>
+                      <td style={{ padding: "8px 8px", fontWeight: 600, color: "#111827" }}>{shortName(a.nome)}</td>
                       <td style={{ padding: "8px 8px", textAlign: "right", color: "#374151" }}>{a.total}</td>
                       <td style={{ padding: "8px 8px", textAlign: "right", color: "#b91c1c" }}>{a.cancelados}</td>
                       <td style={{ padding: "8px 8px", textAlign: "right", color: "#15803d" }}>{a.retidos}</td>
                       <td style={{ padding: "8px 8px", textAlign: "right", color: "#374151" }}>{pct(a.retidos, a.total)}</td>
-                      <td style={{ padding: "8px 8px", textAlign: "right", color: "#374151" }}>{pct(a.retidos, totalRetidos)}</td>
+                      <td style={{ padding: "8px 8px", textAlign: "right", color: a.mrrPerdidoCents > 0 ? "#b91c1c" : "#9ca3af", fontWeight: a.mrrPerdidoCents > 0 ? 600 : 400 }}>
+                        {a.mrrPerdidoCents > 0 ? formatarReais(a.mrrPerdidoCents) : "—"}
+                      </td>
                       <td style={{ padding: "8px 8px", textAlign: "right", color: "#15803d", fontWeight: 600 }}>
                         {projComissao !== null ? formatarReais(projComissao) : "—"}
                       </td>
@@ -218,8 +251,11 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
               {competencia.orcamentoComissaoCents && (
                 <tfoot>
                   <tr style={{ borderTop: "2px solid #e5e7eb" }}>
-                    <td colSpan={6} style={{ padding: "8px 8px", fontSize: 13, fontWeight: 600, color: "#6b7280" }}>
-                      Orçamento total
+                    <td colSpan={5} style={{ padding: "8px 8px", fontSize: 13, fontWeight: 600, color: "#6b7280" }}>
+                      Total
+                    </td>
+                    <td style={{ padding: "8px 8px", textAlign: "right", fontWeight: 700, color: "#b91c1c" }}>
+                      {mrrCanceladoCents > 0 ? formatarReais(mrrCanceladoCents) : "—"}
                     </td>
                     <td style={{ padding: "8px 8px", textAlign: "right", fontWeight: 700, color: "#111827" }}>
                       {formatarReais(competencia.orcamentoComissaoCents)}

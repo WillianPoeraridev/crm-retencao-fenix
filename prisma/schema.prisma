@@ -113,6 +113,10 @@ model SolicitacaoRetencao {
   registradoIXC  Boolean      @default(false)
   transbordo     String?
 
+  // Valor mensal do plano do cliente em centavos (9990 = R$ 99,90).
+  // Usado para calcular MRR cancelado / MRR retido nas métricas.
+  ticketCents    Int?
+
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 

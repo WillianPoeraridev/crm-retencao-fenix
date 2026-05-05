@@ -8,6 +8,7 @@ import { SeletorCompetencia } from "./seletor-competencia";
 import { BlocoInformacoes } from "./bloco-informacoes";
 import { AbasRetencao } from "./abas-retencao";
 import { ImportarExportar } from "./importar-exportar";
+import { fmtBRL } from "@/lib/format";
 
 export default async function RetencaoPage({
   searchParams,
@@ -25,10 +26,14 @@ export default async function RetencaoPage({
     ? await getSolicitacoesByCompetencia(competencia.id)
     : [];
 
-  const totalCancelados = solicitacoes.filter((s) => s.status === "CANCELADO").length;
-  const totalRetidos = solicitacoes.filter((s) => s.status === "RETIDO").length;
+  const cancelados = solicitacoes.filter((s) => s.status === "CANCELADO");
+  const retidos = solicitacoes.filter((s) => s.status === "RETIDO");
+  const totalCancelados = cancelados.length;
+  const totalRetidos = retidos.length;
   const totalInadimplencia = solicitacoes.filter((s) => s.status === "INADIMPLENCIA").length;
   const totalEmpresa = totalCancelados + totalInadimplencia;
+  const mrrCanceladoCents = cancelados.reduce((s, x) => s + (x.ticketCents ?? 0), 0);
+  const mrrRetidoCents = retidos.reduce((s, x) => s + (x.ticketCents ?? 0), 0);
 
   const saldo = competencia?.metaCancelamentos != null
     ? competencia.metaCancelamentos - totalCancelados
@@ -72,6 +77,12 @@ export default async function RetencaoPage({
           {saldo !== null && (
             <CardResumo label="Saldo" valor={saldo} cor={saldo >= 0 ? "#15803d" : "#b91c1c"} />
           )}
+          {mrrCanceladoCents > 0 && (
+            <CardResumo label="MRR Perdido" valorStr={fmtBRL(mrrCanceladoCents / 100)} cor="#b91c1c" />
+          )}
+          {mrrRetidoCents > 0 && (
+            <CardResumo label="MRR Retido" valorStr={fmtBRL(mrrRetidoCents / 100)} cor="#15803d" />
+          )}
         </>}
       </div>
 
@@ -105,11 +116,13 @@ export default async function RetencaoPage({
 function CardResumo({
   label,
   valor,
+  valorStr,
   meta,
   cor = "#111827",
 }: {
   label: string;
-  valor: number;
+  valor?: number;
+  valorStr?: string;
   meta?: number | null;
   cor?: string;
 }) {
@@ -124,7 +137,7 @@ function CardResumo({
       }}
     >
       <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 20, fontWeight: 700, color: cor }}>{valor}</div>
+      <div style={{ fontSize: 20, fontWeight: 700, color: cor }}>{valorStr ?? valor}</div>
       {meta != null && (
         <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2 }}>
           meta: {meta}

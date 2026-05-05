@@ -26,7 +26,7 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { nomeCliente, contato, bairro, cidade, regiao, status, motivo, observacoes, retiradaTexto, agendaRetirada, registradoIXC, transbordo } = body;
+    const { nomeCliente, contato, bairro, cidade, regiao, status, motivo, observacoes, retiradaTexto, agendaRetirada, registradoIXC, transbordo, ticketCents } = body;
 
     if (!nomeCliente || !cidade || !regiao || !status) {
       return NextResponse.json({ error: "Campos obrigatorios faltando." }, { status: 400 });
@@ -68,6 +68,7 @@ export async function PATCH(
         agendaRetirada: agendaRetirada ? new Date(agendaRetirada) : null,
         registradoIXC: registradoIXC === true,
         transbordo: transbordo?.trim() || null,
+        ticketCents: typeof ticketCents === "number" && Number.isFinite(ticketCents) ? Math.round(ticketCents) : null,
       },
     });
 

@@ -31,8 +31,52 @@ interface LinhaPreview {
   observacoes: string | null;
   registradoIXC: boolean;
   transbordo: string | null;
+  ticketCents: number | null;
   erro: string | null;
 }
+
+function parseTicket(raw: string): number | null {
+  if (!raw) return null;
+  const limpo = raw.replace(/[R$\s]/gi, "").replace(",", ".");
+  if (!limpo) return null;
+  const n = parseFloat(limpo);
+  if (isNaN(n) || n < 0) return null;
+  return Math.round(n * 100);
+}
+
+// Mapeia o nome de cabeçalho para um campo lógico. Lida com variações
+// de acento, caixa e espaços. A planilha da Fênix mudou e agora pode
+// ter "TICKET CLIENTE" entre RETIRADA e ATENDENTE.
+function normalizarHeader(s: string): string {
+  return s
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const HEADER_TO_FIELD: Record<string, string> = {
+  "DATA": "data",
+  "STATUS": "status",
+  "NOME COMPLETO CLIENTE": "nomeCliente",
+  "NOME CLIENTE": "nomeCliente",
+  "BAIRRO": "bairro",
+  "CONTATO": "contato",
+  "CIDADE": "cidade",
+  "REGIAO": "regiao",
+  "AGENDA RETIRADA": "agendaRetirada",
+  "RETIRADA": "retirada",
+  "TICKET CLIENTE": "ticket",
+  "TICKET": "ticket",
+  "ATENDENTE": "atendente",
+  "MOTIVO": "motivo",
+  "OBSERVACOES": "observacoes",
+  "OBSERVACAO": "observacoes",
+  "REGISTRADO IXC": "registradoIXC",
+  "IXC": "registradoIXC",
+  "TRANSBORDO": "transbordo",
+};
 
 interface Props {
   competenciaId: string | null;
@@ -44,54 +88,59 @@ function parsearCSV(texto: string, anoBase: number): LinhaPreview[] {
   const linhas = texto.split(/\r?\n/);
   const resultado: LinhaPreview[] = [];
 
-  // Pula as 3 primeiras linhas (resumo + mês) e pega o cabeçalho na linha 4
-  // Dados começam na linha 5 (índice 4)
-  let inicioData = -1;
+  // Localiza a linha de cabeçalho (começa com "QNT;" ou contém "STATUS").
+  // Dados começam logo após.
+  let headerLine = -1;
   for (let i = 0; i < Math.min(linhas.length, 10); i++) {
-    if (linhas[i].startsWith("QNT;")) {
-      inicioData = i + 1;
+    if (linhas[i].toUpperCase().startsWith("QNT;")) {
+      headerLine = i;
       break;
     }
   }
+  if (headerLine === -1) headerLine = 3; // fallback
 
-  if (inicioData === -1) {
-    // Tenta da linha 5 direto
-    inicioData = 4;
+  const headerCells = parsearLinhaSemicolon(linhas[headerLine] ?? "");
+  // Mapa de campo lógico → índice da coluna no CSV
+  const idx: Record<string, number> = {};
+  for (let i = 0; i < headerCells.length; i++) {
+    const campo = HEADER_TO_FIELD[normalizarHeader(headerCells[i])];
+    if (campo && idx[campo] === undefined) idx[campo] = i;
   }
+
+  const inicioData = headerLine + 1;
+  const get = (campos: string[], campo: string): string => {
+    const i = idx[campo];
+    return i !== undefined ? (campos[i] ?? "").trim() : "";
+  };
 
   for (let i = inicioData; i < linhas.length; i++) {
     const linha = linhas[i];
     if (!linha.trim()) continue;
 
-    // Parse semicolon-separated, respeitando aspas
     const campos = parsearLinhaSemicolon(linha);
 
-    // campos[0]=QNT, [1]=DATA, [2]=STATUS, [3]=NOME, [4]=BAIRRO,
-    // [5]=CONTATO, [6]=CIDADE, [7]=REGIÃO, [8]=AGENDA RETIRADA,
-    // [9]=RETIRADA, [10]=ATENDENTE, [11]=MOTIVO, [12]=OBSERVAÇÕES
-
-    const statusRaw = (campos[2] ?? "").trim();
+    const statusRaw = get(campos, "status");
     const status = normalizarStatus(statusRaw);
 
     // Pula linhas que não são dados (resumos, títulos, etc.)
     if (!status) continue;
 
-    const nomeCliente = (campos[3] ?? "").trim();
+    const nomeCliente = get(campos, "nomeCliente");
     if (!nomeCliente) continue;
 
-    const cidadeRaw = (campos[6] ?? "").trim();
+    const cidadeRaw = get(campos, "cidade");
     const cidade = normalizarCidade(cidadeRaw);
 
-    const regiaoRaw = (campos[7] ?? "").trim();
+    const regiaoRaw = get(campos, "regiao");
     const regiao = normalizarRegiao(regiaoRaw);
 
-    const motivoRaw = (campos[11] ?? "").trim();
+    const motivoRaw = get(campos, "motivo");
     const motivo = motivoRaw ? normalizarMotivo(motivoRaw) : null;
 
-    const dataRaw = (campos[1] ?? "").trim();
+    const dataRaw = get(campos, "data");
     const dataParsed = parsearDataCSV(dataRaw, anoBase);
 
-    const agendaRaw = (campos[8] ?? "").trim();
+    const agendaRaw = get(campos, "agendaRetirada");
     let agendaRetirada: string | null = null;
     let retiradaTexto: string | null = null;
 
@@ -106,10 +155,13 @@ function parsearCSV(texto: string, anoBase: number): LinhaPreview[] {
       }
     }
 
-    const retiradaCol = (campos[9] ?? "").trim();
+    const retiradaCol = get(campos, "retirada");
     if (retiradaCol && !retiradaTexto) {
       retiradaTexto = retiradaCol;
     }
+
+    const ticketRaw = get(campos, "ticket");
+    const ticketCents = parseTicket(ticketRaw);
 
     // Monta erros
     let erro: string | null = null;
@@ -123,20 +175,21 @@ function parsearCSV(texto: string, anoBase: number): LinhaPreview[] {
       dataRegistro: dataParsed?.toISOString() ?? new Date().toISOString(),
       status,
       nomeCliente,
-      bairro: (campos[4] ?? "").trim(),
-      contato: (campos[5] ?? "").trim(),
+      bairro: get(campos, "bairro"),
+      contato: get(campos, "contato"),
       cidade: cidade ?? "",
       cidadeOriginal: cidadeRaw,
       regiao: regiao ?? "",
       regiaoOriginal: regiaoRaw,
       agendaRetirada,
       retiradaTexto,
-      atendenteNome: (campos[10] ?? "").trim(),
+      atendenteNome: get(campos, "atendente"),
       motivo,
       motivoOriginal: motivoRaw,
-      observacoes: (campos[12] ?? "").trim() || null,
-      registradoIXC: (campos[13] ?? "").trim().toUpperCase() === "SIM",
-      transbordo: (campos[14] ?? "").trim() || null,
+      observacoes: get(campos, "observacoes") || null,
+      registradoIXC: get(campos, "registradoIXC").toUpperCase() === "SIM",
+      transbordo: get(campos, "transbordo") || null,
+      ticketCents,
       erro,
     });
   }
@@ -265,6 +318,7 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
             observacoes: l.observacoes,
             registradoIXC: l.registradoIXC,
             transbordo: l.transbordo,
+            ticketCents: l.ticketCents,
           })),
         }),
       });

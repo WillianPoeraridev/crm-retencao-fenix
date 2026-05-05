@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       registradoIXC,
       transbordo,
       dataRegistro,
+      ticketCents,
     } = body;
 
     // 3. Validação da competência
@@ -102,6 +103,7 @@ export async function POST(req: NextRequest) {
         agendaRetirada: agendaRetirada ? new Date(agendaRetirada) : null,
         registradoIXC: registradoIXC === true,
         transbordo: transbordo?.trim() || null,
+        ticketCents: typeof ticketCents === "number" && Number.isFinite(ticketCents) ? Math.round(ticketCents) : null,
       },
     });
 

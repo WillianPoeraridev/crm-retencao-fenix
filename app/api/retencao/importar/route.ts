@@ -19,6 +19,7 @@ interface LinhaImportacao {
   observacoes: string | null;
   registradoIXC: boolean;
   transbordo: string | null;
+  ticketCents: number | null;
 }
 
 // POST — importa linhas validadas pelo frontend
@@ -83,6 +84,7 @@ export async function POST(req: NextRequest) {
       agendaRetirada: Date | null;
       registradoIXC: boolean;
       transbordo: string | null;
+      ticketCents: number | null;
     }> = [];
 
     for (let i = 0; i < linhas.length; i++) {
@@ -163,6 +165,7 @@ export async function POST(req: NextRequest) {
         agendaRetirada,
         registradoIXC: l.registradoIXC === true,
         transbordo: l.transbordo?.trim() || null,
+        ticketCents: typeof l.ticketCents === "number" && Number.isFinite(l.ticketCents) ? Math.round(l.ticketCents) : null,
       });
     }
 

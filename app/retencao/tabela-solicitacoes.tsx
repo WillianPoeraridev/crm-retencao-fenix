@@ -6,6 +6,7 @@ import type { SolicitacaoComAtendente, CidadeOption } from "@/lib/retencao";
 import { FormNovaSolicitacao } from "./form-nova-solicitacao";
 import { Toast } from "@/app/toast";
 import { STATUS_LABEL, STATUS_COR, MOTIVO_LABEL } from "@/lib/labels";
+import { fmtBRL, shortName } from "@/lib/format";
 
 function formatarData(data: Date) {
   const d = new Date(data);
@@ -67,7 +68,7 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
           <thead>
             <tr style={{ textAlign: "left", backgroundColor: "#f9fafb", borderBottom: "2px solid #e5e7eb" }}>
-              {["Data", "Cliente", "Cidade", "Região", "Status", "Motivo", "Atendente", "Observações"].map((h) => (
+              {["Data", "Cliente", "Cidade", "Região", "Status", "Ticket", "Motivo", "Atendente", "Observações"].map((h) => (
                 <th key={h} style={{ padding: "8px 10px", color: "#6b7280", fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
               ))}
               <th style={{ padding: "8px 10px", color: "#6b7280", fontWeight: 600, textAlign: "center" }}>IXC</th>
@@ -116,10 +117,13 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
                     {STATUS_LABEL[s.status] ?? s.status}
                   </span>
                 </td>
+                <td style={{ padding: "7px 10px", color: s.ticketCents != null ? "#111827" : "#9ca3af", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                  {s.ticketCents != null ? fmtBRL(s.ticketCents / 100) : "—"}
+                </td>
                 <td style={{ padding: "7px 10px", color: "#6b7280", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {s.motivo ? MOTIVO_LABEL[s.motivo] ?? s.motivo : "—"}
                 </td>
-                <td style={{ padding: "7px 10px", fontWeight: 500, color: "#111827" }}>{s.atendente.name.split(" ")[0]}</td>
+                <td style={{ padding: "7px 10px", fontWeight: 500, color: "#111827" }}>{shortName(s.atendente.name)}</td>
                 <td style={{ padding: "7px 10px", color: "#6b7280", maxWidth: 220 }}>
                   <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.observacoes ?? "—"}</div>
                   {s.transbordo && (
