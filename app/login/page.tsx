@@ -70,7 +70,7 @@ function LoginForm() {
             alt="Fênix Internet"
             width={100}
             height={100}
-            style={{ objectFit: "contain", marginBottom: 8 }}
+            style={{ objectFit: "contain", marginBottom: 8, display: "block", margin: "0 auto 8px" }}
           />
           <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>
             Fênix CRM Retenção
