@@ -30,7 +30,7 @@ export function Navbar() {
     <nav style={{
       backgroundColor: "#1e2530",
       borderBottom: "1px solid #2a3340",
-      padding: "0 40px",
+      padding: "0 40px 0 60px",
       height: 52,
       display: "flex",
       alignItems: "center",
