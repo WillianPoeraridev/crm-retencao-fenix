@@ -4,6 +4,18 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+function getComericalUrl() {
+  const rawUrl = process.env.NEXT_PUBLIC_CRM_COMERCIAL_URL?.trim();
+  if (!rawUrl) return null;
+
+  try {
+    const url = new URL(rawUrl);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
 export function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
@@ -12,6 +24,7 @@ export function Navbar() {
 
   const isAdmin = session.user.role === "ADMIN";
   const primeiroNome = session.user.name?.split(" ")[0] ?? session.user.name;
+  const urlComercial = getComericalUrl();
 
   return (
     <nav style={{
@@ -46,6 +59,28 @@ export function Navbar() {
           <NavLink href="/retencao" atual={pathname.startsWith("/retencao")}>Retenção</NavLink>
           {isAdmin && (
             <NavLink href="/admin" atual={pathname.startsWith("/admin")}>Admin</NavLink>
+          )}
+          {isAdmin && urlComercial && (
+            <a
+              href={urlComercial}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                padding: "5px 12px",
+                borderRadius: 6,
+                fontSize: 13,
+                fontWeight: 500,
+                color: "#f97316",
+                backgroundColor: "rgba(249,115,22,0.1)",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              Comercial
+              <span style={{ fontSize: 10, opacity: 0.7 }}>↗</span>
+            </a>
           )}
         </div>
       </div>
