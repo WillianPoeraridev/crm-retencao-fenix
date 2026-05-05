@@ -39,7 +39,6 @@ export function Navbar() {
           letterSpacing: "-0.01em",
           textDecoration: "none",
         }}>
-          <span style={{ fontSize: 18 }}>🔥</span>
           <span>Fênix Retenção</span>
         </Link>
 
