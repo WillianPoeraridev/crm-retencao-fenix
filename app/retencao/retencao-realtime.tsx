@@ -14,7 +14,7 @@ export function RetencaoRealtime() {
       .channel("retencao-changes")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "SolicitacaoRetencao" },
+        { event: "*", schema: "shared", table: "SolicitacaoRetencaoEvent" },
         () => {
           router.refresh();
         },
