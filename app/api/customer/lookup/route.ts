@@ -44,14 +44,13 @@ export async function POST(req: Request) {
 
     let created = false;
 
-    // 2. Não existe → cria automaticamente
+    // 2. Não existe → comportamento depende de ter recebido `nome`
     if (!customer) {
       if (!nome) {
-        return NextResponse.json(
-          { error: "Cliente não cadastrado. Informe o nome para criar." },
-          { status: 400 }
-        );
+        // Modo "lookup-only": frontend só quer saber se existe (ex: onBlur do campo)
+        return NextResponse.json({ found: false });
       }
+      // Modo "get-or-create": cria
       created = true;
       const novo = await prisma.customer.create({
         data: {
@@ -75,6 +74,7 @@ export async function POST(req: Request) {
     const { vendas = 0, leads = 0 } = comercialCountsResult[0] ?? {};
 
     return NextResponse.json({
+      found: true,
       id: customer.id,
       cpfCnpj: customer.cpfCnpj,
       nome: customer.nome,

@@ -6,6 +6,7 @@ import { Toast } from "@/app/toast";
 import type { CidadeOption } from "@/lib/retencao";
 
 export interface RascunhoSolicitacao {
+  cpfCnpj: string; // só dígitos; UI mostra com máscara
   nomeCliente: string;
   contato: string;
   bairro: string;
@@ -23,6 +24,7 @@ export interface RascunhoSolicitacao {
 }
 
 const RASCUNHO_VAZIO: RascunhoSolicitacao = {
+  cpfCnpj: "",
   nomeCliente: "",
   contato: "",
   bairro: "",

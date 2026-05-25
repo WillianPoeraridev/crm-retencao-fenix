@@ -4,6 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CidadeOption } from "@/lib/retencao";
 import type { RascunhoSolicitacao } from "./botao-nova-solicitacao";
+import {
+  formatCpfCnpj,
+  isValidCpfCnpj,
+  normalizeCpfCnpj,
+} from "@/lib/validators/cpf-cnpj";
 
 const REGIOES = [
   ["SINOS", "Sinos"],
@@ -57,6 +62,7 @@ interface Solicitacao {
   registradoIXC: boolean;
   transbordo: string | null;
   ticketCents: number | null;
+  customerId?: string | null;
 }
 
 interface Props {
@@ -71,6 +77,20 @@ interface Props {
   onDescartar?: () => void;
   onCancelar?: () => void;
 }
+
+// Estado do CPF/CNPJ — discriminated union pra UI saber qual badge mostrar
+type CpfStatus =
+  | { tipo: "idle" }
+  | { tipo: "checking" }
+  | { tipo: "invalid"; mensagem: string }
+  | {
+      tipo: "found";
+      customerId: string;
+      nome: string;
+      contatoPrimario: string | null;
+      counts: { vendas: number; leads: number; solicitacoes: number };
+    }
+  | { tipo: "new" };
 
 const MESES_ABREV = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
 
@@ -105,6 +125,7 @@ export function FormNovaSolicitacao({
   const ehEdicao = !!solicitacao;
 
   const [form, setForm] = useState<RascunhoSolicitacao>({
+    cpfCnpj: rascunho?.cpfCnpj ?? "",
     nomeCliente: solicitacao?.nomeCliente ?? rascunho?.nomeCliente ?? "",
     contato: solicitacao?.contato ?? rascunho?.contato ?? "",
     bairro: solicitacao?.bairro ?? rascunho?.bairro ?? "",
@@ -129,6 +150,7 @@ export function FormNovaSolicitacao({
       : (rascunho?.ticket ?? ""),
   });
 
+  const [cpfStatus, setCpfStatus] = useState<CpfStatus>({ tipo: "idle" });
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -155,6 +177,57 @@ export function FormNovaSolicitacao({
       }
       return next;
     });
+  }
+
+  // Lookup no Customer master quando o usuário sai do campo CPF/CNPJ
+  async function handleCpfBlur() {
+    const raw = form.cpfCnpj.trim();
+    if (!raw) {
+      setCpfStatus({ tipo: "idle" });
+      return;
+    }
+    if (!isValidCpfCnpj(raw)) {
+      setCpfStatus({ tipo: "invalid", mensagem: "CPF/CNPJ inválido" });
+      return;
+    }
+    setCpfStatus({ tipo: "checking" });
+    try {
+      const res = await fetch("/api/customer/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cpfCnpj: raw }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCpfStatus({ tipo: "invalid", mensagem: data.error ?? "Erro ao consultar" });
+        return;
+      }
+      if (data.found) {
+        setCpfStatus({
+          tipo: "found",
+          customerId: data.id,
+          nome: data.nome,
+          contatoPrimario: data.contatoPrimario,
+          counts: data.counts,
+        });
+        // Autopreenche nome/contato apenas se ainda estiverem vazios (não sobrescreve o que o atendente digitou)
+        setForm((prev) => ({
+          ...prev,
+          nomeCliente: prev.nomeCliente.trim() ? prev.nomeCliente : data.nome,
+          contato: prev.contato.trim() ? prev.contato : (data.contatoPrimario ?? ""),
+        }));
+      } else {
+        setCpfStatus({ tipo: "new" });
+      }
+    } catch {
+      setCpfStatus({ tipo: "invalid", mensagem: "Erro de conexão ao consultar cliente" });
+    }
+  }
+
+  // Sempre que o usuário edita o CPF, volta pra "idle" — força novo lookup no blur seguinte
+  function setCpf(value: string) {
+    setForm((prev) => ({ ...prev, cpfCnpj: value }));
+    setCpfStatus({ tipo: "idle" });
   }
 
   // Fecha o modal — na criação, salva rascunho; na edição, fecha direto
@@ -194,6 +267,36 @@ export function FormNovaSolicitacao({
     setEnviando(true);
 
     try {
+      // 1. Resolve customerId se o atendente preencheu o CPF
+      let customerId: string | null = null;
+      const cpfRaw = form.cpfCnpj.trim();
+      if (cpfRaw) {
+        if (!isValidCpfCnpj(cpfRaw)) {
+          setErro("CPF/CNPJ inválido. Corrija ou deixe em branco.");
+          return;
+        }
+        if (cpfStatus.tipo === "found") {
+          customerId = cpfStatus.customerId;
+        } else {
+          // Não houve onBlur ainda OU foi cliente novo — chama o endpoint passando o nome pra criar
+          const lookupRes = await fetch("/api/customer/lookup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              cpfCnpj: cpfRaw,
+              nome: form.nomeCliente.trim(),
+              contatoPrimario: form.contato.trim() || null,
+            }),
+          });
+          const lookupData = await lookupRes.json();
+          if (!lookupRes.ok || !lookupData.found) {
+            setErro(lookupData.error ?? "Não foi possível registrar o cliente.");
+            return;
+          }
+          customerId = lookupData.id;
+        }
+      }
+
       const url = ehEdicao ? `/api/retencao/${solicitacao.id}` : "/api/retencao";
       const method = ehEdicao ? "PATCH" : "POST";
 
@@ -207,6 +310,8 @@ export function FormNovaSolicitacao({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          cpfCnpj: cpfRaw ? normalizeCpfCnpj(cpfRaw) : "",
+          customerId,
           registradoIXC: form.registradoIXC === "true",
           ticketCents,
           ...(ehEdicao ? {} : { competenciaId }),
@@ -260,6 +365,27 @@ export function FormNovaSolicitacao({
         </h2>
 
         <form onSubmit={onSubmit}>
+          <div style={CAMPO}>
+            <label style={LABEL}>CPF / CNPJ</label>
+            <input
+              style={{
+                ...INPUT,
+                border:
+                  cpfStatus.tipo === "invalid" ? "1px solid #dc2626" :
+                  cpfStatus.tipo === "found" ? "1px solid #10b981" :
+                  cpfStatus.tipo === "new" ? "1px solid #3b82f6" :
+                  INPUT.border,
+              }}
+              value={form.cpfCnpj ? formatCpfCnpj(form.cpfCnpj) : ""}
+              onChange={(e) => setCpf(e.target.value)}
+              onBlur={handleCpfBlur}
+              placeholder="000.000.000-00 ou 00.000.000/0000-00"
+              inputMode="numeric"
+              autoComplete="off"
+            />
+            <CpfStatusBadge status={cpfStatus} />
+          </div>
+
           <div style={CAMPO}>
             <label style={LABEL}>Nome do cliente *</label>
             <input
@@ -488,4 +614,41 @@ export function FormNovaSolicitacao({
       </div>
     </div>
   );
+}
+
+// ============================================================
+// Badge condicional que mostra o status do lookup do CPF/CNPJ
+// ============================================================
+function CpfStatusBadge({ status }: { status: CpfStatus }) {
+  const BASE: React.CSSProperties = {
+    fontSize: 12,
+    marginTop: 4,
+    padding: "4px 8px",
+    borderRadius: 4,
+    display: "inline-block",
+  };
+
+  switch (status.tipo) {
+    case "idle":
+      return null;
+    case "checking":
+      return <span style={{ ...BASE, background: "#f3f4f6", color: "#6b7280" }}>Consultando…</span>;
+    case "invalid":
+      return <span style={{ ...BASE, background: "#fee2e2", color: "#991b1b" }}>{status.mensagem}</span>;
+    case "new":
+      return <span style={{ ...BASE, background: "#dbeafe", color: "#1e40af" }}>Cliente novo — será cadastrado ao salvar</span>;
+    case "found": {
+      const { vendas, leads, solicitacoes } = status.counts;
+      const partes: string[] = [];
+      if (vendas) partes.push(`${vendas} venda${vendas > 1 ? "s" : ""}`);
+      if (leads) partes.push(`${leads} lead${leads > 1 ? "s" : ""}`);
+      if (solicitacoes) partes.push(`${solicitacoes} retenç${solicitacoes > 1 ? "ões" : "ão"}`);
+      const resumo = partes.length ? partes.join(" · ") : "sem histórico";
+      return (
+        <span style={{ ...BASE, background: "#dcfce7", color: "#166534" }}>
+          ✓ Cliente conhecido ({resumo})
+        </span>
+      );
+    }
+  }
 }
