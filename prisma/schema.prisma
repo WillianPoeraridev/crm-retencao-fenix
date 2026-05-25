@@ -2,28 +2,36 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["retencao", "shared"]
 }
 
 enum Role {
   ADMIN
   ATENDENTE
+
+  @@schema("retencao")
 }
 
 enum StatusRetencao {
   CANCELADO
   RETIDO
   INADIMPLENCIA
+
+  @@schema("retencao")
 }
 
 enum Regiao {
   SINOS
   LITORAL
   MATRIZ
+
+  @@schema("retencao")
 }
 
 enum MotivoCancelamento {
@@ -35,6 +43,8 @@ enum MotivoCancelamento {
   PROBLEMAS_FINANC
   OUTROS
   INADIMPLENCIA_90  // usado automaticamente quando status = INADIMPLENCIA
+
+  @@schema("retencao")
 }
 
 // Cidade agora é uma tabela editável (antes era enum)
@@ -45,6 +55,8 @@ model Cidade {
   createdAt DateTime @default(now())
 
   solicitacoes SolicitacaoRetencao[]
+
+  @@schema("retencao")
 }
 
 model User {
@@ -59,6 +71,8 @@ model User {
   updatedAt    DateTime @updatedAt
 
   solicitacoes SolicitacaoRetencao[] @relation("AtendenteSolicitacoes")
+
+  @@schema("retencao")
 }
 
 model Competencia {
@@ -81,6 +95,7 @@ model Competencia {
   solicitacoes      SolicitacaoRetencao[]
 
   @@unique([ano, mes])
+  @@schema("retencao")
 }
 
 model SolicitacaoRetencao {
@@ -117,6 +132,9 @@ model SolicitacaoRetencao {
   // Usado para calcular MRR cancelado / MRR retido nas métricas.
   ticketCents    Int?
 
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -125,4 +143,28 @@ model SolicitacaoRetencao {
   @@index([atendenteId])
   @@index([cidade])
   @@index([regiao])
+  @@index([customerId])
+  @@schema("retencao")
+}
+
+// ========================
+// SHARED — Cliente unificado
+// ========================
+
+/// Fonte da verdade do cliente, compartilhada entre CRM Comercial e CRM Retenção.
+/// ESPELHADO: os campos escalares deste model devem ser IDÊNTICOS ao Customer em
+/// crm-comercial-fenix/prisma/schema.prisma. As relações inversas (vendas, leads,
+/// solicitacoes) são específicas de cada projeto — não precisam bater.
+model Customer {
+  id              String  @id @default(cuid())
+  cpfCnpj         String  @unique
+  nome            String
+  contatoPrimario String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  solicitacoes SolicitacaoRetencao[]
+
+  @@schema("shared")
 }
