@@ -47,7 +47,7 @@ export function apiError(error: unknown, contexto: string) {
     );
   }
 
-  const mensagem =
-    error instanceof Error ? error.message : "Erro interno do servidor";
-  return NextResponse.json({ error: mensagem }, { status: 500 });
+  // Não vazar a mensagem interna (pode conter detalhes de SQL/Prisma);
+  // o erro real já foi logado acima no servidor.
+  return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
 }
