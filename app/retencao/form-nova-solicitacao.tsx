@@ -336,7 +336,6 @@ export function FormNovaSolicitacao({
 
   return (
     <div
-      onClick={(e) => { if (e.target === e.currentTarget) handleFecharModal(); }}
       style={{
         position: "fixed",
         inset: 0,

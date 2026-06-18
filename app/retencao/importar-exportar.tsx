@@ -400,7 +400,6 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
       {/* Modal de preview */}
       {preview && (
         <div
-          onClick={(e) => { if (e.target === e.currentTarget) setPreview(null); }}
           style={{
             position: "fixed",
             inset: 0,

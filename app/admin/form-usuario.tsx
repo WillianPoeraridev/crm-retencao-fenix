@@ -61,7 +61,6 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
 
   return (
     <div
-      onClick={(e) => { if (e.target === e.currentTarget) onCancelar(); }}
       style={{
         position: "fixed",
         inset: 0,
