@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 function getComericalUrl() {
   const rawUrl = process.env.NEXT_PUBLIC_CRM_COMERCIAL_URL?.trim();
   if (!rawUrl) return null;
-
   try {
     const url = new URL(rawUrl);
     return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
@@ -19,7 +18,6 @@ function getComericalUrl() {
 function getDashboardUrl() {
   const rawUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL?.trim();
   if (!rawUrl) return null;
-
   try {
     const url = new URL(rawUrl);
     return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
@@ -38,6 +36,7 @@ export function Navbar() {
   const primeiroNome = session.user.name?.split(" ")[0] ?? session.user.name;
   const urlComercial = getComericalUrl();
   const urlDashboard = getDashboardUrl();
+  const temCrossApp = isAdmin && (urlComercial || urlDashboard);
 
   return (
     <nav style={{
@@ -53,99 +52,42 @@ export function Navbar() {
       zIndex: 40,
       boxShadow: "0 1px 0 var(--border)",
     }}>
-      {/* Esquerda */}
+      {/* Esquerda: logo + páginas do app */}
       <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-        <Link href="/retencao" style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          fontWeight: 700,
-          fontSize: 14,
-          color: "#fff",
-          letterSpacing: "-0.01em",
-          textDecoration: "none",
-        }}>
-          <span>Fênix Retenção</span>
+        <Link href="/retencao" style={{ fontWeight: 700, fontSize: 14, color: "#fff", letterSpacing: "-0.01em", textDecoration: "none" }}>
+          Fênix Retenção
         </Link>
-
         <div style={{ display: "flex", gap: 2 }}>
           <NavLink href="/retencao" atual={pathname.startsWith("/retencao")}>Retenção</NavLink>
           {isAdmin && (
             <NavLink href="/admin" atual={pathname.startsWith("/admin")}>Admin</NavLink>
           )}
-          {isAdmin && urlComercial && (
-            <a
-              href={`/api/sso/start?to=${encodeURIComponent(urlComercial)}`}
-              style={{
-                padding: "5px 12px",
-                borderRadius: 6,
-                fontSize: 13,
-                fontWeight: 500,
-                color: "#f97316",
-                backgroundColor: "rgba(249,115,22,0.1)",
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-              }}
-            >
-              Comercial
-              <span style={{ fontSize: 10, opacity: 0.7 }}>→</span>
-            </a>
-          )}
-          {isAdmin && urlDashboard && (
-            <a
-              href={`/api/sso/start?to=${encodeURIComponent(urlDashboard)}`}
-              style={{
-                padding: "5px 12px",
-                borderRadius: 6,
-                fontSize: 13,
-                fontWeight: 500,
-                color: "#f97316",
-                backgroundColor: "rgba(249,115,22,0.1)",
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-              }}
-            >
-              Dashboard
-              <span style={{ fontSize: 10, opacity: 0.7 }}>→</span>
-            </a>
-          )}
         </div>
       </div>
 
-      {/* Direita */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      {/* Direita: navegação entre apps (fixa) + usuário */}
+      <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+        {temCrossApp && (
+          <>
+            <div style={{ display: "flex", gap: 2 }}>
+              {urlComercial && <SsoLink to={urlComercial}>Comercial</SsoLink>}
+              {urlDashboard && <SsoLink to={urlDashboard}>Dashboard</SsoLink>}
+            </div>
+            <div style={{ width: 1, height: 24, backgroundColor: "#2a3340" }} />
+          </>
+        )}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{
-            width: 28,
-            height: 28,
-            borderRadius: "50%",
-            backgroundColor: "var(--accent)",
-            color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 11,
-            fontWeight: 700,
+            width: 28, height: 28, borderRadius: "50%", backgroundColor: "var(--accent)", color: "#fff",
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700,
           }}>
             {primeiroNome?.[0]?.toUpperCase()}
           </div>
-          <span style={{ fontSize: 13, color: "#9ca3af", fontWeight: 500 }}>
-            {primeiroNome}
-          </span>
+          <span style={{ fontSize: 13, color: "#9ca3af", fontWeight: 500 }}>{primeiroNome}</span>
           {isAdmin && (
             <span style={{
-              fontSize: 10,
-              fontWeight: 700,
-              backgroundColor: "var(--accent-bg)",
-              color: "var(--accent)",
-              padding: "2px 7px",
-              borderRadius: 20,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
+              fontSize: 10, fontWeight: 700, backgroundColor: "var(--accent-bg)", color: "var(--accent)",
+              padding: "2px 7px", borderRadius: 20, letterSpacing: "0.04em", textTransform: "uppercase",
             }}>
               Admin
             </span>
@@ -154,15 +96,8 @@ export function Navbar() {
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
           style={{
-            padding: "5px 12px",
-            border: "1px solid #374151",
-            borderRadius: 6,
-            background: "transparent",
-            color: "#9ca3af",
-            cursor: "pointer",
-            fontSize: 12,
-            fontWeight: 500,
-            transition: "all 0.15s",
+            padding: "5px 12px", border: "1px solid #374151", borderRadius: 6, background: "transparent",
+            color: "#9ca3af", cursor: "pointer", fontSize: 12, fontWeight: 500, transition: "all 0.15s",
           }}
           onMouseEnter={e => {
             (e.target as HTMLButtonElement).style.color = "#fff";
@@ -183,16 +118,25 @@ export function Navbar() {
 function NavLink({ href, atual, children }: { href: string; atual: boolean; children: React.ReactNode }) {
   return (
     <Link href={href} style={{
-      padding: "5px 12px",
-      borderRadius: 6,
-      fontSize: 13,
-      fontWeight: atual ? 600 : 400,
-      color: atual ? "#fff" : "#9ca3af",
-      backgroundColor: atual ? "rgba(255,255,255,0.08)" : "transparent",
-      textDecoration: "none",
+      padding: "5px 12px", borderRadius: 6, fontSize: 13,
+      fontWeight: atual ? 600 : 400, color: atual ? "#fff" : "#9ca3af",
+      backgroundColor: atual ? "rgba(255,255,255,0.08)" : "transparent", textDecoration: "none",
       transition: "all 0.15s",
     }}>
       {children}
     </Link>
+  );
+}
+
+function SsoLink({ to, children }: { to: string; children: React.ReactNode }) {
+  return (
+    <a href={`/api/sso/start?to=${encodeURIComponent(to)}`} style={{
+      padding: "5px 12px", borderRadius: 6, fontSize: 13, fontWeight: 500,
+      color: "#f97316", backgroundColor: "rgba(249,115,22,0.1)", textDecoration: "none",
+      display: "inline-flex", alignItems: "center", gap: 4,
+    }}>
+      {children}
+      <span style={{ fontSize: 10, opacity: 0.7 }}>→</span>
+    </a>
   );
 }
