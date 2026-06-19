@@ -62,9 +62,7 @@ export function Navbar() {
           )}
           {isAdmin && urlComercial && (
             <a
-              href={urlComercial}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`/api/sso/start?to=${encodeURIComponent(urlComercial)}`}
               style={{
                 padding: "5px 12px",
                 borderRadius: 6,
@@ -79,7 +77,7 @@ export function Navbar() {
               }}
             >
               Comercial
-              <span style={{ fontSize: 10, opacity: 0.7 }}>↗</span>
+              <span style={{ fontSize: 10, opacity: 0.7 }}>→</span>
             </a>
           )}
         </div>
