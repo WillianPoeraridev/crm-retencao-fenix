@@ -15,14 +15,11 @@ export function RetencaoRealtime() {
       .on(
         "postgres_changes",
         { event: "*", schema: "shared", table: "SolicitacaoRetencaoEvent" },
-        (payload) => {
-          console.log("[realtime] retencao evento recebido:", payload); // DIAGNÓSTICO TEMPORÁRIO
+        () => {
           router.refresh();
         },
       )
-      .subscribe((status) => {
-        console.log("[realtime] retencao status do canal:", status); // DIAGNÓSTICO TEMPORÁRIO
-      });
+      .subscribe();
 
     return () => {
       supabase?.removeChannel(channel);
