@@ -16,6 +16,18 @@ function getComericalUrl() {
   }
 }
 
+function getDashboardUrl() {
+  const rawUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL?.trim();
+  if (!rawUrl) return null;
+
+  try {
+    const url = new URL(rawUrl);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
 export function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
@@ -25,6 +37,7 @@ export function Navbar() {
   const isAdmin = session.user.role === "ADMIN";
   const primeiroNome = session.user.name?.split(" ")[0] ?? session.user.name;
   const urlComercial = getComericalUrl();
+  const urlDashboard = getDashboardUrl();
 
   return (
     <nav style={{
@@ -77,6 +90,26 @@ export function Navbar() {
               }}
             >
               Comercial
+              <span style={{ fontSize: 10, opacity: 0.7 }}>→</span>
+            </a>
+          )}
+          {isAdmin && urlDashboard && (
+            <a
+              href={`/api/sso/start?to=${encodeURIComponent(urlDashboard)}`}
+              style={{
+                padding: "5px 12px",
+                borderRadius: 6,
+                fontSize: 13,
+                fontWeight: 500,
+                color: "#f97316",
+                backgroundColor: "rgba(249,115,22,0.1)",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              Dashboard
               <span style={{ fontSize: 10, opacity: 0.7 }}>→</span>
             </a>
           )}
