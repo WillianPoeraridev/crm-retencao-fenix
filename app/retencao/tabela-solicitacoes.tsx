@@ -9,9 +9,11 @@ import { STATUS_LABEL, STATUS_COR, MOTIVO_LABEL } from "@/lib/labels";
 import { fmtBRL, shortName } from "@/lib/format";
 
 function formatarData(data: Date) {
+  // UTC pra bater server (UTC) e cliente (horário local) — a data é salva
+  // como meia-noite UTC; getDate()/getMonth() locais causavam hydration mismatch.
   const d = new Date(data);
-  const dia = d.getDate().toString().padStart(2, "0");
-  const mes = (d.getMonth() + 1).toString().padStart(2, "0");
+  const dia = d.getUTCDate().toString().padStart(2, "0");
+  const mes = (d.getUTCMonth() + 1).toString().padStart(2, "0");
   return `${dia}/${mes}`;
 }
 
