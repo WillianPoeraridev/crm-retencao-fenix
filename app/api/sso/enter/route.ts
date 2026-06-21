@@ -12,8 +12,11 @@ export async function GET(req: Request) {
     return NextResponse.redirect(new URL("/login?sso=invalido", req.url));
   }
 
+  // Qualquer usuário ativo deste CRM pode entrar via passe (vindo do portal de
+  // login central ou da navegação da gerência). O passe é assinado (SSO_SECRET)
+  // e o usuário precisa existir/estar ativo aqui — duplo controle de acesso.
   const user = await prisma.user.findUnique({ where: { email: payload.email } });
-  if (!user || !user.isActive || user.role !== "ADMIN") {
+  if (!user || !user.isActive) {
     return NextResponse.redirect(new URL("/login?sso=negado", req.url));
   }
 
