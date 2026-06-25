@@ -359,10 +359,39 @@ export function FormNovaSolicitacao({
           flexDirection: "column",
         }}
       >
-        <div style={{ padding: "20px 28px 16px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
+        <div style={{
+          padding: "16px 28px",
+          borderBottom: "1px solid var(--border)",
+          flexShrink: 0,
+          backgroundColor: "var(--surface-raised, #f8f9fa)",
+          borderRadius: "10px 10px 0 0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: 0 }}>
             {ehEdicao ? "Editar Solicitação" : "Nova Solicitação"}
           </h2>
+          <button
+            type="button"
+            onClick={handleFecharModal}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--fg-subtle)",
+              fontSize: 20,
+              lineHeight: 1,
+              padding: "4px 6px",
+              borderRadius: 4,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            aria-label="Fechar"
+          >
+            ✕
+          </button>
         </div>
 
         <div style={{ overflowY: "auto", padding: 28, paddingTop: 20, minHeight: 0 }}>
