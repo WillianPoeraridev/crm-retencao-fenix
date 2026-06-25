@@ -352,17 +352,20 @@ export function FormNovaSolicitacao({
         style={{
           backgroundColor: "var(--surface)",
           borderRadius: 10,
-          padding: 28,
           width: "100%",
           maxWidth: 560,
           maxHeight: "90vh",
-          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "var(--fg)" }}>
-          {ehEdicao ? "Editar Solicitação" : "Nova Solicitação"}
-        </h2>
+        <div style={{ padding: "20px 28px 16px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: 0 }}>
+            {ehEdicao ? "Editar Solicitação" : "Nova Solicitação"}
+          </h2>
+        </div>
 
+        <div style={{ overflowY: "auto", padding: 28, paddingTop: 20, minHeight: 0 }}>
         <form onSubmit={onSubmit}>
           <div style={CAMPO}>
             <label style={LABEL}>CPF / CNPJ</label>
@@ -610,6 +613,7 @@ export function FormNovaSolicitacao({
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );
