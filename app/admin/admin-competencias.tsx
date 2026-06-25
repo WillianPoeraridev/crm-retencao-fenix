@@ -50,27 +50,27 @@ export function AdminCompetencias({ competencias }: Props) {
 
   return (
     <>
-      <div style={{ border: "1px solid #e5e7eb", borderRadius: 8, overflow: "hidden" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", backgroundColor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
+      <div style={{ border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", backgroundColor: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: "var(--fg)" }}>
             Competências ({competencias.length})
           </h2>
           <button
             onClick={() => setCriando(true)}
-            style={{ padding: "6px 14px", border: "none", borderRadius: 6, background: "#2563eb", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
+            style={{ padding: "6px 14px", border: "none", borderRadius: 6, background: "var(--primary-solid)", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
           >
             + Nova competência
           </button>
         </div>
 
         {competencias.length === 0 ? (
-          <div style={{ padding: 24, textAlign: "center", color: "#6b7280", fontSize: 14 }}>
+          <div style={{ padding: 24, textAlign: "center", color: "var(--fg-muted)", fontSize: 14 }}>
             Nenhuma competência cadastrada ainda.
           </div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
             <thead>
-              <tr style={{ backgroundColor: "#111827", color: "#fff", textAlign: "left" }}>
+              <tr style={{ backgroundColor: "var(--th-bg)", color: "#fff", textAlign: "left" }}>
                 <th style={{ padding: "8px 16px", fontWeight: 600 }}>Competência</th>
                 <th style={{ padding: "8px 16px", fontWeight: 600 }}>Meta</th>
                 <th style={{ padding: "8px 16px", fontWeight: 600 }}>Orçamento</th>
@@ -82,17 +82,17 @@ export function AdminCompetencias({ competencias }: Props) {
             </thead>
             <tbody>
               {competencias.map((c, i) => (
-                <tr key={c.id} style={{ borderBottom: "1px solid #e5e7eb", backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
-                  <td style={{ padding: "10px 16px", fontWeight: 600, color: "#111827" }}>{MESES[c.mes - 1]} {c.ano}</td>
-                  <td style={{ padding: "10px 16px", color: "#111827" }}>{c.metaCancelamentos ?? "—"}</td>
-                  <td style={{ padding: "10px 16px", color: "#111827" }}>{formatarReais(c.orcamentoComissaoCents)}</td>
-                  <td style={{ padding: "10px 16px", color: "#111827" }}>{c.baseAtivosTotal?.toLocaleString("pt-BR") ?? "—"}</td>
-                  <td style={{ padding: "10px 16px", color: "#111827" }}>{c.diasUteis ?? "—"}</td>
-                  <td style={{ padding: "10px 16px", color: "#111827" }}>{c.diasTrabalhados ?? "—"}</td>
+                <tr key={c.id} style={{ borderBottom: "1px solid var(--border)", backgroundColor: i % 2 === 0 ? "var(--surface)" : "var(--surface-2)" }}>
+                  <td style={{ padding: "10px 16px", fontWeight: 600, color: "var(--fg)" }}>{MESES[c.mes - 1]} {c.ano}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--fg)" }}>{c.metaCancelamentos ?? "—"}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--fg)" }}>{formatarReais(c.orcamentoComissaoCents)}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--fg)" }}>{c.baseAtivosTotal?.toLocaleString("pt-BR") ?? "—"}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--fg)" }}>{c.diasUteis ?? "—"}</td>
+                  <td style={{ padding: "10px 16px", color: "var(--fg)" }}>{c.diasTrabalhados ?? "—"}</td>
                   <td style={{ padding: "10px 16px" }}>
                     <button
                       onClick={() => setEditando(c)}
-                      style={{ padding: "4px 12px", border: "1px solid #d1d5db", borderRadius: 6, background: "#fff", color: "#374151", cursor: "pointer", fontSize: 13 }}
+                      style={{ padding: "4px 12px", border: "1px solid var(--border-strong)", borderRadius: 6, background: "var(--surface)", color: "var(--fg-secondary)", cursor: "pointer", fontSize: 13 }}
                     >
                       Editar
                     </button>

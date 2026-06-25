@@ -14,7 +14,7 @@ export function AbasRetencao({ children }: Props) {
   return (
     <div>
       {/* Botões de aba */}
-      <div style={{ display: "flex", gap: 4, borderBottom: "2px solid #e5e7eb", marginBottom: 10 }}>
+      <div style={{ display: "flex", gap: 4, borderBottom: "2px solid var(--border)", marginBottom: 10 }}>
         <BotaoAba
           label="Tabela"
           ativa={aba === "tabela"}
@@ -53,13 +53,13 @@ function BotaoAba({
       style={{
         padding: "8px 20px",
         border: "none",
-        borderBottom: ativa ? "2px solid #2563eb" : "2px solid transparent",
+        borderBottom: ativa ? "2px solid var(--primary)" : "2px solid transparent",
         marginBottom: -2,
         background: "transparent",
         cursor: "pointer",
         fontSize: 14,
         fontWeight: ativa ? 700 : 400,
-        color: ativa ? "#2563eb" : "#6b7280",
+        color: ativa ? "var(--primary)" : "var(--fg-muted)",
         transition: "color 0.15s",
       }}
     >

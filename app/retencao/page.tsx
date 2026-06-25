@@ -47,10 +47,10 @@ export default async function RetencaoPage({
           style={{
             padding: "10px 16px",
             marginBottom: 16,
-            backgroundColor: "#fef2f2",
-            border: "1px solid #fecaca",
+            backgroundColor: "var(--danger-bg)",
+            border: "1px solid var(--danger-border)",
             borderRadius: 6,
-            color: "#991b1b",
+            color: "var(--danger-strong)",
             fontSize: 14,
           }}
         >
@@ -70,18 +70,18 @@ export default async function RetencaoPage({
       {/* Header: linha 2 - cards */}
       <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
         {competencia && <>
-          <CardResumo label="Cancelados" valor={totalCancelados} meta={competencia.metaCancelamentos} cor="#b91c1c" />
-          <CardResumo label="Retidos" valor={totalRetidos} cor="#15803d" />
-          <CardResumo label="Inadimplência" valor={totalInadimplencia} cor="#b45309" />
-          <CardResumo label="Total Empresa" valor={totalEmpresa} cor="#111827" />
+          <CardResumo label="Cancelados" valor={totalCancelados} meta={competencia.metaCancelamentos} cor="var(--danger)" />
+          <CardResumo label="Retidos" valor={totalRetidos} cor="var(--success)" />
+          <CardResumo label="Inadimplência" valor={totalInadimplencia} cor="var(--warning-strong)" />
+          <CardResumo label="Total Empresa" valor={totalEmpresa} cor="var(--fg)" />
           {saldo !== null && (
-            <CardResumo label="Saldo" valor={saldo} cor={saldo >= 0 ? "#15803d" : "#b91c1c"} />
+            <CardResumo label="Saldo" valor={saldo} cor={saldo >= 0 ? "var(--success)" : "var(--danger)"} />
           )}
           {mrrCanceladoCents > 0 && (
-            <CardResumo label="MRR Perdido" valorStr={fmtBRL(mrrCanceladoCents / 100)} cor="#b91c1c" />
+            <CardResumo label="MRR Perdido" valorStr={fmtBRL(mrrCanceladoCents / 100)} cor="var(--danger)" />
           )}
           {mrrRetidoCents > 0 && (
-            <CardResumo label="MRR Retido" valorStr={fmtBRL(mrrRetidoCents / 100)} cor="#15803d" />
+            <CardResumo label="MRR Retido" valorStr={fmtBRL(mrrRetidoCents / 100)} cor="var(--success)" />
           )}
         </>}
       </div>
@@ -99,10 +99,10 @@ export default async function RetencaoPage({
           style={{
             marginTop: 28,
             padding: 18,
-            border: "1px dashed #d1d5db",
+            border: "1px dashed var(--border-strong)",
             borderRadius: 8,
             textAlign: "center",
-            color: "#6b7280",
+            color: "var(--fg-muted)",
           }}
         >
           <p style={{ fontSize: 16, marginBottom: 8 }}>Nenhuma competência cadastrada para este mês.</p>
@@ -118,7 +118,7 @@ function CardResumo({
   valor,
   valorStr,
   meta,
-  cor = "#111827",
+  cor = "var(--fg)",
 }: {
   label: string;
   valor?: number;
@@ -129,17 +129,17 @@ function CardResumo({
   return (
     <div
       style={{
-        border: "1px solid #e5e7eb",
+        border: "1px solid var(--border)",
         borderRadius: 8,
         padding: "10px 16px",
         minWidth: 120,
-        backgroundColor: "#fff",
+        backgroundColor: "var(--surface)",
       }}
     >
-      <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 11, color: "var(--fg-muted)", marginBottom: 4 }}>{label}</div>
       <div style={{ fontSize: 20, fontWeight: 700, color: cor }}>{valorStr ?? valor}</div>
       {meta != null && (
-        <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2 }}>
+        <div style={{ fontSize: 11, color: "var(--fg-muted)", marginTop: 2 }}>
           meta: {meta}
         </div>
       )}

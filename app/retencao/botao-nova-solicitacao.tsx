@@ -85,7 +85,7 @@ export function BotaoNovaSolicitacao({ competenciaId, cidades, ano, mes }: Props
             padding: "8px 18px",
             border: "none",
             borderRadius: 6,
-            background: competenciaId ? "#2563eb" : "#9ca3af",
+            background: competenciaId ? "var(--primary-solid)" : "var(--fg-subtle)",
             color: "#fff",
             cursor: competenciaId ? "pointer" : "not-allowed",
             fontSize: 14,
@@ -96,7 +96,7 @@ export function BotaoNovaSolicitacao({ competenciaId, cidades, ano, mes }: Props
         </button>
 
         {temRascunho && !aberto && (
-          <span style={{ fontSize: 12, color: "#b45309", fontWeight: 500 }}>
+          <span style={{ fontSize: 12, color: "var(--warning-strong)", fontWeight: 500 }}>
             ● rascunho salvo
           </span>
         )}

@@ -235,9 +235,9 @@ function parsearLinhaSemicolon(linha: string): string[] {
 }
 
 const STATUS_COR: Record<string, string> = {
-  CANCELADO: "#b91c1c",
-  RETIDO: "#15803d",
-  INADIMPLENCIA: "#b45309",
+  CANCELADO: "var(--danger)",
+  RETIDO: "var(--success)",
+  INADIMPLENCIA: "var(--warning-strong)",
 };
 
 export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
@@ -355,10 +355,10 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
           disabled={!competenciaId}
           style={{
             padding: "7px 14px",
-            border: "1px solid #d1d5db",
+            border: "1px solid var(--border-strong)",
             borderRadius: 6,
-            background: "#fff",
-            color: competenciaId ? "#374151" : "#9ca3af",
+            background: "var(--surface)",
+            color: competenciaId ? "var(--fg-secondary)" : "var(--fg-subtle)",
             cursor: competenciaId ? "pointer" : "not-allowed",
             fontSize: 13,
             fontWeight: 500,
@@ -375,10 +375,10 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
               disabled={!competenciaId}
               style={{
                 padding: "7px 14px",
-                border: "1px solid #d1d5db",
+                border: "1px solid var(--border-strong)",
                 borderRadius: 6,
-                background: "#fff",
-                color: competenciaId ? "#374151" : "#9ca3af",
+                background: "var(--surface)",
+                color: competenciaId ? "var(--fg-secondary)" : "var(--fg-subtle)",
                 cursor: competenciaId ? "pointer" : "not-allowed",
                 fontSize: 13,
                 fontWeight: 500,
@@ -414,7 +414,7 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              backgroundColor: "#fff",
+              backgroundColor: "var(--surface)",
               borderRadius: 10,
               padding: 24,
               width: "100%",
@@ -424,13 +424,13 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
               flexDirection: "column",
             }}
           >
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#111827", marginBottom: 4 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", marginBottom: 4 }}>
               Pré-visualização da importação
             </h2>
-            <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 16 }}>
-              <span style={{ color: "#15803d", fontWeight: 600 }}>{validas} válidas</span>
+            <p style={{ fontSize: 13, color: "var(--fg-muted)", marginBottom: 16 }}>
+              <span style={{ color: "var(--success)", fontWeight: 600 }}>{validas} válidas</span>
               {comErro > 0 && (
-                <span style={{ color: "#b91c1c", fontWeight: 600 }}> · {comErro} com erro (serão ignoradas)</span>
+                <span style={{ color: "var(--danger)", fontWeight: 600 }}> · {comErro} com erro (serão ignoradas)</span>
               )}
               {" · "}{preview.length} linhas encontradas
             </p>
@@ -438,7 +438,7 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
             <div style={{ flex: 1, overflowY: "auto", marginBottom: 16 }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                 <thead>
-                  <tr style={{ backgroundColor: "#111827", color: "#fff", textAlign: "left", position: "sticky", top: 0 }}>
+                  <tr style={{ backgroundColor: "var(--th-bg)", color: "#fff", textAlign: "left", position: "sticky", top: 0 }}>
                     <th style={{ padding: "6px 8px" }}>#</th>
                     <th style={{ padding: "6px 8px" }}>Status</th>
                     <th style={{ padding: "6px 8px" }}>Cliente</th>
@@ -453,23 +453,23 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
                     <tr
                       key={i}
                       style={{
-                        borderBottom: "1px solid #e5e7eb",
-                        backgroundColor: l.erro ? "#fef2f2" : i % 2 === 0 ? "#fff" : "#f9fafb",
+                        borderBottom: "1px solid var(--border)",
+                        backgroundColor: l.erro ? "var(--danger-bg)" : i % 2 === 0 ? "var(--surface)" : "var(--surface-2)",
                       }}
                     >
-                      <td style={{ padding: "6px 8px", color: "#6b7280" }}>{i + 1}</td>
-                      <td style={{ padding: "6px 8px", fontWeight: 600, color: STATUS_COR[l.status] ?? "#111827" }}>
+                      <td style={{ padding: "6px 8px", color: "var(--fg-muted)" }}>{i + 1}</td>
+                      <td style={{ padding: "6px 8px", fontWeight: 600, color: STATUS_COR[l.status] ?? "var(--fg)" }}>
                         {l.status}
                       </td>
-                      <td style={{ padding: "6px 8px", color: "#111827" }}>{l.nomeCliente}</td>
-                      <td style={{ padding: "6px 8px", color: l.cidade ? "#111827" : "#b91c1c" }}>
+                      <td style={{ padding: "6px 8px", color: "var(--fg)" }}>{l.nomeCliente}</td>
+                      <td style={{ padding: "6px 8px", color: l.cidade ? "var(--fg)" : "var(--danger)" }}>
                         {l.cidade || l.cidadeOriginal}
                       </td>
-                      <td style={{ padding: "6px 8px", color: l.regiao ? "#111827" : "#b91c1c" }}>
+                      <td style={{ padding: "6px 8px", color: l.regiao ? "var(--fg)" : "var(--danger)" }}>
                         {l.regiao || l.regiaoOriginal}
                       </td>
-                      <td style={{ padding: "6px 8px", color: "#111827" }}>{l.atendenteNome}</td>
-                      <td style={{ padding: "6px 8px", color: "#b91c1c", fontSize: 11 }}>
+                      <td style={{ padding: "6px 8px", color: "var(--fg)" }}>{l.atendenteNome}</td>
+                      <td style={{ padding: "6px 8px", color: "var(--danger)", fontSize: 11 }}>
                         {l.erro ?? "✓"}
                       </td>
                     </tr>
@@ -483,10 +483,10 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
                 onClick={() => setPreview(null)}
                 style={{
                   padding: "8px 18px",
-                  border: "1px solid #d1d5db",
+                  border: "1px solid var(--border-strong)",
                   borderRadius: 6,
-                  background: "#fff",
-                  color: "#374151",
+                  background: "var(--surface)",
+                  color: "var(--fg-secondary)",
                   cursor: "pointer",
                   fontSize: 14,
                 }}
@@ -500,7 +500,7 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
                   padding: "8px 18px",
                   border: "none",
                   borderRadius: 6,
-                  background: importando || validas === 0 ? "#9ca3af" : "#15803d",
+                  background: importando || validas === 0 ? "var(--fg-subtle)" : "var(--success)",
                   color: "#fff",
                   cursor: importando || validas === 0 ? "not-allowed" : "pointer",
                   fontSize: 14,

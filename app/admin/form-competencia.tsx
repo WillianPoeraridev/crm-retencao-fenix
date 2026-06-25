@@ -28,19 +28,19 @@ interface Props {
 }
 
 const CAMPO: React.CSSProperties = { display: "grid", gap: 4, marginBottom: 12 };
-const LABEL: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "#374151" };
+const LABEL: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "var(--fg-secondary)" };
 const INPUT: React.CSSProperties = {
   padding: "8px 10px",
-  border: "1px solid #d1d5db",
+  border: "1px solid var(--border-strong)",
   borderRadius: 6,
   fontSize: 14,
   width: "100%",
   boxSizing: "border-box",
-  color: "#111827",
-  backgroundColor: "#fff",
+  color: "var(--fg)",
+  backgroundColor: "var(--surface)",
 };
 const GRID2: React.CSSProperties = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 };
-const HINT: React.CSSProperties = { fontSize: 11, color: "#9ca3af", marginTop: 2 };
+const HINT: React.CSSProperties = { fontSize: 11, color: "var(--fg-subtle)", marginTop: 2 };
 
 export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
   const router = useRouter();
@@ -124,7 +124,7 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: "var(--surface)",
           borderRadius: 10,
           padding: 28,
           width: "100%",
@@ -133,7 +133,7 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
           overflowY: "auto",
         }}
       >
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "#111827" }}>
+        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "var(--fg)" }}>
           {ehEdicao ? "Editar Competência" : "Nova Competência"}
         </h2>
 
@@ -157,13 +157,13 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
           )}
 
           {ehEdicao && (
-            <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 16 }}>
-              Editando: <strong style={{ color: "#111827" }}>{MESES.find(([v]) => v === competencia.mes)?.[1]} {competencia.ano}</strong>
+            <p style={{ fontSize: 13, color: "var(--fg-muted)", marginBottom: 16 }}>
+              Editando: <strong style={{ color: "var(--fg)" }}>{MESES.find(([v]) => v === competencia.mes)?.[1]} {competencia.ano}</strong>
             </p>
           )}
 
-          <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 14, marginBottom: 4 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Metas</p>
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14, marginBottom: 4 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "var(--fg-muted)", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Metas</p>
           </div>
 
           <div style={GRID2}>
@@ -188,8 +188,8 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
             </div>
           </div>
 
-          <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 14, marginBottom: 4 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Financeiro</p>
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14, marginBottom: 4 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "var(--fg-muted)", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>Financeiro</p>
           </div>
 
           <div style={GRID2}>
@@ -204,11 +204,11 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
             </div>
           </div>
 
-          {erro && <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 12 }}>{erro}</p>}
+          {erro && <p style={{ color: "var(--danger)", fontSize: 13, marginBottom: 12 }}>{erro}</p>}
 
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
-            <button type="button" onClick={onCancelar} style={{ padding: "8px 18px", border: "1px solid #d1d5db", borderRadius: 6, background: "#fff", color: "#374151", cursor: "pointer", fontSize: 14 }}>Cancelar</button>
-            <button type="submit" disabled={enviando} style={{ padding: "8px 18px", border: "none", borderRadius: 6, background: enviando ? "#9ca3af" : "#2563eb", color: "#fff", cursor: enviando ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>{enviando ? "Salvando..." : ehEdicao ? "Salvar alterações" : "Criar competência"}</button>
+            <button type="button" onClick={onCancelar} style={{ padding: "8px 18px", border: "1px solid var(--border-strong)", borderRadius: 6, background: "var(--surface)", color: "var(--fg-secondary)", cursor: "pointer", fontSize: 14 }}>Cancelar</button>
+            <button type="submit" disabled={enviando} style={{ padding: "8px 18px", border: "none", borderRadius: 6, background: enviando ? "var(--fg-subtle)" : "var(--primary)", color: "#fff", cursor: enviando ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>{enviando ? "Salvando..." : ehEdicao ? "Salvar alterações" : "Criar competência"}</button>
           </div>
         </form>
       </div>

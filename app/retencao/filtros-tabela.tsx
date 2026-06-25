@@ -13,11 +13,11 @@ const STATUS_OPCOES = [
 
 const INPUT: React.CSSProperties = {
   padding: "6px 10px",
-  border: "1px solid #d1d5db",
+  border: "1px solid var(--border-strong)",
   borderRadius: 6,
   fontSize: 13,
-  color: "#111827",
-  backgroundColor: "#fff",
+  color: "var(--fg)",
+  backgroundColor: "var(--surface)",
   outline: "none",
 };
 
@@ -77,8 +77,8 @@ export function FiltrosTabela({ solicitacoes, cidades }: Props) {
           alignItems: "center",
           marginBottom: 12,
           padding: "6px 14px",
-          backgroundColor: "#f9fafb",
-          border: "1px solid #e5e7eb",
+          backgroundColor: "var(--surface-2)",
+          border: "1px solid var(--border)",
           borderRadius: 8,
         }}
       >
@@ -111,7 +111,7 @@ export function FiltrosTabela({ solicitacoes, cidades }: Props) {
         </select>
 
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
-          <span style={{ fontSize: 12, color: "#6b7280", whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 12, color: "var(--fg-muted)", whiteSpace: "nowrap" }}>
             {filtradas.length} de {solicitacoes.length} registro{solicitacoes.length !== 1 ? "s" : ""}
           </span>
           {temFiltroAtivo && (
@@ -119,10 +119,10 @@ export function FiltrosTabela({ solicitacoes, cidades }: Props) {
               onClick={limpar}
               style={{
                 padding: "4px 10px",
-                border: "1px solid #d1d5db",
+                border: "1px solid var(--border-strong)",
                 borderRadius: 5,
-                background: "#fff",
-                color: "#6b7280",
+                background: "var(--surface)",
+                color: "var(--fg-muted)",
                 cursor: "pointer",
                 fontSize: 12,
                 whiteSpace: "nowrap",

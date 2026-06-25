@@ -120,7 +120,7 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
 
   return (
     <div style={{ marginTop: 32 }}>
-      <h2 style={{ fontSize: 16, fontWeight: 700, color: "#111827", marginBottom: 16 }}>
+      <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--fg)", marginBottom: 16 }}>
         Informações
       </h2>
 
@@ -130,7 +130,7 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
             <LinhaInfo label="Realizado orgânico" valor={totalCancelados} />
             <LinhaInfo label="Realizado inadimplência" valor={totalInadimplencia} />
             <LinhaInfo label="Total empresa" valor={totalEmpresa} destaque />
-            <LinhaInfo label="Saldo" valor={saldo} cor={saldo >= 0 ? "#15803d" : "#b91c1c"} />
+            <LinhaInfo label="Saldo" valor={saldo} cor={saldo >= 0 ? "var(--success)" : "var(--danger)"} />
             {diasRestantes > 0 && (
               <LinhaInfo label="Dias restantes" valor={diasRestantes} />
             )}
@@ -138,7 +138,7 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
               <LinhaInfo
                 label="Meta recalculada"
                 valor={metaRecalculada}
-                cor={metaRecalculada <= 0 ? "#15803d" : "#b45309"}
+                cor={metaRecalculada <= 0 ? "var(--success)" : "var(--warning-strong)"}
               />
             )}
             {churnGeral !== null && (
@@ -149,8 +149,8 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
             )}
             {(mrrCanceladoCents > 0 || mrrRetidoCents > 0) && (
               <>
-                <LinhaInfo label="MRR perdido (cancelados)" valorStr={formatarReais(mrrCanceladoCents)} cor="#b91c1c" />
-                <LinhaInfo label="MRR retido" valorStr={formatarReais(mrrRetidoCents)} cor="#15803d" />
+                <LinhaInfo label="MRR perdido (cancelados)" valorStr={formatarReais(mrrCanceladoCents)} cor="var(--danger)" />
+                <LinhaInfo label="MRR retido" valorStr={formatarReais(mrrRetidoCents)} cor="var(--success)" />
                 {ticketMedioCanceladoCents !== null && (
                   <LinhaInfo label="Ticket médio cancelado" valorStr={formatarReais(ticketMedioCanceladoCents)} />
                 )}
@@ -163,7 +163,7 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
 
           <Secao titulo={`Motivos de Cancelamento (${totalCancelados} cancelados)`}>
             {motivosOrdenados.length === 0 ? (
-              <p style={{ fontSize: 13, color: "#9ca3af" }}>Nenhum cancelamento registrado.</p>
+              <p style={{ fontSize: 13, color: "var(--fg-subtle)" }}>Nenhum cancelamento registrado.</p>
             ) : (
               motivosOrdenados.map(([motivo, count]) => (
                 <div
@@ -173,15 +173,15 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
                     justifyContent: "space-between",
                     alignItems: "center",
                     padding: "6px 0",
-                    borderBottom: "1px solid #f3f4f6",
+                    borderBottom: "1px solid var(--border)",
                   }}
                 >
-                  <span style={{ fontSize: 13, color: "#374151" }}>
+                  <span style={{ fontSize: 13, color: "var(--fg-secondary)" }}>
                     {MOTIVO_LABEL[motivo] ?? motivo}
                   </span>
-                  <span style={{ fontSize: 13, color: "#6b7280" }}>
+                  <span style={{ fontSize: 13, color: "var(--fg-muted)" }}>
                     {count}{" "}
-                    <span style={{ color: "#9ca3af" }}>({pct(count, totalCancelados)})</span>
+                    <span style={{ color: "var(--fg-subtle)" }}>({pct(count, totalCancelados)})</span>
                   </span>
                 </div>
               ))
@@ -192,11 +192,11 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
                 justifyContent: "space-between",
                 marginTop: 8,
                 paddingTop: 8,
-                borderTop: "2px solid #e5e7eb",
+                borderTop: "2px solid var(--border)",
               }}
             >
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>Tx. de retenção</span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#15803d" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--fg)" }}>Tx. de retenção</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--success)" }}>
                 {pct(totalRetidos, totalAtendidos)}
               </span>
             </div>
@@ -205,18 +205,18 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
 
         <Secao titulo="Ranking por Atendente">
           {ranking.length === 0 ? (
-            <p style={{ fontSize: 13, color: "#9ca3af" }}>Nenhum registro ainda.</p>
+            <p style={{ fontSize: 13, color: "var(--fg-subtle)" }}>Nenhum registro ainda.</p>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
-                <tr style={{ borderBottom: "2px solid #e5e7eb", textAlign: "left" }}>
-                  <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600 }}>Atendente</th>
-                  <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Total</th>
-                  <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Cancel.</th>
-                  <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Retidos</th>
-                  <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Tx. Ret.</th>
-                  <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>MRR Perdido</th>
-                  <th style={{ padding: "6px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Proj. Comissão</th>
+                <tr style={{ borderBottom: "2px solid var(--border)", textAlign: "left" }}>
+                  <th style={{ padding: "6px 8px", color: "var(--fg-muted)", fontWeight: 600 }}>Atendente</th>
+                  <th style={{ padding: "6px 8px", color: "var(--fg-muted)", fontWeight: 600, textAlign: "right" }}>Total</th>
+                  <th style={{ padding: "6px 8px", color: "var(--fg-muted)", fontWeight: 600, textAlign: "right" }}>Cancel.</th>
+                  <th style={{ padding: "6px 8px", color: "var(--fg-muted)", fontWeight: 600, textAlign: "right" }}>Retidos</th>
+                  <th style={{ padding: "6px 8px", color: "var(--fg-muted)", fontWeight: 600, textAlign: "right" }}>Tx. Ret.</th>
+                  <th style={{ padding: "6px 8px", color: "var(--fg-muted)", fontWeight: 600, textAlign: "right" }}>MRR Perdido</th>
+                  <th style={{ padding: "6px 8px", color: "var(--fg-muted)", fontWeight: 600, textAlign: "right" }}>Proj. Comissão</th>
                 </tr>
               </thead>
               <tbody>
@@ -229,19 +229,19 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
                     <tr
                       key={a.nome}
                       style={{
-                        borderBottom: "1px solid #f3f4f6",
-                        backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb",
+                        borderBottom: "1px solid var(--border)",
+                        backgroundColor: i % 2 === 0 ? "var(--surface)" : "var(--surface-2)",
                       }}
                     >
-                      <td style={{ padding: "8px 8px", fontWeight: 600, color: "#111827" }}>{shortName(a.nome)}</td>
-                      <td style={{ padding: "8px 8px", textAlign: "right", color: "#374151" }}>{a.total}</td>
-                      <td style={{ padding: "8px 8px", textAlign: "right", color: "#b91c1c" }}>{a.cancelados}</td>
-                      <td style={{ padding: "8px 8px", textAlign: "right", color: "#15803d" }}>{a.retidos}</td>
-                      <td style={{ padding: "8px 8px", textAlign: "right", color: "#374151" }}>{pct(a.retidos, a.total)}</td>
-                      <td style={{ padding: "8px 8px", textAlign: "right", color: a.mrrPerdidoCents > 0 ? "#b91c1c" : "#9ca3af", fontWeight: a.mrrPerdidoCents > 0 ? 600 : 400 }}>
+                      <td style={{ padding: "8px 8px", fontWeight: 600, color: "var(--fg)" }}>{shortName(a.nome)}</td>
+                      <td style={{ padding: "8px 8px", textAlign: "right", color: "var(--fg-secondary)" }}>{a.total}</td>
+                      <td style={{ padding: "8px 8px", textAlign: "right", color: "var(--danger)" }}>{a.cancelados}</td>
+                      <td style={{ padding: "8px 8px", textAlign: "right", color: "var(--success)" }}>{a.retidos}</td>
+                      <td style={{ padding: "8px 8px", textAlign: "right", color: "var(--fg-secondary)" }}>{pct(a.retidos, a.total)}</td>
+                      <td style={{ padding: "8px 8px", textAlign: "right", color: a.mrrPerdidoCents > 0 ? "var(--danger)" : "var(--fg-subtle)", fontWeight: a.mrrPerdidoCents > 0 ? 600 : 400 }}>
                         {a.mrrPerdidoCents > 0 ? formatarReais(a.mrrPerdidoCents) : "—"}
                       </td>
-                      <td style={{ padding: "8px 8px", textAlign: "right", color: "#15803d", fontWeight: 600 }}>
+                      <td style={{ padding: "8px 8px", textAlign: "right", color: "var(--success)", fontWeight: 600 }}>
                         {projComissao !== null ? formatarReais(projComissao) : "—"}
                       </td>
                     </tr>
@@ -250,14 +250,14 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
               </tbody>
               {competencia.orcamentoComissaoCents && (
                 <tfoot>
-                  <tr style={{ borderTop: "2px solid #e5e7eb" }}>
-                    <td colSpan={5} style={{ padding: "8px 8px", fontSize: 13, fontWeight: 600, color: "#6b7280" }}>
+                  <tr style={{ borderTop: "2px solid var(--border)" }}>
+                    <td colSpan={5} style={{ padding: "8px 8px", fontSize: 13, fontWeight: 600, color: "var(--fg-muted)" }}>
                       Total
                     </td>
-                    <td style={{ padding: "8px 8px", textAlign: "right", fontWeight: 700, color: "#b91c1c" }}>
+                    <td style={{ padding: "8px 8px", textAlign: "right", fontWeight: 700, color: "var(--danger)" }}>
                       {mrrCanceladoCents > 0 ? formatarReais(mrrCanceladoCents) : "—"}
                     </td>
-                    <td style={{ padding: "8px 8px", textAlign: "right", fontWeight: 700, color: "#111827" }}>
+                    <td style={{ padding: "8px 8px", textAlign: "right", fontWeight: 700, color: "var(--fg)" }}>
                       {formatarReais(competencia.orcamentoComissaoCents)}
                     </td>
                   </tr>
@@ -271,7 +271,7 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         <Secao titulo="Cancelamentos por Região">
           {regioes.length === 0 ? (
-            <p style={{ fontSize: 13, color: "#9ca3af" }}>Nenhum registro ainda.</p>
+            <p style={{ fontSize: 13, color: "var(--fg-subtle)" }}>Nenhum registro ainda.</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {regioes.map(([regiao, dados]) => {
@@ -280,37 +280,37 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
                 return (
                   <div key={regiao}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: "#111827" }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "var(--fg)" }}>
                         {REGIAO_LABEL[regiao] ?? regiao}
                       </span>
                       <div style={{ display: "flex", gap: 14, fontSize: 12 }}>
-                        <span style={{ color: "#b91c1c", fontWeight: 600 }}>{dados.cancelados} cancel.</span>
-                        <span style={{ color: "#15803d", fontWeight: 600 }}>{dados.retidos} retidos</span>
-                        <span style={{ color: "#6b7280" }}>{pct(dados.retidos, totalAtendidosRegiao)} ret.</span>
+                        <span style={{ color: "var(--danger)", fontWeight: 600 }}>{dados.cancelados} cancel.</span>
+                        <span style={{ color: "var(--success)", fontWeight: 600 }}>{dados.retidos} retidos</span>
+                        <span style={{ color: "var(--fg-muted)" }}>{pct(dados.retidos, totalAtendidosRegiao)} ret.</span>
                       </div>
                     </div>
-                    <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", backgroundColor: "#f3f4f6" }}>
-                      <div style={{ width: `${barPct}%`, backgroundColor: "#b91c1c", transition: "width 0.3s ease" }} />
-                      <div style={{ width: `${pctNum(dados.retidos, maxCancelRegiao)}%`, backgroundColor: "#86efac", transition: "width 0.3s ease" }} />
+                    <div style={{ display: "flex", height: 8, borderRadius: 4, overflow: "hidden", backgroundColor: "var(--border)" }}>
+                      <div style={{ width: `${barPct}%`, backgroundColor: "var(--danger-solid)", transition: "width 0.3s ease" }} />
+                      <div style={{ width: `${pctNum(dados.retidos, maxCancelRegiao)}%`, backgroundColor: "var(--success-bar)", transition: "width 0.3s ease" }} />
                     </div>
-                    <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 3 }}>
+                    <div style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 3 }}>
                       {pct(dados.cancelados, totalCancelados)} dos cancelamentos do mês
                       {dados.inadimplencia > 0 && (
-                        <span style={{ marginLeft: 8, color: "#b45309" }}>· {dados.inadimplencia} inadimpl.</span>
+                        <span style={{ marginLeft: 8, color: "var(--warning-strong)" }}>· {dados.inadimplencia} inadimpl.</span>
                       )}
                     </div>
                   </div>
                 );
               })}
-              <div style={{ borderTop: "2px solid #e5e7eb", paddingTop: 10, display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>Total</span>
+              <div style={{ borderTop: "2px solid var(--border)", paddingTop: 10, display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--fg-secondary)" }}>Total</span>
                 <div style={{ display: "flex", gap: 14, fontSize: 12 }}>
-                  <span style={{ color: "#b91c1c", fontWeight: 700 }}>{totalCancelados} cancel.</span>
-                  <span style={{ color: "#15803d", fontWeight: 700 }}>{totalRetidos} retidos</span>
+                  <span style={{ color: "var(--danger)", fontWeight: 700 }}>{totalCancelados} cancel.</span>
+                  <span style={{ color: "var(--success)", fontWeight: 700 }}>{totalRetidos} retidos</span>
                   {totalInadimplencia > 0 && (
-                    <span style={{ color: "#b45309", fontWeight: 700 }}>{totalInadimplencia} inadimpl.</span>
+                    <span style={{ color: "var(--warning-strong)", fontWeight: 700 }}>{totalInadimplencia} inadimpl.</span>
                   )}
-                  <span style={{ color: "#6b7280" }}>{pct(totalRetidos, totalAtendidos)} ret.</span>
+                  <span style={{ color: "var(--fg-muted)" }}>{pct(totalRetidos, totalAtendidos)} ret.</span>
                 </div>
               </div>
             </div>
@@ -319,16 +319,16 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
 
         <Secao titulo={`Cancelamentos por Cidade (${cidades.length} ${cidades.length === 1 ? "cidade" : "cidades"})`}>
           {cidades.length === 0 ? (
-            <p style={{ fontSize: 13, color: "#9ca3af" }}>Nenhum cancelamento registrado.</p>
+            <p style={{ fontSize: 13, color: "var(--fg-subtle)" }}>Nenhum cancelamento registrado.</p>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
-                <tr style={{ borderBottom: "2px solid #e5e7eb", textAlign: "left" }}>
-                  <th style={{ padding: "5px 8px", color: "#6b7280", fontWeight: 600 }}>Cidade</th>
-                  <th style={{ padding: "5px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Cancel.</th>
-                  <th style={{ padding: "5px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Retidos</th>
-                  <th style={{ padding: "5px 8px", color: "#6b7280", fontWeight: 600, textAlign: "right" }}>Tx. Ret.</th>
-                  <th style={{ padding: "5px 4px", color: "#6b7280", fontWeight: 600 }}>Proporção</th>
+                <tr style={{ borderBottom: "2px solid var(--border)", textAlign: "left" }}>
+                  <th style={{ padding: "5px 8px", color: "var(--fg-muted)", fontWeight: 600 }}>Cidade</th>
+                  <th style={{ padding: "5px 8px", color: "var(--fg-muted)", fontWeight: 600, textAlign: "right" }}>Cancel.</th>
+                  <th style={{ padding: "5px 8px", color: "var(--fg-muted)", fontWeight: 600, textAlign: "right" }}>Retidos</th>
+                  <th style={{ padding: "5px 8px", color: "var(--fg-muted)", fontWeight: 600, textAlign: "right" }}>Tx. Ret.</th>
+                  <th style={{ padding: "5px 4px", color: "var(--fg-muted)", fontWeight: 600 }}>Proporção</th>
                 </tr>
               </thead>
               <tbody>
@@ -336,17 +336,17 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
                   const totalAtendidosCidade = c.cancelados + c.retidos;
                   const barWidth = pctNum(c.cancelados, maxCancelCidade);
                   return (
-                    <tr key={c.nome} style={{ borderBottom: "1px solid #f3f4f6", backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
-                      <td style={{ padding: "7px 8px", fontWeight: 600, color: "#111827" }}>{c.nome}</td>
-                      <td style={{ padding: "7px 8px", textAlign: "right", color: "#b91c1c", fontWeight: 700 }}>{c.cancelados}</td>
-                      <td style={{ padding: "7px 8px", textAlign: "right", color: "#15803d" }}>{c.retidos}</td>
-                      <td style={{ padding: "7px 8px", textAlign: "right", color: "#374151" }}>{pct(c.retidos, totalAtendidosCidade)}</td>
+                    <tr key={c.nome} style={{ borderBottom: "1px solid var(--border)", backgroundColor: i % 2 === 0 ? "var(--surface)" : "var(--surface-2)" }}>
+                      <td style={{ padding: "7px 8px", fontWeight: 600, color: "var(--fg)" }}>{c.nome}</td>
+                      <td style={{ padding: "7px 8px", textAlign: "right", color: "var(--danger)", fontWeight: 700 }}>{c.cancelados}</td>
+                      <td style={{ padding: "7px 8px", textAlign: "right", color: "var(--success)" }}>{c.retidos}</td>
+                      <td style={{ padding: "7px 8px", textAlign: "right", color: "var(--fg-secondary)" }}>{pct(c.retidos, totalAtendidosCidade)}</td>
                       <td style={{ padding: "7px 4px", minWidth: 80 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <div style={{ flex: 1, height: 6, backgroundColor: "#f3f4f6", borderRadius: 3, overflow: "hidden" }}>
-                            <div style={{ width: `${barWidth}%`, height: "100%", backgroundColor: "#b91c1c", borderRadius: 3 }} />
+                          <div style={{ flex: 1, height: 6, backgroundColor: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
+                            <div style={{ width: `${barWidth}%`, height: "100%", backgroundColor: "var(--danger-solid)", borderRadius: 3 }} />
                           </div>
-                          <span style={{ fontSize: 11, color: "#9ca3af", whiteSpace: "nowrap" }}>
+                          <span style={{ fontSize: 11, color: "var(--fg-subtle)", whiteSpace: "nowrap" }}>
                             {pct(c.cancelados, totalCancelados)}
                           </span>
                         </div>
@@ -356,11 +356,11 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
                 })}
               </tbody>
               <tfoot>
-                <tr style={{ borderTop: "2px solid #e5e7eb" }}>
-                  <td style={{ padding: "7px 8px", fontWeight: 700, color: "#111827", fontSize: 13 }}>Total</td>
-                  <td style={{ padding: "7px 8px", textAlign: "right", fontWeight: 700, color: "#b91c1c" }}>{totalCancelados}</td>
-                  <td style={{ padding: "7px 8px", textAlign: "right", fontWeight: 700, color: "#15803d" }}>{totalRetidos}</td>
-                  <td style={{ padding: "7px 8px", textAlign: "right", fontWeight: 700, color: "#374151" }}>{pct(totalRetidos, totalAtendidos)}</td>
+                <tr style={{ borderTop: "2px solid var(--border)" }}>
+                  <td style={{ padding: "7px 8px", fontWeight: 700, color: "var(--fg)", fontSize: 13 }}>Total</td>
+                  <td style={{ padding: "7px 8px", textAlign: "right", fontWeight: 700, color: "var(--danger)" }}>{totalCancelados}</td>
+                  <td style={{ padding: "7px 8px", textAlign: "right", fontWeight: 700, color: "var(--success)" }}>{totalRetidos}</td>
+                  <td style={{ padding: "7px 8px", textAlign: "right", fontWeight: 700, color: "var(--fg-secondary)" }}>{pct(totalRetidos, totalAtendidos)}</td>
                   <td />
                 </tr>
               </tfoot>
@@ -374,9 +374,9 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
 
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <div style={{ border: "1px solid #e5e7eb", borderRadius: 8, overflow: "hidden" }}>
-      <div style={{ backgroundColor: "#f9fafb", padding: "10px 16px", borderBottom: "1px solid #e5e7eb" }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{titulo}</span>
+    <div style={{ border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
+      <div style={{ backgroundColor: "var(--surface-2)", padding: "10px 16px", borderBottom: "1px solid var(--border)" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--fg-secondary)" }}>{titulo}</span>
       </div>
       <div style={{ padding: "12px 16px" }}>{children}</div>
     </div>
@@ -387,7 +387,7 @@ function LinhaInfo({
   label,
   valor,
   valorStr,
-  cor = "#111827",
+  cor = "var(--fg)",
   destaque = false,
 }: {
   label: string;
@@ -402,11 +402,11 @@ function LinhaInfo({
         display: "flex",
         justifyContent: "space-between",
         padding: "6px 0",
-        borderBottom: "1px solid #f3f4f6",
-        backgroundColor: destaque ? "#fefce8" : "transparent",
+        borderBottom: "1px solid var(--border)",
+        backgroundColor: destaque ? "var(--highlight-bg)" : "transparent",
       }}
     >
-      <span style={{ fontSize: 13, color: "#374151" }}>{label}</span>
+      <span style={{ fontSize: 13, color: "var(--fg-secondary)" }}>{label}</span>
       <span style={{ fontSize: 13, fontWeight: destaque ? 700 : 600, color: cor }}>
         {valorStr ?? valor}
       </span>

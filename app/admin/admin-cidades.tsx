@@ -15,16 +15,16 @@ interface Props {
 }
 
 const CAMPO: React.CSSProperties = { display: "grid", gap: 4, marginBottom: 14 };
-const LABEL: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "#374151" };
+const LABEL: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "var(--fg-secondary)" };
 const INPUT: React.CSSProperties = {
   padding: "8px 10px",
-  border: "1px solid #d1d5db",
+  border: "1px solid var(--border-strong)",
   borderRadius: 6,
   fontSize: 14,
   width: "100%",
   boxSizing: "border-box",
-  color: "#111827",
-  backgroundColor: "#fff",
+  color: "var(--fg)",
+  backgroundColor: "var(--surface)",
 };
 
 export function AdminCidades({ cidades }: Props) {
@@ -83,28 +83,28 @@ export function AdminCidades({ cidades }: Props) {
 
   return (
     <>
-      <div style={{ border: "1px solid #e5e7eb", borderRadius: 8, overflow: "hidden", marginTop: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", backgroundColor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
+      <div style={{ border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden", marginTop: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", backgroundColor: "var(--surface-2)", borderBottom: "1px solid var(--border)" }}>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: "var(--fg)" }}>
             Cidades ({ativas} ativas de {cidades.length})
           </h2>
           <button
             onClick={() => setCriando(true)}
-            style={{ padding: "6px 14px", border: "none", borderRadius: 6, background: "#2563eb", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
+            style={{ padding: "6px 14px", border: "none", borderRadius: 6, background: "var(--primary-solid)", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
           >
             + Nova cidade
           </button>
         </div>
 
         {erro && (
-          <div style={{ padding: "8px 20px", backgroundColor: "#fef2f2", borderBottom: "1px solid #fecaca", color: "#991b1b", fontSize: 13 }}>
+          <div style={{ padding: "8px 20px", backgroundColor: "var(--danger-bg)", borderBottom: "1px solid var(--danger-border)", color: "var(--danger-strong)", fontSize: 13 }}>
             {erro}
           </div>
         )}
 
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
           <thead>
-            <tr style={{ backgroundColor: "#111827", color: "#fff", textAlign: "left" }}>
+            <tr style={{ backgroundColor: "var(--th-bg)", color: "#fff", textAlign: "left" }}>
               <th style={{ padding: "8px 16px", fontWeight: 600 }}>Código</th>
               <th style={{ padding: "8px 16px", fontWeight: 600 }}>Nome</th>
               <th style={{ padding: "8px 16px", fontWeight: 600 }}>Status</th>
@@ -113,14 +113,14 @@ export function AdminCidades({ cidades }: Props) {
           </thead>
           <tbody>
             {cidades.map((c, i) => (
-              <tr key={c.id} style={{ borderBottom: "1px solid #e5e7eb", backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb", opacity: carregando === c.id ? 0.5 : 1 }}>
-                <td style={{ padding: "10px 16px", fontFamily: "monospace", fontSize: 12, color: "#6b7280" }}>{c.id}</td>
-                <td style={{ padding: "10px 16px", fontWeight: 500, color: "#111827" }}>{c.nome}</td>
+              <tr key={c.id} style={{ borderBottom: "1px solid var(--border)", backgroundColor: i % 2 === 0 ? "var(--surface)" : "var(--surface-2)", opacity: carregando === c.id ? 0.5 : 1 }}>
+                <td style={{ padding: "10px 16px", fontFamily: "monospace", fontSize: 12, color: "var(--fg-muted)" }}>{c.id}</td>
+                <td style={{ padding: "10px 16px", fontWeight: 500, color: "var(--fg)" }}>{c.nome}</td>
                 <td style={{ padding: "10px 16px" }}>
                   <span style={{
                     fontSize: 11, padding: "2px 8px", borderRadius: 10, fontWeight: 600,
-                    backgroundColor: c.isActive ? "#dcfce7" : "#fee2e2",
-                    color: c.isActive ? "#15803d" : "#b91c1c",
+                    backgroundColor: c.isActive ? "var(--success-bg)" : "var(--danger-bg-strong)",
+                    color: c.isActive ? "var(--success)" : "var(--danger)",
                   }}>
                     {c.isActive ? "Ativa" : "Inativa"}
                   </span>
@@ -129,7 +129,7 @@ export function AdminCidades({ cidades }: Props) {
                   <button
                     onClick={() => toggleAtivo(c.id, c.isActive)}
                     disabled={carregando === c.id}
-                    style={{ padding: "3px 10px", border: "1px solid #d1d5db", borderRadius: 5, background: "#fff", color: "#374151", cursor: "pointer", fontSize: 12 }}
+                    style={{ padding: "3px 10px", border: "1px solid var(--border-strong)", borderRadius: 5, background: "var(--surface)", color: "var(--fg-secondary)", cursor: "pointer", fontSize: 12 }}
                   >
                     {c.isActive ? "Desativar" : "Ativar"}
                   </button>
@@ -146,8 +146,8 @@ export function AdminCidades({ cidades }: Props) {
           onClick={() => setCriando(false)}
           style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 16 }}
         >
-          <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: "#fff", borderRadius: 10, padding: 28, width: "100%", maxWidth: 420 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "#111827" }}>Nova Cidade</h2>
+          <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: "var(--surface)", borderRadius: 10, padding: 28, width: "100%", maxWidth: 420 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "var(--fg)" }}>Nova Cidade</h2>
             <form onSubmit={handleCriar}>
               <div style={CAMPO}>
                 <label style={LABEL}>Código *</label>
@@ -158,7 +158,7 @@ export function AdminCidades({ cidades }: Props) {
                   placeholder="Ex: NOVA_CIDADE"
                   required
                 />
-                <span style={{ fontSize: 11, color: "#9ca3af" }}>Será convertido para maiúsculas com underscores</span>
+                <span style={{ fontSize: 11, color: "var(--fg-subtle)" }}>Será convertido para maiúsculas com underscores</span>
               </div>
               <div style={CAMPO}>
                 <label style={LABEL}>Nome *</label>
@@ -170,10 +170,10 @@ export function AdminCidades({ cidades }: Props) {
                   required
                 />
               </div>
-              {erro && <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 12 }}>{erro}</p>}
+              {erro && <p style={{ color: "var(--danger)", fontSize: 13, marginBottom: 12 }}>{erro}</p>}
               <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
-                <button type="button" onClick={() => setCriando(false)} style={{ padding: "8px 18px", border: "1px solid #d1d5db", borderRadius: 6, background: "#fff", color: "#374151", cursor: "pointer", fontSize: 14 }}>Cancelar</button>
-                <button type="submit" disabled={enviando} style={{ padding: "8px 18px", border: "none", borderRadius: 6, background: enviando ? "#9ca3af" : "#2563eb", color: "#fff", cursor: enviando ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>{enviando ? "Criando..." : "Criar cidade"}</button>
+                <button type="button" onClick={() => setCriando(false)} style={{ padding: "8px 18px", border: "1px solid var(--border-strong)", borderRadius: 6, background: "var(--surface)", color: "var(--fg-secondary)", cursor: "pointer", fontSize: 14 }}>Cancelar</button>
+                <button type="submit" disabled={enviando} style={{ padding: "8px 18px", border: "none", borderRadius: 6, background: enviando ? "var(--fg-subtle)" : "var(--primary)", color: "#fff", cursor: enviando ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>{enviando ? "Criando..." : "Criar cidade"}</button>
               </div>
             </form>
           </div>

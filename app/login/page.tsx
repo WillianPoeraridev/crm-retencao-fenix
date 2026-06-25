@@ -46,6 +46,7 @@ function LoginForm() {
     <main
       style={{
         minHeight: "100vh",
+        colorScheme: "light",
         background: "linear-gradient(135deg, #1e2530 0%, #0f1419 100%)",
         display: "flex",
         alignItems: "center",

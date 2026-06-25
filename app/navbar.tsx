@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "./theme-toggle";
 
 function getComericalUrl() {
   const rawUrl = process.env.NEXT_PUBLIC_CRM_COMERCIAL_URL?.trim();
@@ -93,6 +94,7 @@ export function Navbar() {
             </span>
           )}
         </div>
+        <ThemeToggle />
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
           style={{

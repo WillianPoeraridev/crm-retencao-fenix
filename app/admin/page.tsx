@@ -29,16 +29,16 @@ export default async function AdminPage() {
 
   return (
     <main style={{ padding: "16px 40px", maxWidth: 1100, margin: "0 auto" }}>
-      <div style={{ marginBottom: 20, paddingBottom: 12, borderBottom: "1px solid #e5e7eb" }}>
+      <div style={{ marginBottom: 20, paddingBottom: 12, borderBottom: "1px solid var(--border)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-          <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--fg)", margin: 0 }}>
             Painel Administrativo
           </h1>
           <span style={{
             fontSize: 10,
             fontWeight: 700,
             backgroundColor: "rgba(249,115,22,0.1)",
-            color: "#f97316",
+            color: "var(--accent)",
             padding: "2px 7px",
             borderRadius: 20,
             letterSpacing: "0.04em",
@@ -47,8 +47,8 @@ export default async function AdminPage() {
             Admin
           </span>
         </div>
-        <p style={{ color: "#6b7280", fontSize: 12, margin: 0 }}>
-          Logado como <strong style={{ color: "#374151" }}>{session.user.name}</strong>
+        <p style={{ color: "var(--fg-muted)", fontSize: 12, margin: 0 }}>
+          Logado como <strong style={{ color: "var(--fg-secondary)" }}>{session.user.name}</strong>
         </p>
       </div>
 

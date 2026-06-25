@@ -39,15 +39,15 @@ export function SeletorCompetencia({ ano, mes, temCompetencia }: Props) {
       </button>
 
       <div style={{ textAlign: "center", width: 200 }}>
-        <div style={{ fontSize: 22, fontWeight: 700, color: "#111827" }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: "var(--fg)" }}>
           {MESES[mes - 1]} {ano}
         </div>
         <div style={{ fontSize: 13, marginTop: 2, height: 18 }}>
           {!temCompetencia && (
-            <span style={{ color: "#b45309" }}>sem dados cadastrados</span>
+            <span style={{ color: "var(--warning-strong)" }}>sem dados cadastrados</span>
           )}
           {ehMesAtual && (
-            <span style={{ color: "#2563eb" }}>mês atual</span>
+            <span style={{ color: "var(--primary)" }}>mês atual</span>
           )}
         </div>
       </div>
@@ -64,7 +64,7 @@ export function SeletorCompetencia({ ano, mes, temCompetencia }: Props) {
         <button
           onClick={() => router.push(pathname)}
           title="Voltar ao mês atual"
-          style={{ ...estiloBtn, fontSize: 11, padding: "4px 10px", color: "#2563eb", borderColor: "#2563eb", alignSelf: "flex-start", marginTop: 1 }}
+          style={{ ...estiloBtn, fontSize: 11, padding: "4px 10px", color: "var(--primary)", borderColor: "var(--primary)", alignSelf: "flex-start", marginTop: 1 }}
         >
           hoje
         </button>
@@ -75,11 +75,11 @@ export function SeletorCompetencia({ ano, mes, temCompetencia }: Props) {
 
 const estiloBtn: React.CSSProperties = {
   padding: "6px 12px",
-  border: "1px solid #d1d5db",
+  border: "1px solid var(--border-strong)",
   borderRadius: 6,
-  background: "#fff",
+  background: "var(--surface)",
   cursor: "pointer",
   fontSize: 16,
-  color: "#374151",
+  color: "var(--fg-secondary)",
   lineHeight: 1,
 };

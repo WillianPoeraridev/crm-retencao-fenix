@@ -14,7 +14,7 @@ export function Toast({ mensagem, tipo = "sucesso", onClose }: Props) {
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const bg = tipo === "sucesso" ? "#15803d" : "#b91c1c";
+  const bg = tipo === "sucesso" ? "var(--success)" : "var(--danger)";
 
   return (
     <div

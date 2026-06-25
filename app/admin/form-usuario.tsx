@@ -4,16 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const CAMPO: React.CSSProperties = { display: "grid", gap: 4, marginBottom: 14 };
-const LABEL: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "#374151" };
+const LABEL: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "var(--fg-secondary)" };
 const INPUT: React.CSSProperties = {
   padding: "8px 10px",
-  border: "1px solid #d1d5db",
+  border: "1px solid var(--border-strong)",
   borderRadius: 6,
   fontSize: 14,
   width: "100%",
   boxSizing: "border-box",
-  color: "#111827",
-  backgroundColor: "#fff",
+  color: "var(--fg)",
+  backgroundColor: "var(--surface)",
 };
 
 interface Props {
@@ -75,14 +75,14 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: "var(--surface)",
           borderRadius: 10,
           padding: 28,
           width: "100%",
           maxWidth: 420,
         }}
       >
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "#111827" }}>
+        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "var(--fg)" }}>
           Novo Atendente
         </h2>
 
@@ -100,11 +100,11 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
             <input style={INPUT} type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Mínimo 6 caracteres" required minLength={6} />
           </div>
 
-          {erro && <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 12 }}>{erro}</p>}
+          {erro && <p style={{ color: "var(--danger)", fontSize: 13, marginBottom: 12 }}>{erro}</p>}
 
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
-            <button type="button" onClick={onCancelar} style={{ padding: "8px 18px", border: "1px solid #d1d5db", borderRadius: 6, background: "#fff", color: "#374151", cursor: "pointer", fontSize: 14 }}>Cancelar</button>
-            <button type="submit" disabled={enviando} style={{ padding: "8px 18px", border: "none", borderRadius: 6, background: enviando ? "#9ca3af" : "#2563eb", color: "#fff", cursor: enviando ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>{enviando ? "Criando..." : "Criar atendente"}</button>
+            <button type="button" onClick={onCancelar} style={{ padding: "8px 18px", border: "1px solid var(--border-strong)", borderRadius: 6, background: "var(--surface)", color: "var(--fg-secondary)", cursor: "pointer", fontSize: 14 }}>Cancelar</button>
+            <button type="submit" disabled={enviando} style={{ padding: "8px 18px", border: "none", borderRadius: 6, background: enviando ? "var(--fg-subtle)" : "var(--primary)", color: "#fff", cursor: enviando ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>{enviando ? "Criando..." : "Criar atendente"}</button>
           </div>
         </form>
       </div>

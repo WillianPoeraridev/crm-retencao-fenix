@@ -33,16 +33,16 @@ const STATUS = [
 ] as const;
 
 const CAMPO: React.CSSProperties = { display: "grid", gap: 4, marginBottom: 12 };
-const LABEL: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "#374151" };
+const LABEL: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "var(--fg-secondary)" };
 const INPUT: React.CSSProperties = {
   padding: "8px 10px",
-  border: "1px solid #d1d5db",
+  border: "1px solid var(--border-strong)",
   borderRadius: 6,
   fontSize: 14,
   width: "100%",
   boxSizing: "border-box",
-  color: "#111827",
-  backgroundColor: "#fff",
+  color: "var(--fg)",
+  backgroundColor: "var(--surface)",
 };
 const GRID2: React.CSSProperties = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 };
 
@@ -350,7 +350,7 @@ export function FormNovaSolicitacao({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: "var(--surface)",
           borderRadius: 10,
           padding: 28,
           width: "100%",
@@ -359,7 +359,7 @@ export function FormNovaSolicitacao({
           overflowY: "auto",
         }}
       >
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "#111827" }}>
+        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "var(--fg)" }}>
           {ehEdicao ? "Editar Solicitação" : "Nova Solicitação"}
         </h2>
 
@@ -370,9 +370,9 @@ export function FormNovaSolicitacao({
               style={{
                 ...INPUT,
                 border:
-                  cpfStatus.tipo === "invalid" ? "1px solid #dc2626" :
-                  cpfStatus.tipo === "found" ? "1px solid #10b981" :
-                  cpfStatus.tipo === "new" ? "1px solid #3b82f6" :
+                  cpfStatus.tipo === "invalid" ? "1px solid var(--danger)" :
+                  cpfStatus.tipo === "found" ? "1px solid var(--success)" :
+                  cpfStatus.tipo === "new" ? "1px solid var(--primary)" :
                   INPUT.border,
               }}
               value={form.cpfCnpj ? formatCpfCnpj(form.cpfCnpj) : ""}
@@ -496,7 +496,7 @@ export function FormNovaSolicitacao({
               <div style={CAMPO}>
                 <label style={LABEL}>Motivo</label>
                 <input
-                  style={{ ...INPUT, backgroundColor: "#f3f4f6", color: "#6b7280" }}
+                  style={{ ...INPUT, backgroundColor: "var(--border)", color: "var(--fg-muted)" }}
                   value="90 + Inadimplência"
                   disabled
                 />
@@ -567,13 +567,13 @@ export function FormNovaSolicitacao({
                   onChange={(e) => set("registradoIXC", e.target.checked ? "true" : "")}
                   style={{ width: 16, height: 16, cursor: "pointer" }}
                 />
-                <span style={{ fontSize: 14, color: "#374151" }}>SIM</span>
+                <span style={{ fontSize: 14, color: "var(--fg-secondary)" }}>SIM</span>
               </label>
             </div>
           </div>
 
           {erro && (
-            <p style={{ color: "#b91c1c", fontSize: 13, marginBottom: 12 }}>{erro}</p>
+            <p style={{ color: "var(--danger)", fontSize: 13, marginBottom: 12 }}>{erro}</p>
           )}
 
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
@@ -582,10 +582,10 @@ export function FormNovaSolicitacao({
               onClick={handleCancelar}
               style={{
                 padding: "8px 18px",
-                border: "1px solid #d1d5db",
+                border: "1px solid var(--border-strong)",
                 borderRadius: 6,
-                background: "#fff",
-                color: "#374151",
+                background: "var(--surface)",
+                color: "var(--fg-secondary)",
                 cursor: "pointer",
                 fontSize: 14,
               }}
@@ -599,7 +599,7 @@ export function FormNovaSolicitacao({
                 padding: "8px 18px",
                 border: "none",
                 borderRadius: 6,
-                background: enviando ? "#9ca3af" : "#2563eb",
+                background: enviando ? "var(--fg-subtle)" : "var(--primary)",
                 color: "#fff",
                 cursor: enviando ? "not-allowed" : "pointer",
                 fontSize: 14,
@@ -631,11 +631,11 @@ function CpfStatusBadge({ status }: { status: CpfStatus }) {
     case "idle":
       return null;
     case "checking":
-      return <span style={{ ...BASE, background: "#f3f4f6", color: "#6b7280" }}>Consultando…</span>;
+      return <span style={{ ...BASE, background: "var(--border)", color: "var(--fg-muted)" }}>Consultando…</span>;
     case "invalid":
-      return <span style={{ ...BASE, background: "#fee2e2", color: "#991b1b" }}>{status.mensagem}</span>;
+      return <span style={{ ...BASE, background: "var(--danger-bg-strong)", color: "var(--danger-strong)" }}>{status.mensagem}</span>;
     case "new":
-      return <span style={{ ...BASE, background: "#dbeafe", color: "#1e40af" }}>Cliente novo — será cadastrado ao salvar</span>;
+      return <span style={{ ...BASE, background: "var(--primary-bg)", color: "var(--info-strong)" }}>Cliente novo — será cadastrado ao salvar</span>;
     case "found": {
       const { vendas, leads, solicitacoes } = status.counts;
       const partes: string[] = [];
@@ -644,7 +644,7 @@ function CpfStatusBadge({ status }: { status: CpfStatus }) {
       if (solicitacoes) partes.push(`${solicitacoes} retenç${solicitacoes > 1 ? "ões" : "ão"}`);
       const resumo = partes.length ? partes.join(" · ") : "sem histórico";
       return (
-        <span style={{ ...BASE, background: "#dcfce7", color: "#166534" }}>
+        <span style={{ ...BASE, background: "var(--success-bg)", color: "var(--success)" }}>
           ✓ Cliente conhecido ({resumo})
         </span>
       );
