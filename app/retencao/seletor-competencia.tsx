@@ -46,9 +46,6 @@ export function SeletorCompetencia({ ano, mes, temCompetencia }: Props) {
           {!temCompetencia && (
             <span style={{ color: "var(--warning-strong)" }}>sem dados cadastrados</span>
           )}
-          {ehMesAtual && (
-            <span style={{ color: "var(--primary)" }}>mês atual</span>
-          )}
         </div>
       </div>
 
