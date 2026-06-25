@@ -221,14 +221,17 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
             style={{
               backgroundColor: "var(--surface)",
               borderRadius: 10,
-              padding: 28,
               width: "100%",
               maxWidth: 400,
+              display: "flex",
+              flexDirection: "column",
             }}
           >
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--fg)", marginBottom: 8 }}>
-              Excluir solicitação
-            </h2>
+            <div style={{ padding: "14px 24px", borderBottom: "1px solid var(--border)", flexShrink: 0, backgroundColor: "var(--surface-2)", borderRadius: "10px 10px 0 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--fg)", margin: 0 }}>Excluir solicitação</h2>
+              <button type="button" onClick={() => setConfirmarExclusaoId(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--fg-subtle)", fontSize: 20, lineHeight: 1, padding: "4px 6px", borderRadius: 4 }} aria-label="Fechar">✕</button>
+            </div>
+            <div style={{ padding: "20px 24px 24px" }}>
             <p style={{ fontSize: 14, color: "var(--fg-muted)", marginBottom: 24 }}>
               Tem certeza? Esta ação não pode ser desfeita.
             </p>
@@ -262,6 +265,7 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
               >
                 Excluir
               </button>
+            </div>
             </div>
           </div>
         </div>

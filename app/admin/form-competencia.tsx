@@ -126,17 +126,30 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
         style={{
           backgroundColor: "var(--surface)",
           borderRadius: 10,
-          padding: 28,
           width: "100%",
           maxWidth: 520,
           maxHeight: "90vh",
-          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "var(--fg)" }}>
-          {ehEdicao ? "Editar Competência" : "Nova Competência"}
-        </h2>
+        <div style={{
+          padding: "14px 28px",
+          borderBottom: "1px solid var(--border)",
+          flexShrink: 0,
+          backgroundColor: "var(--surface-2)",
+          borderRadius: "10px 10px 0 0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: 0 }}>
+            {ehEdicao ? "Editar Competência" : "Nova Competência"}
+          </h2>
+          <button type="button" onClick={onCancelar} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--fg-subtle)", fontSize: 20, lineHeight: 1, padding: "4px 6px", borderRadius: 4 }} aria-label="Fechar">✕</button>
+        </div>
 
+        <div style={{ overflowY: "auto", padding: 28, paddingTop: 20, minHeight: 0 }}>
         <form onSubmit={onSubmit}>
           {!ehEdicao && (
             <div style={GRID2}>
@@ -211,6 +224,7 @@ export function FormCompetencia({ competencia, onSucesso, onCancelar }: Props) {
             <button type="submit" disabled={enviando} style={{ padding: "8px 18px", border: "none", borderRadius: 6, background: enviando ? "var(--fg-subtle)" : "var(--primary)", color: "#fff", cursor: enviando ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>{enviando ? "Salvando..." : ehEdicao ? "Salvar alterações" : "Criar competência"}</button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

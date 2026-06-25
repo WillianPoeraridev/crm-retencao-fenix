@@ -77,15 +77,27 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
         style={{
           backgroundColor: "var(--surface)",
           borderRadius: 10,
-          padding: 28,
           width: "100%",
           maxWidth: 420,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "var(--fg)" }}>
-          Novo Atendente
-        </h2>
+        <div style={{
+          padding: "14px 24px",
+          borderBottom: "1px solid var(--border)",
+          flexShrink: 0,
+          backgroundColor: "var(--surface-2)",
+          borderRadius: "10px 10px 0 0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: 0 }}>Novo Atendente</h2>
+          <button type="button" onClick={onCancelar} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--fg-subtle)", fontSize: 20, lineHeight: 1, padding: "4px 6px", borderRadius: 4 }} aria-label="Fechar">✕</button>
+        </div>
 
+        <div style={{ padding: "20px 24px 24px" }}>
         <form onSubmit={onSubmit}>
           <div style={CAMPO}>
             <label style={LABEL}>Nome *</label>
@@ -107,6 +119,7 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
             <button type="submit" disabled={enviando} style={{ padding: "8px 18px", border: "none", borderRadius: 6, background: enviando ? "var(--fg-subtle)" : "var(--primary)", color: "#fff", cursor: enviando ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>{enviando ? "Criando..." : "Criar atendente"}</button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

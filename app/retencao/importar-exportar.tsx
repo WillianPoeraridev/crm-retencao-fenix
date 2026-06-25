@@ -424,18 +424,21 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
               flexDirection: "column",
             }}
           >
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", marginBottom: 4 }}>
-              Pré-visualização da importação
-            </h2>
-            <p style={{ fontSize: 13, color: "var(--fg-muted)", marginBottom: 16 }}>
+            <div style={{ padding: "14px 24px", borderBottom: "1px solid var(--border)", flexShrink: 0, backgroundColor: "var(--surface-2)", borderRadius: "10px 10px 0 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: 0 }}>Pré-visualização da importação</h2>
+              <button type="button" onClick={() => setPreview(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--fg-subtle)", fontSize: 20, lineHeight: 1, padding: "4px 6px", borderRadius: 4 }} aria-label="Fechar">✕</button>
+            </div>
+            <div style={{ padding: "12px 24px 4px", flexShrink: 0 }}>
+            <p style={{ fontSize: 13, color: "var(--fg-muted)", marginBottom: 0 }}>
               <span style={{ color: "var(--success)", fontWeight: 600 }}>{validas} válidas</span>
               {comErro > 0 && (
                 <span style={{ color: "var(--danger)", fontWeight: 600 }}> · {comErro} com erro (serão ignoradas)</span>
               )}
               {" · "}{preview.length} linhas encontradas
             </p>
+            </div>
 
-            <div style={{ flex: 1, overflowY: "auto", marginBottom: 16 }}>
+            <div style={{ flex: 1, overflowY: "auto", minHeight: 0, marginBottom: 0, padding: "0 24px" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                 <thead>
                   <tr style={{ backgroundColor: "var(--th-bg)", color: "#fff", textAlign: "left", position: "sticky", top: 0 }}>
@@ -478,7 +481,7 @@ export function ImportarExportar({ competenciaId, ano, isAdmin }: Props) {
               </table>
             </div>
 
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", padding: "16px 24px" }}>
               <button
                 onClick={() => setPreview(null)}
                 style={{

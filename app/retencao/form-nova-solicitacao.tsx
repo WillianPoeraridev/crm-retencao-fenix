@@ -363,7 +363,7 @@ export function FormNovaSolicitacao({
           padding: "16px 28px",
           borderBottom: "1px solid var(--border)",
           flexShrink: 0,
-          backgroundColor: "var(--surface-raised, #f8f9fa)",
+          backgroundColor: "var(--surface-2)",
           borderRadius: "10px 10px 0 0",
           display: "flex",
           alignItems: "center",

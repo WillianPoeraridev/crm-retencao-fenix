@@ -146,8 +146,12 @@ export function AdminCidades({ cidades }: Props) {
           onClick={() => setCriando(false)}
           style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 16 }}
         >
-          <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: "var(--surface)", borderRadius: 10, padding: 28, width: "100%", maxWidth: 420 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: "var(--fg)" }}>Nova Cidade</h2>
+          <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: "var(--surface)", borderRadius: 10, width: "100%", maxWidth: 420, display: "flex", flexDirection: "column" }}>
+            <div style={{ padding: "14px 24px", borderBottom: "1px solid var(--border)", flexShrink: 0, backgroundColor: "var(--surface-2)", borderRadius: "10px 10px 0 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--fg)", margin: 0 }}>Nova Cidade</h2>
+              <button type="button" onClick={() => setCriando(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--fg-subtle)", fontSize: 20, lineHeight: 1, padding: "4px 6px", borderRadius: 4 }} aria-label="Fechar">✕</button>
+            </div>
+            <div style={{ padding: "20px 24px 24px" }}>
             <form onSubmit={handleCriar}>
               <div style={CAMPO}>
                 <label style={LABEL}>Código *</label>
@@ -176,6 +180,7 @@ export function AdminCidades({ cidades }: Props) {
                 <button type="submit" disabled={enviando} style={{ padding: "8px 18px", border: "none", borderRadius: 6, background: enviando ? "var(--fg-subtle)" : "var(--primary)", color: "#fff", cursor: enviando ? "not-allowed" : "pointer", fontSize: 14, fontWeight: 600 }}>{enviando ? "Criando..." : "Criar cidade"}</button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}
