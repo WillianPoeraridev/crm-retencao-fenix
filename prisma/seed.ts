@@ -18,6 +18,14 @@ async function main() {
   const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter });
 
+  // Tenant dos dados da Fênix (slug = subdomínio). Idempotente entre os seeds.
+  const TENANT_ID = "fenix";
+  await prisma.tenant.upsert({
+    where: { slug: TENANT_ID },
+    update: {},
+    create: { id: TENANT_ID, slug: TENANT_ID, nome: "Fênix Fibra" },
+  });
+
   // Emails (vão no campo "email" do teu model atual)
   const ADMIN_EMAIL = "willianpoerari@fenixfibra.com.br";
   const ATENDENTE_EMAIL = "willianpoerarifx@gmail.com";
@@ -31,7 +39,7 @@ async function main() {
 
   // 1) Users — Admin
   const admin = await prisma.user.upsert({
-    where: { email: ADMIN_EMAIL },
+    where: { tenantId_email: { tenantId: TENANT_ID, email: ADMIN_EMAIL } },
     update: {
       name: "Willian (Admin)",
       role: Role.ADMIN,
@@ -44,6 +52,7 @@ async function main() {
       passwordHash: adminHash,
       role: Role.ADMIN,
       isActive: true,
+      tenantId: TENANT_ID,
     },
   });
 
@@ -59,7 +68,7 @@ async function main() {
   const atendentes = [];
   for (const a of atendentesData) {
     const user = await prisma.user.upsert({
-      where: { email: a.email },
+      where: { tenantId_email: { tenantId: TENANT_ID, email: a.email } },
       update: {
         name: a.name,
         role: Role.ATENDENTE,
@@ -72,6 +81,7 @@ async function main() {
         passwordHash: atendenteHash,
         role: Role.ATENDENTE,
         isActive: true,
+        tenantId: TENANT_ID,
       },
     });
     atendentes.push(user);
@@ -85,9 +95,10 @@ async function main() {
   const ano = now.getFullYear();
 
   const competencia = await prisma.competencia.upsert({
-    where: { ano_mes: { ano, mes } },
+    where: { tenantId_ano_mes: { tenantId: TENANT_ID, ano, mes } },
     update: {},
     create: {
+      tenantId: TENANT_ID,
       ano,
       mes,
       metaCancelamentos: 220,
@@ -104,6 +115,7 @@ async function main() {
   await prisma.solicitacaoRetencao.createMany({
     data: [
       {
+        tenantId: TENANT_ID,
         competenciaId: competencia.id,
         dataRegistro: now,
         status: StatusRetencao.CANCELADO,
@@ -118,6 +130,7 @@ async function main() {
         atendenteId: atendente.id,
       },
       {
+        tenantId: TENANT_ID,
         competenciaId: competencia.id,
         dataRegistro: now,
         status: StatusRetencao.RETIDO,

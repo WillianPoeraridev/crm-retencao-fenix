@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
 export async function POST(req: NextRequest) {
@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const existente = await prisma.user.findUnique({
+    const db = withTenant(session.user.tenantId);
+    const existente = await db.user.findFirst({
       where: { email: email.trim().toLowerCase() },
     });
 
@@ -41,13 +42,14 @@ export async function POST(req: NextRequest) {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const usuario = await prisma.user.create({
+    const usuario = await db.user.create({
       data: {
         name: name.trim(),
         email: email.trim().toLowerCase(),
         passwordHash,
         role: "ATENDENTE",
         isActive: true,
+        tenantId: session.user.tenantId,
       },
       select: { id: true, name: true, email: true, role: true, isActive: true },
     });

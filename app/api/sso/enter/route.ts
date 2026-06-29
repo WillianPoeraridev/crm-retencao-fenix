@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { encode } from "next-auth/jwt";
 import { prisma } from "@/lib/prisma";
 import { validarPasse } from "@/lib/sso";
+import { tenantSlugFromHost, resolveTenantBySlug } from "@/lib/tenant";
 
 // Consome um passe vindo de outro app Fênix e cria a sessão local (sem senha).
-// Só entra quem existe como ADMIN ativo aqui.
+// Multi-tenant: o passe carrega tenant; conferimos que o slug bate com o
+// subdomínio e buscamos o user ESCOPADO ao tenant.
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const payload = validarPasse(searchParams.get("passe"));
@@ -12,17 +14,33 @@ export async function GET(req: Request) {
     return NextResponse.redirect(new URL("/login?sso=invalido", req.url));
   }
 
-  // Qualquer usuário ativo deste CRM pode entrar via passe (vindo do portal de
-  // login central ou da navegação da gerência). O passe é assinado (SSO_SECRET)
-  // e o usuário precisa existir/estar ativo aqui — duplo controle de acesso.
-  const user = await prisma.user.findUnique({ where: { email: payload.email } });
+  const hostSlug = tenantSlugFromHost(req.headers.get("host"));
+  if (payload.tenantSlug !== hostSlug) {
+    return NextResponse.redirect(new URL("/login?sso=tenant", req.url));
+  }
+  const tenant = await resolveTenantBySlug(hostSlug);
+  if (!tenant || tenant.id !== payload.tenantId) {
+    return NextResponse.redirect(new URL("/login?sso=tenant", req.url));
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { tenantId_email: { tenantId: tenant.id, email: payload.email } },
+  });
   if (!user || !user.isActive) {
     return NextResponse.redirect(new URL("/login?sso=negado", req.url));
   }
 
   const maxAge = 30 * 24 * 60 * 60;
   const sessionToken = await encode({
-    token: { id: user.id, role: user.role, name: user.name, email: user.email, sub: user.id },
+    token: {
+      id: user.id,
+      role: user.role,
+      name: user.name,
+      email: user.email,
+      tenantId: tenant.id,
+      tenantSlug: tenant.slug,
+      sub: user.id,
+    },
     secret: process.env.NEXTAUTH_SECRET!,
     maxAge,
   });

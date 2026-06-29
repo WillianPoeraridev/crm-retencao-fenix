@@ -1,6 +1,7 @@
 import { getCompetenciaByAnoMes, getSolicitacoesByCompetencia, getCidadesAtivas, resolverAnoMes } from "@/lib/retencao";
 import { RetencaoRealtime } from "./retencao-realtime";
 import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { FiltrosTabela } from "./filtros-tabela";
 import { BotaoNovaSolicitacao } from "./botao-nova-solicitacao";
@@ -16,14 +17,17 @@ export default async function RetencaoPage({
   searchParams: Promise<{ forbidden?: string; ano?: string; mes?: string }>;
 }) {
   const params = await searchParams;
-  const { ano, mes } = resolverAnoMes(params);
-  const competencia = await getCompetenciaByAnoMes(ano, mes);
-  const cidades = await getCidadesAtivas();
   const session = await getServerSession(authOptions);
-  const isAdmin = session?.user?.role === "ADMIN";
+  if (!session) redirect("/login");
+  const tenantId = session.user.tenantId;
+  const isAdmin = session.user.role === "ADMIN";
+
+  const { ano, mes } = resolverAnoMes(params);
+  const competencia = await getCompetenciaByAnoMes(tenantId, ano, mes);
+  const cidades = await getCidadesAtivas(tenantId);
 
   const solicitacoes = competencia
-    ? await getSolicitacoesByCompetencia(competencia.id)
+    ? await getSolicitacoesByCompetencia(tenantId, competencia.id)
     : [];
 
   const cancelados = solicitacoes.filter((s) => s.status === "CANCELADO");

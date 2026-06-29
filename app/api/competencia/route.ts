@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   // 1. Só ADMIN pode criar competência
@@ -9,6 +9,8 @@ export async function POST(req: NextRequest) {
   if (!session || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
+  const tenantId = session.user.tenantId;
+  const db = withTenant(tenantId);
 
   const body = await req.json();
   const {
@@ -31,8 +33,8 @@ export async function POST(req: NextRequest) {
   }
 
   // 3. Verifica se já existe
-  const existente = await prisma.competencia.findUnique({
-    where: { ano_mes: { ano: Number(ano), mes: Number(mes) } },
+  const existente = await db.competencia.findFirst({
+    where: { ano: Number(ano), mes: Number(mes) },
   });
 
   if (existente) {
@@ -43,8 +45,9 @@ export async function POST(req: NextRequest) {
   }
 
   // 4. Cria
-  const competencia = await prisma.competencia.create({
+  const competencia = await db.competencia.create({
     data: {
+      tenantId,
       ano: Number(ano),
       mes: Number(mes),
       metaCancelamentos: metaCancelamentos ? Number(metaCancelamentos) : null,

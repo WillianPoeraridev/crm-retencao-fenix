@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
 import { Regiao, StatusRetencao, MotivoCancelamento } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
+    const db = withTenant(session.user.tenantId);
 
     // 2. Parsing do body
     const body = await req.json();
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const competencia = await prisma.competencia.findUnique({
+    const competencia = await db.competencia.findUnique({
       where: { id: competenciaId },
     });
 
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Validação de cidade — agora consulta a tabela
-    const cidadeExiste = await prisma.cidade.findUnique({ where: { id: cidade } });
+    const cidadeExiste = await db.cidade.findFirst({ where: { id: cidade } });
     if (!cidadeExiste || !cidadeExiste.isActive) {
       return NextResponse.json({ error: `Cidade inválida ou inativa: ${cidade}` }, { status: 400 });
     }
@@ -87,8 +88,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 8. Criação no banco
-    const solicitacao = await prisma.solicitacaoRetencao.create({
+    const solicitacao = await db.solicitacaoRetencao.create({
       data: {
+        tenantId: session.user.tenantId,
         competenciaId: competencia.id,
         atendenteId: session.user.id,
         dataRegistro: dataRegistro ? new Date(dataRegistro) : new Date(),

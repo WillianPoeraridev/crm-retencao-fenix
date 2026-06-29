@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
 
 // GET — lista cidades ativas (qualquer usuário logado)
 export async function GET() {
@@ -11,7 +11,8 @@ export async function GET() {
       return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
 
-    const cidades = await prisma.cidade.findMany({
+    const db = withTenant(session.user.tenantId);
+    const cidades = await db.cidade.findMany({
       where: { isActive: true },
       orderBy: { nome: "asc" },
       select: { id: true, nome: true, isActive: true },
@@ -56,7 +57,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const existente = await prisma.cidade.findUnique({ where: { id: codigo } });
+    const db = withTenant(session.user.tenantId);
+    const existente = await db.cidade.findFirst({ where: { id: codigo } });
     if (existente) {
       return NextResponse.json(
         { error: "Já existe uma cidade com este código." },
@@ -64,10 +66,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const cidade = await prisma.cidade.create({
+    const cidade = await db.cidade.create({
       data: {
         id: codigo,
         nome: nome.trim(),
+        tenantId: session.user.tenantId,
       },
     });
 

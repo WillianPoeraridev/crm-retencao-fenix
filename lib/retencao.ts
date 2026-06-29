@@ -1,15 +1,17 @@
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
+
+// Helpers de leitura do CRM Retenção. Recebem tenantId (da sessão) e usam withTenant.
 
 // Busca a competência do mês/ano atual
-export async function getCompetenciaAtual() {
+export async function getCompetenciaAtual(tenantId: string) {
   const now = new Date();
-  return getCompetenciaByAnoMes(now.getFullYear(), now.getMonth() + 1);
+  return getCompetenciaByAnoMes(tenantId, now.getFullYear(), now.getMonth() + 1);
 }
 
 // Busca a competência de um mês/ano específico
-export async function getCompetenciaByAnoMes(ano: number, mes: number) {
-  return prisma.competencia.findUnique({
-    where: { ano_mes: { ano, mes } },
+export async function getCompetenciaByAnoMes(tenantId: string, ano: number, mes: number) {
+  return withTenant(tenantId).competencia.findFirst({
+    where: { ano, mes },
   });
 }
 
@@ -27,8 +29,8 @@ export function resolverAnoMes(params: { ano?: string; mes?: string }) {
 }
 
 // Busca todas as solicitações de uma competência, com atendente e cidade
-export async function getSolicitacoesByCompetencia(competenciaId: string) {
-  return prisma.solicitacaoRetencao.findMany({
+export async function getSolicitacoesByCompetencia(tenantId: string, competenciaId: string) {
+  return withTenant(tenantId).solicitacaoRetencao.findMany({
     where: { competenciaId },
     include: {
       atendente: {
@@ -43,8 +45,8 @@ export async function getSolicitacoesByCompetencia(competenciaId: string) {
 }
 
 // Busca cidades ativas (para dropdowns)
-export async function getCidadesAtivas() {
-  return prisma.cidade.findMany({
+export async function getCidadesAtivas(tenantId: string) {
+  return withTenant(tenantId).cidade.findMany({
     where: { isActive: true },
     orderBy: { nome: "asc" },
     select: { id: true, nome: true },

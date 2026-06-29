@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
 import { Regiao, StatusRetencao, MotivoCancelamento } from "@prisma/client";
 
 interface LinhaImportacao {
@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Apenas ADMIN pode importar." }, { status: 401 });
     }
+    const db = withTenant(session.user.tenantId);
 
     const body = await req.json();
     const { competenciaId, linhas } = body as {
@@ -41,13 +42,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Valida competência
-    const competencia = await prisma.competencia.findUnique({ where: { id: competenciaId } });
+    const competencia = await db.competencia.findUnique({ where: { id: competenciaId } });
     if (!competencia) {
       return NextResponse.json({ error: "Competência não encontrada." }, { status: 404 });
     }
 
     // Busca atendentes ativos
-    const usuarios = await prisma.user.findMany({
+    const usuarios = await db.user.findMany({
       where: { isActive: true },
       select: { id: true, name: true },
     });
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Busca cidades ativas
-    const cidades = await prisma.cidade.findMany({ select: { id: true } });
+    const cidades = await db.cidade.findMany({ select: { id: true } });
     const cidadeIds = new Set(cidades.map((c) => c.id));
 
     const erros: string[] = [];
@@ -178,7 +179,7 @@ export async function POST(req: NextRequest) {
 
     // Proteção contra duplicata: busca registros já existentes nesta competência
     // e filtra qualquer linha com mesmo nomeCliente + data + status.
-    const existentes = await prisma.solicitacaoRetencao.findMany({
+    const existentes = await db.solicitacaoRetencao.findMany({
       where: { competenciaId },
       select: { nomeCliente: true, dataRegistro: true, status: true },
     });
@@ -209,8 +210,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Cria tudo de uma vez
-    const resultado = await prisma.solicitacaoRetencao.createMany({
-      data: semDuplicata,
+    const resultado = await db.solicitacaoRetencao.createMany({
+      data: semDuplicata.map((d) => ({ ...d, tenantId: session.user.tenantId })),
       skipDuplicates: false,
     });
 

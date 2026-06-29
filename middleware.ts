@@ -1,23 +1,29 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { tenantSlugFromHost, portalLoginUrl } from "./lib/tenant-host";
 
-// Login centralizado no portal. Quem chega sem sessão é mandado pro
-// crm-operacional.com.br, que valida e roteia de volta via passe SSO.
-const PORTAL = process.env.NEXT_PUBLIC_DASHBOARD_URL || "https://crm-operacional.com.br";
-
+// Login centralizado no portal do tenant ({slug}.crm-operacional.com.br).
+// Multi-tenant: a sessão só vale no subdomínio do próprio tenant.
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   const { pathname } = req.nextUrl;
+  const host = req.headers.get("host");
 
   // Rotas que precisam responder sem sessão (SSO cria a sessão; NextAuth/session)
   if (pathname.startsWith("/api/auth") || pathname === "/api/sso/enter") {
     return NextResponse.next();
   }
 
-  // Sem sessão → portal central (login único)
+  // Sem sessão → portal do tenant atual (login único)
   if (!token) {
-    return NextResponse.redirect(new URL("/login", PORTAL));
+    return NextResponse.redirect(portalLoginUrl(host));
+  }
+
+  // Sessão de tenant diferente do subdomínio → trata como não autenticado.
+  const hostSlug = tenantSlugFromHost(host);
+  if (token.tenantSlug !== hostSlug && !pathname.startsWith("/api/sso")) {
+    return NextResponse.redirect(portalLoginUrl(host));
   }
 
   // Já logado abrindo a tela de login local → vai pro app

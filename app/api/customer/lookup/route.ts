@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { prisma, withTenant } from "@/lib/prisma";
 import { z } from "zod";
 import { cpfCnpjSchema } from "@/lib/validators/cpf-cnpj";
 import { apiError } from "@/lib/api-utils";
@@ -31,11 +31,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
+    const tenantId = session.user.tenantId;
+    const db = withTenant(tenantId);
+
     const body = await req.json();
     const { cpfCnpj, nome, contatoPrimario } = bodySchema.parse(body);
 
     // 1. Tenta achar customer existente, já com counts locais (Retenção)
-    let customer = await prisma.customer.findUnique({
+    //    findFirst (não findUnique) p/ o withTenant injetar tenantId no where.
+    let customer = await db.customer.findFirst({
       where: { cpfCnpj },
       include: {
         _count: { select: { solicitacoes: true } },
@@ -50,10 +54,11 @@ export async function POST(req: Request) {
         // Modo "lookup-only": frontend só quer saber se existe (ex: onBlur do campo)
         return NextResponse.json({ found: false });
       }
-      // Modo "get-or-create": cria
+      // Modo "get-or-create": cria (tenantId injetado pelo withTenant)
       created = true;
-      const novo = await prisma.customer.create({
+      const novo = await db.customer.create({
         data: {
+          tenantId,
           cpfCnpj,
           nome,
           contatoPrimario: contatoPrimario ?? null,
@@ -62,14 +67,14 @@ export async function POST(req: Request) {
       customer = { ...novo, _count: { solicitacoes: 0 } };
     }
 
-    // 3. Conta vendas + leads via raw query (cross-schema)
-    //    Os models Venda e LeadCarteira não são declarados no schema deste CRM.
+    // 3. Conta vendas + leads via raw query (cross-schema).
+    //    SQL cru NÃO passa pelo withTenant → filtro de tenantId explícito.
     const comercialCountsResult = await prisma.$queryRaw<
       { vendas: number; leads: number }[]
     >`
       SELECT
-        (SELECT COUNT(*)::int FROM "comercial"."Venda" WHERE "customerId" = ${customer.id}) AS vendas,
-        (SELECT COUNT(*)::int FROM "comercial"."LeadCarteira" WHERE "customerId" = ${customer.id}) AS leads
+        (SELECT COUNT(*)::int FROM "comercial"."Venda" WHERE "customerId" = ${customer.id} AND "tenantId" = ${tenantId}) AS vendas,
+        (SELECT COUNT(*)::int FROM "comercial"."LeadCarteira" WHERE "customerId" = ${customer.id} AND "tenantId" = ${tenantId}) AS leads
     `;
     const { vendas = 0, leads = 0 } = comercialCountsResult[0] ?? {};
 
