@@ -50,19 +50,22 @@ enum MotivoCancelamento {
 // Cidade agora é uma tabela editável (antes era enum)
 model Cidade {
   id        String   @id          // ex: "CACHOEIRINHA" — mesmo valor do antigo enum
+  tenantId  String
   nome      String                // ex: "Cachoeirinha" — nome legível
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
   solicitacoes SolicitacaoRetencao[]
 
+  @@index([tenantId])
   @@schema("retencao")
 }
 
 model User {
   id           String   @id @default(cuid())
+  tenantId     String
   name         String
-  email        String   @unique
+  email        String
   passwordHash String
   role         Role     @default(ATENDENTE)
   isActive     Boolean  @default(true)
@@ -72,11 +75,14 @@ model User {
 
   solicitacoes SolicitacaoRetencao[] @relation("AtendenteSolicitacoes")
 
+  @@unique([tenantId, email])
+  @@index([tenantId])
   @@schema("retencao")
 }
 
 model Competencia {
   id                String   @id @default(cuid())
+  tenantId          String
   ano               Int
   mes               Int
 
@@ -94,12 +100,14 @@ model Competencia {
 
   solicitacoes      SolicitacaoRetencao[]
 
-  @@unique([ano, mes])
+  @@unique([tenantId, ano, mes])
+  @@index([tenantId])
   @@schema("retencao")
 }
 
 model SolicitacaoRetencao {
   id             String       @id @default(cuid())
+  tenantId       String
 
   competenciaId  String
   competencia    Competencia  @relation(fields: [competenciaId], references: [id], onDelete: Cascade)
@@ -144,7 +152,24 @@ model SolicitacaoRetencao {
   @@index([cidade])
   @@index([regiao])
   @@index([customerId])
+  @@index([tenantId])
   @@schema("retencao")
+}
+
+// ========================
+// SHARED — Tenant (multi-tenancy)
+// ========================
+
+/// Inquilino da plataforma (1 ISP). Vive no schema `shared`, espelhado nos 3 apps.
+model Tenant {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  nome      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@schema("shared")
 }
 
 // ========================
@@ -157,7 +182,8 @@ model SolicitacaoRetencao {
 /// solicitacoes) são específicas de cada projeto — não precisam bater.
 model Customer {
   id              String  @id @default(cuid())
-  cpfCnpj         String  @unique
+  tenantId        String
+  cpfCnpj         String
   nome            String
   contatoPrimario String?
 
@@ -166,5 +192,7 @@ model Customer {
 
   solicitacoes SolicitacaoRetencao[]
 
+  @@unique([tenantId, cpfCnpj])
+  @@index([tenantId])
   @@schema("shared")
 }
