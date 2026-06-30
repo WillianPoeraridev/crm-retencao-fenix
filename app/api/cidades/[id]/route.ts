@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
 
 // PATCH — ativar/desativar cidade (ADMIN only)
 export async function PATCH(
@@ -14,16 +14,17 @@ export async function PATCH(
       return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
 
+    const db = withTenant(session.user.tenantId);
     const { id } = await params;
     const body = await req.json();
     const { isActive } = body;
 
-    const existente = await prisma.cidade.findUnique({ where: { id } });
+    const existente = await db.cidade.findFirst({ where: { id } });
     if (!existente) {
       return NextResponse.json({ error: "Cidade não encontrada." }, { status: 404 });
     }
 
-    const atualizada = await prisma.cidade.update({
+    const atualizada = await db.cidade.update({
       where: { id },
       data: { isActive },
     });

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
 import { Regiao, StatusRetencao, MotivoCancelamento } from "@prisma/client";
 
 export async function PATCH(
@@ -14,9 +14,10 @@ export async function PATCH(
       return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
     }
 
+    const db = withTenant(session.user.tenantId);
     const { id } = await params;
 
-    const existente = await prisma.solicitacaoRetencao.findUnique({ where: { id } });
+    const existente = await db.solicitacaoRetencao.findFirst({ where: { id } });
     if (!existente) {
       return NextResponse.json({ error: "Solicitacao nao encontrada." }, { status: 404 });
     }
@@ -31,7 +32,7 @@ export async function PATCH(
     if (!nomeCliente || !cidade || !regiao || !status) {
       return NextResponse.json({ error: "Campos obrigatorios faltando." }, { status: 400 });
     }
-    const cidadeExiste = await prisma.cidade.findUnique({ where: { id: cidade } });
+    const cidadeExiste = await db.cidade.findFirst({ where: { id: cidade } });
     if (!cidadeExiste || !cidadeExiste.isActive) {
       return NextResponse.json({ error: "Cidade inválida ou inativa: " + cidade }, { status: 400 });
     }
@@ -53,7 +54,7 @@ export async function PATCH(
       );
     }
 
-    const atualizado = await prisma.solicitacaoRetencao.update({
+    const atualizado = await db.solicitacaoRetencao.update({
       where: { id },
       data: {
         nomeCliente: nomeCliente.trim(),
@@ -89,9 +90,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
     }
 
+    const db = withTenant(session.user.tenantId);
     const { id } = await params;
 
-    const existente = await prisma.solicitacaoRetencao.findUnique({ where: { id } });
+    const existente = await db.solicitacaoRetencao.findFirst({ where: { id } });
     if (!existente) {
       return NextResponse.json({ error: "Solicitacao nao encontrada." }, { status: 404 });
     }
@@ -100,7 +102,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Sem permissao para excluir esta solicitacao." }, { status: 403 });
     }
 
-    await prisma.solicitacaoRetencao.delete({ where: { id } });
+    await db.solicitacaoRetencao.delete({ where: { id } });
 
     return NextResponse.json({ ok: true });
   } catch (error) {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
 type Params = { params: Promise<{ id: string }> };
@@ -13,11 +13,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
 
+    const db = withTenant(session.user.tenantId);
     const { id } = await params;
     const body = await req.json();
     const { isActive, password } = body;
 
-    const existente = await prisma.user.findUnique({ where: { id } });
+    const existente = await db.user.findFirst({ where: { id } });
     if (!existente) {
       return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
     }
@@ -46,7 +47,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       data.passwordHash = await bcrypt.hash(password, 10);
     }
 
-    const atualizado = await prisma.user.update({
+    const atualizado = await db.user.update({
       where: { id },
       data,
       select: { id: true, name: true, email: true, role: true, isActive: true },

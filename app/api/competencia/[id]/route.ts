@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
 
 export async function PATCH(
   req: NextRequest,
@@ -14,6 +14,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
     }
 
+    const db = withTenant(session.user.tenantId);
     const { id } = await params;
     const body = await req.json();
 
@@ -27,7 +28,7 @@ export async function PATCH(
     } = body;
 
     // 2. Verifica se existe
-    const existente = await prisma.competencia.findUnique({ where: { id } });
+    const existente = await db.competencia.findFirst({ where: { id } });
     if (!existente) {
       return NextResponse.json(
         { error: "Competência não encontrada." },
@@ -36,7 +37,7 @@ export async function PATCH(
     }
 
     // 3. Atualiza — null limpa o campo, undefined mantém o valor atual
-    const competencia = await prisma.competencia.update({
+    const competencia = await db.competencia.update({
       where: { id },
       data: {
         metaCancelamentos: metaCancelamentos !== undefined

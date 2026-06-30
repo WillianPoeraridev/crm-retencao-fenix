@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
 import ExcelJS from "exceljs";
 import {
   STATUS_SYSTEM_TO_CSV,
@@ -52,10 +52,11 @@ export async function GET(req: NextRequest) {
     const competenciaId = searchParams.get("competenciaId");
     if (!competenciaId) return NextResponse.json({ error: "competenciaId é obrigatório." }, { status: 400 });
 
-    const competencia = await prisma.competencia.findUnique({ where: { id: competenciaId } });
+    const db = withTenant(session.user.tenantId);
+    const competencia = await db.competencia.findFirst({ where: { id: competenciaId } });
     if (!competencia) return NextResponse.json({ error: "Competência não encontrada." }, { status: 404 });
 
-    const solicitacoes = await prisma.solicitacaoRetencao.findMany({
+    const solicitacoes = await db.solicitacaoRetencao.findMany({
       where: { competenciaId },
       include: {
         atendente: { select: { name: true } },

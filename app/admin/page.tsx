@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/prisma";
 import { AdminCompetencias } from "./admin-competencias";
 import { AdminUsuarios } from "./admin-usuarios";
 import { AdminCidades } from "./admin-cidades";
@@ -13,15 +13,16 @@ export default async function AdminPage() {
     redirect("/retencao?forbidden=1");
   }
 
+  const db = withTenant(session.user.tenantId);
   const [competencias, usuarios, cidades] = await Promise.all([
-    prisma.competencia.findMany({
+    db.competencia.findMany({
       orderBy: [{ ano: "desc" }, { mes: "desc" }],
     }),
-    prisma.user.findMany({
+    db.user.findMany({
       orderBy: [{ role: "asc" }, { name: "asc" }],
       select: { id: true, name: true, email: true, role: true, isActive: true },
     }),
-    prisma.cidade.findMany({
+    db.cidade.findMany({
       orderBy: { nome: "asc" },
       select: { id: true, nome: true, isActive: true },
     }),
