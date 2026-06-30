@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CRM Retenção Fênix",
+  title: "CRM Retenção",
   description: "Sistema de retenção de clientes",
 };
 

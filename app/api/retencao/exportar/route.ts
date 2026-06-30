@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
     const nomeArquivo    = `CRM_Retencao_${mesNome}_${competencia.ano}.xlsx`;
 
     const wb = new ExcelJS.Workbook();
-    wb.creator = "Fênix CRM";
+    wb.creator = `${session.user.tenantNome} · Retenção`;
     wb.created = new Date();
 
     // ══════════════════════════════════════════════

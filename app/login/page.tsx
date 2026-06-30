@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -64,18 +63,14 @@ function LoginForm() {
           boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
         }}
       >
-        {/* Logo */}
+        {/* Título */}
         <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <Image
-            src="/images/cropped-Fenix-Internet-Logo-certo.png"
-            alt="Fênix Internet"
-            width={100}
-            height={100}
-            style={{ objectFit: "contain", marginBottom: 8, display: "block", margin: "0 auto 8px" }}
-          />
           <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>
-            Fênix CRM Retenção
+            CRM Retenção
           </h1>
+          <p style={{ fontSize: 13, color: "#6b7280", marginTop: 4 }}>
+            Faça login para acessar o sistema
+          </p>
         </div>
 
         <form onSubmit={onSubmit}>

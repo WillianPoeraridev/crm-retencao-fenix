@@ -10,6 +10,7 @@ interface AppUser extends NextAuthUser {
   role: Role;
   tenantId: string;
   tenantSlug: string;
+  tenantNome: string;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -50,6 +51,7 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           tenantId: tenant.id,
           tenantSlug: tenant.slug,
+          tenantNome: tenant.nome,
         } satisfies AppUser;
       },
     }),
@@ -62,6 +64,7 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as AppUser).role;
         token.tenantId = (user as AppUser).tenantId;
         token.tenantSlug = (user as AppUser).tenantSlug;
+        token.tenantNome = (user as AppUser).tenantNome;
       }
       return token;
     },
@@ -71,6 +74,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as Role;
         session.user.tenantId = token.tenantId as string;
         session.user.tenantSlug = token.tenantSlug as string;
+        session.user.tenantNome = token.tenantNome as string;
       }
       return session;
     },

@@ -56,7 +56,7 @@ export function Navbar() {
       {/* Esquerda: logo + páginas do app */}
       <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
         <Link href="/retencao" style={{ fontWeight: 700, fontSize: 14, color: "#fff", letterSpacing: "-0.01em", textDecoration: "none" }}>
-          Fênix Retenção
+          {session.user.tenantNome} · Retenção
         </Link>
         <div style={{ display: "flex", gap: 2 }}>
           <NavLink href="/retencao" atual={pathname.startsWith("/retencao")}>Retenção</NavLink>

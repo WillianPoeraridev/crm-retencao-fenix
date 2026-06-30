@@ -39,6 +39,7 @@ export async function GET(req: Request) {
       email: user.email,
       tenantId: tenant.id,
       tenantSlug: tenant.slug,
+      tenantNome: tenant.nome,
       sub: user.id,
     },
     secret: process.env.NEXTAUTH_SECRET!,
