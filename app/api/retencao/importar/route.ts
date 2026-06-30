@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { withTenant } from "@/lib/prisma";
-import { Regiao, StatusRetencao, MotivoCancelamento } from "@prisma/client";
+import { StatusRetencao, MotivoCancelamento } from "@prisma/client";
 
 interface LinhaImportacao {
   dataRegistro: string;
@@ -68,6 +68,11 @@ export async function POST(req: NextRequest) {
     const cidades = await db.cidade.findMany({ select: { id: true } });
     const cidadeIds = new Set(cidades.map((c) => c.id));
 
+    // Regiões do tenant: mapeia por NOME em maiúsculo (casa com o enum antigo da
+    // planilha — "Matriz".toUpperCase() === "MATRIZ").
+    const regioesList = await db.regiao.findMany({ select: { id: true, nome: true } });
+    const regiaoByKey = new Map(regioesList.map((r) => [r.nome.toUpperCase().trim(), r.id]));
+
     const erros: string[] = [];
     const dadosValidos: Array<{
       competenciaId: string;
@@ -78,7 +83,7 @@ export async function POST(req: NextRequest) {
       bairro: string | null;
       contato: string | null;
       cidade: string;
-      regiao: Regiao;
+      regiaoId: string;
       motivo: MotivoCancelamento | null;
       observacoes: string | null;
       retiradaTexto: string | null;
@@ -111,8 +116,9 @@ export async function POST(req: NextRequest) {
         erros.push(`Linha ${num}: status inválido "${l.status}", pulando.`);
         continue;
       }
-      if (!Object.values(Regiao).includes(l.regiao as Regiao)) {
-        erros.push(`Linha ${num}: região inválida "${l.regiao}", pulando.`);
+      const regiaoIdRow = regiaoByKey.get((l.regiao ?? "").toUpperCase().trim());
+      if (!regiaoIdRow) {
+        erros.push(`Linha ${num}: região "${l.regiao}" não cadastrada no tenant, pulando.`);
         continue;
       }
       if (!cidadeIds.has(l.cidade)) {
@@ -159,7 +165,7 @@ export async function POST(req: NextRequest) {
         bairro: l.bairro?.trim() || null,
         contato: l.contato?.trim() || null,
         cidade: l.cidade,
-        regiao: l.regiao as Regiao,
+        regiaoId: regiaoIdRow,
         motivo,
         observacoes: l.observacoes?.trim() || null,
         retiradaTexto: l.retiradaTexto?.trim() || null,

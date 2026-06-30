@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { withTenant } from "@/lib/prisma";
-import { Regiao, StatusRetencao, MotivoCancelamento } from "@prisma/client";
+import { StatusRetencao, MotivoCancelamento } from "@prisma/client";
 
 export async function PATCH(
   req: NextRequest,
@@ -27,17 +27,18 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { nomeCliente, contato, bairro, cidade, regiao, status, motivo, observacoes, retiradaTexto, agendaRetirada, registradoIXC, transbordo, ticketCents } = body;
+    const { nomeCliente, contato, bairro, cidade, regiaoId, status, motivo, observacoes, retiradaTexto, agendaRetirada, registradoIXC, transbordo, ticketCents } = body;
 
-    if (!nomeCliente || !cidade || !regiao || !status) {
+    if (!nomeCliente || !cidade || !regiaoId || !status) {
       return NextResponse.json({ error: "Campos obrigatorios faltando." }, { status: 400 });
     }
     const cidadeExiste = await db.cidade.findFirst({ where: { id: cidade } });
     if (!cidadeExiste || !cidadeExiste.isActive) {
       return NextResponse.json({ error: "Cidade inválida ou inativa: " + cidade }, { status: 400 });
     }
-    if (!Object.values(Regiao).includes(regiao)) {
-      return NextResponse.json({ error: "Regiao invalida: " + regiao }, { status: 400 });
+    const regiaoExiste = await db.regiao.findFirst({ where: { id: regiaoId } });
+    if (!regiaoExiste) {
+      return NextResponse.json({ error: "Região inválida." }, { status: 400 });
     }
     if (!Object.values(StatusRetencao).includes(status)) {
       return NextResponse.json({ error: "Status invalido: " + status }, { status: 400 });
@@ -61,7 +62,7 @@ export async function PATCH(
         contato: contato?.trim() || null,
         bairro: bairro?.trim() || null,
         cidade,
-        regiao,
+        regiaoId,
         status,
         motivo: motivo || null,
         observacoes: observacoes?.trim() || null,

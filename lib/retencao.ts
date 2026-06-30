@@ -39,8 +39,20 @@ export async function getSolicitacoesByCompetencia(tenantId: string, competencia
       cidadeInfo: {
         select: { id: true, nome: true },
       },
+      regiaoRef: {
+        select: { id: true, nome: true, cor: true },
+      },
     },
     orderBy: { dataRegistro: "desc" },
+  });
+}
+
+// Regiões ativas do tenant (dropdowns / agrupamentos).
+export async function getRegioesAtivas(tenantId: string) {
+  return withTenant(tenantId).regiao.findMany({
+    where: { isActive: true },
+    orderBy: [{ ordem: "asc" }, { nome: "asc" }],
+    select: { id: true, nome: true, cor: true },
   });
 }
 

@@ -2,7 +2,7 @@ import "dotenv/config";
 import bcrypt from "bcrypt";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient, Role, StatusRetencao, Regiao, MotivoCancelamento } from "@prisma/client";
+import { PrismaClient, Role, StatusRetencao, MotivoCancelamento } from "@prisma/client";
 
 function mustEnv(name: string) {
   const v = process.env[name];
@@ -111,7 +111,9 @@ async function main() {
     },
   });
 
-  // 3) Exemplos (opcional, mas ajuda na demo)
+  // 3) Exemplos (opcional, mas ajuda na demo). Região por id (tabela criada na migration).
+  const regioesSeed = await prisma.regiao.findMany({ where: { tenantId: TENANT_ID }, select: { id: true, nome: true } });
+  const regId = (nome: string) => regioesSeed.find((r) => r.nome === nome)?.id ?? null;
   await prisma.solicitacaoRetencao.createMany({
     data: [
       {
@@ -123,7 +125,7 @@ async function main() {
         bairro: "Centro",
         contato: "(51) 99999-0001",
         cidade: "CACHOEIRINHA",
-        regiao: Regiao.MATRIZ,
+        regiaoId: regId("Matriz"),
         motivo: MotivoCancelamento.INSATISFACAO_SERVICO,
         observacoes: "Sem sinal - CTO.",
         retiradaTexto: "Sem retirada",
@@ -138,7 +140,7 @@ async function main() {
         bairro: "Lago Azul",
         contato: "(51) 99999-0002",
         cidade: "TRAMANDAI",
-        regiao: Regiao.LITORAL,
+        regiaoId: regId("Litoral"),
         observacoes: "Retido com 50% OFF na próxima fatura.",
         retiradaTexto: "Entregou em loja",
         atendenteId: atendente.id,

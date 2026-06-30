@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { CidadeOption } from "@/lib/retencao";
 import type { RascunhoSolicitacao } from "./botao-nova-solicitacao";
@@ -9,12 +9,6 @@ import {
   isValidCpfCnpj,
   normalizeCpfCnpj,
 } from "@/lib/validators/cpf-cnpj";
-
-const REGIOES = [
-  ["SINOS", "Sinos"],
-  ["LITORAL", "Litoral"],
-  ["MATRIZ", "Matriz"],
-] as const;
 
 const MOTIVOS = [
   ["INSATISFACAO_ATD", "Insatisfação com Atendimento"],
@@ -52,7 +46,7 @@ interface Solicitacao {
   contato: string | null;
   bairro: string | null;
   cidade: string;
-  regiao: string;
+  regiaoId: string | null;
   status: string;
   motivo: string | null;
   observacoes: string | null;
@@ -124,13 +118,20 @@ export function FormNovaSolicitacao({
   const router = useRouter();
   const ehEdicao = !!solicitacao;
 
+  const [regioesOpts, setRegioesOpts] = useState<{ id: string; nome: string }[]>([]);
+  useEffect(() => {
+    fetch("/api/regioes").then(r => r.json()).then((rs) => {
+      setRegioesOpts((Array.isArray(rs) ? rs : []).filter((r: { isActive?: boolean }) => r.isActive !== false));
+    });
+  }, []);
+
   const [form, setForm] = useState<RascunhoSolicitacao>({
     cpfCnpj: rascunho?.cpfCnpj ?? "",
     nomeCliente: solicitacao?.nomeCliente ?? rascunho?.nomeCliente ?? "",
     contato: solicitacao?.contato ?? rascunho?.contato ?? "",
     bairro: solicitacao?.bairro ?? rascunho?.bairro ?? "",
     cidade: solicitacao?.cidade ?? rascunho?.cidade ?? "",
-    regiao: solicitacao?.regiao ?? rascunho?.regiao ?? "",
+    regiaoId: solicitacao?.regiaoId ?? rascunho?.regiaoId ?? "",
     status: solicitacao?.status ?? rascunho?.status ?? "",
     motivo: solicitacao?.motivo ?? rascunho?.motivo ?? "",
     observacoes: solicitacao?.observacoes ?? rascunho?.observacoes ?? "",
@@ -479,13 +480,13 @@ export function FormNovaSolicitacao({
               <label style={LABEL}>Região *</label>
               <select
                 style={INPUT}
-                value={form.regiao}
-                onChange={(e) => set("regiao", e.target.value)}
+                value={form.regiaoId ?? ""}
+                onChange={(e) => set("regiaoId", e.target.value)}
                 required
               >
                 <option value="">Selecione...</option>
-                {REGIOES.map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
+                {regioesOpts.map((r) => (
+                  <option key={r.id} value={r.id}>{r.nome}</option>
                 ))}
               </select>
             </div>

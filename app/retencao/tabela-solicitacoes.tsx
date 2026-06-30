@@ -113,9 +113,9 @@ export function TabelaSolicitacoes({ solicitacoes, cidades }: Props) {
                 <td style={{ padding: "7px 10px" }}>
                   <span style={{
                     fontSize: 11, fontWeight: 600,
-                    color: s.regiao === "MATRIZ" ? "var(--info)" : s.regiao === "LITORAL" ? "var(--cyan)" : "var(--violet)",
+                    color: s.regiaoRef?.cor ?? "var(--fg-muted)",
                   }}>
-                    {s.regiao}
+                    {s.regiaoRef?.nome ?? "—"}
                   </span>
                 </td>
                 <td style={{ padding: "7px 10px" }}>

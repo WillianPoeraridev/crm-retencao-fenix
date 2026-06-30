@@ -1,5 +1,5 @@
 import type { SolicitacaoComAtendente } from "@/lib/retencao";
-import { MOTIVO_LABEL, REGIAO_LABEL } from "@/lib/labels";
+import { MOTIVO_LABEL } from "@/lib/labels";
 import { shortName } from "@/lib/format";
 
 interface Competencia {
@@ -96,7 +96,7 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
 
   const regiaoMap: Record<string, { cancelados: number; retidos: number; inadimplencia: number }> = {};
   for (const s of solicitacoes) {
-    const r = s.regiao;
+    const r = (s as { regiaoRef?: { nome?: string } | null }).regiaoRef?.nome ?? "Sem região";
     if (!regiaoMap[r]) regiaoMap[r] = { cancelados: 0, retidos: 0, inadimplencia: 0 };
     if (s.status === "CANCELADO") regiaoMap[r].cancelados++;
     if (s.status === "RETIDO") regiaoMap[r].retidos++;
@@ -281,7 +281,7 @@ export function BlocoInformacoes({ solicitacoes, competencia }: Props) {
                   <div key={regiao}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: "var(--fg)" }}>
-                        {REGIAO_LABEL[regiao] ?? regiao}
+                        {regiao}
                       </span>
                       <div style={{ display: "flex", gap: 14, fontSize: 12 }}>
                         <span style={{ color: "var(--danger)", fontWeight: 600 }}>{dados.cancelados} cancel.</span>

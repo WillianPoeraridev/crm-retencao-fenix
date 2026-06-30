@@ -26,11 +26,31 @@ enum StatusRetencao {
   @@schema("retencao")
 }
 
-enum Regiao {
+// DEPRECATED (transição expand): substituído pela tabela Regiao. Removido após migrar.
+enum RegiaoEnum {
   SINOS
   LITORAL
   MATRIZ
 
+  @@schema("retencao")
+}
+
+// Região configurável por tenant (era enum).
+model Regiao {
+  id         String   @id @default(cuid())
+  tenantId   String
+  nome       String
+  ordem      Int      @default(0)
+  cor        String?
+  isForaArea Boolean  @default(false)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  solicitacoes SolicitacaoRetencao[]
+
+  @@unique([tenantId, nome])
+  @@index([tenantId])
   @@schema("retencao")
 }
 
@@ -122,7 +142,9 @@ model SolicitacaoRetencao {
   cidade         String
   cidadeInfo     Cidade       @relation(fields: [cidade], references: [id])
 
-  regiao         Regiao
+  regiao         RegiaoEnum?  // DEPRECATED: usar regiaoId (transição expand)
+  regiaoId       String?
+  regiaoRef      Regiao?      @relation(fields: [regiaoId], references: [id])
 
   agendaRetirada DateTime?
   retiradaTexto  String?
@@ -151,6 +173,7 @@ model SolicitacaoRetencao {
   @@index([atendenteId])
   @@index([cidade])
   @@index([regiao])
+  @@index([regiaoId])
   @@index([customerId])
   @@index([tenantId])
   @@schema("retencao")

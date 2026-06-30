@@ -11,7 +11,7 @@ export interface RascunhoSolicitacao {
   contato: string;
   bairro: string;
   cidade: string;
-  regiao: string;
+  regiaoId: string;
   status: string;
   motivo: string;
   observacoes: string;
@@ -29,7 +29,7 @@ const RASCUNHO_VAZIO: RascunhoSolicitacao = {
   contato: "",
   bairro: "",
   cidade: "",
-  regiao: "",
+  regiaoId: "",
   status: "",
   motivo: "",
   observacoes: "",

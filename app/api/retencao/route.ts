@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { withTenant } from "@/lib/prisma";
-import { Regiao, StatusRetencao, MotivoCancelamento } from "@prisma/client";
+import { StatusRetencao, MotivoCancelamento } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       contato,
       bairro,
       cidade,
-      regiao,
+      regiaoId,
       status,
       motivo,
       observacoes,
@@ -55,9 +55,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Campos obrigatórios
-    if (!nomeCliente || !cidade || !regiao || !status) {
+    if (!nomeCliente || !cidade || !regiaoId || !status) {
       return NextResponse.json(
-        { error: "Campos obrigatórios faltando: nomeCliente, cidade, regiao, status." },
+        { error: "Campos obrigatórios faltando: nomeCliente, cidade, região, status." },
         { status: 400 }
       );
     }
@@ -68,9 +68,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Cidade inválida ou inativa: ${cidade}` }, { status: 400 });
     }
 
-    // 6. Validação dos enums restantes
-    if (!Object.values(Regiao).includes(regiao)) {
-      return NextResponse.json({ error: `Região inválida: ${regiao}` }, { status: 400 });
+    // 6. Região: precisa existir e ser deste tenant (FK + withTenant garantem).
+    const regiaoExiste = await db.regiao.findFirst({ where: { id: regiaoId } });
+    if (!regiaoExiste) {
+      return NextResponse.json({ error: "Região inválida." }, { status: 400 });
     }
     if (!Object.values(StatusRetencao).includes(status)) {
       return NextResponse.json({ error: `Status inválido: ${status}` }, { status: 400 });
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
         contato: contato?.trim() || null,
         bairro: bairro?.trim() || null,
         cidade,
-        regiao,
+        regiaoId,
         status,
         motivo: motivo || null,
         observacoes: observacoes?.trim() || null,

@@ -5,6 +5,7 @@ import { withTenant } from "@/lib/prisma";
 import { AdminCompetencias } from "./admin-competencias";
 import { AdminUsuarios } from "./admin-usuarios";
 import { AdminCidades } from "./admin-cidades";
+import { AdminRegioes } from "./admin-regioes";
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
@@ -54,6 +55,7 @@ export default async function AdminPage() {
       </div>
 
       <AdminCompetencias competencias={competencias} />
+      <AdminRegioes />
       <AdminCidades cidades={cidades} />
       <AdminUsuarios usuarios={usuarios} sessaoId={session.user.id} />
     </main>

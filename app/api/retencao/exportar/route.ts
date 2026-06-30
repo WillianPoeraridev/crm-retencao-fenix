@@ -6,7 +6,6 @@ import ExcelJS from "exceljs";
 import {
   STATUS_SYSTEM_TO_CSV,
   MOTIVO_SYSTEM_TO_CSV,
-  REGIAO_SYSTEM_TO_CSV,
   MESES_PT,
 } from "@/lib/csv-mappings";
 import { MOTIVO_LABEL } from "@/lib/labels";
@@ -61,6 +60,7 @@ export async function GET(req: NextRequest) {
       include: {
         atendente: { select: { name: true } },
         cidadeInfo: { select: { nome: true } },
+        regiaoRef: { select: { nome: true } },
       },
       orderBy: [{ status: "asc" }, { dataRegistro: "asc" }],
     });
@@ -173,7 +173,7 @@ export async function GET(req: NextRequest) {
         s.bairro ?? "",
         s.contato ?? "",
         s.cidadeInfo.nome,
-        REGIAO_SYSTEM_TO_CSV[s.regiao] ?? s.regiao,
+        s.regiaoRef?.nome ?? "",
         s.agendaRetirada ? formatarDataCompleta(s.agendaRetirada) : "",
         s.retiradaTexto ?? "",
         s.ticketCents != null ? (s.ticketCents / 100).toFixed(2).replace(".", ",") : "",
