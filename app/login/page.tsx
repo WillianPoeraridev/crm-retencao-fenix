@@ -158,6 +158,13 @@ function LoginForm() {
             {carregando ? "Entrando..." : "Entrar"}
           </button>
         </form>
+        <p style={{ textAlign: "center", marginTop: 18, fontSize: 12, color: "#9ca3af" }}>
+          por{" "}
+          <a href="https://portifolio-wp-five.vercel.app" target="_blank" rel="noopener noreferrer"
+             style={{ color: "#7c3aed", fontWeight: 700, textDecoration: "none" }}>
+            Willian-Labs
+          </a>
+        </p>
       </div>
     </main>
   );
