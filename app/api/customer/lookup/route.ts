@@ -17,7 +17,7 @@ const bodySchema = z.object({
 /**
  * POST /api/customer/lookup
  *
- * Get-or-create de Customer (fonte da verdade compartilhada entre os CRMs Fênix).
+ * Get-or-create de Customer (fonte da verdade compartilhada entre os CRMs da plataforma).
  * Retorna o customer pelo CPF/CNPJ normalizado, criando se não existir.
  *
  * Inclui contagens cross-CRM (solicitações no Retenção via Prisma, vendas + leads

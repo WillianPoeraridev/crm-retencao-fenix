@@ -1,4 +1,4 @@
-# CRM Retenção — Fênix Internet (MVP 0.1)
+# CRM Retenção (MVP 0.1)
 
 MVP do CRM do **Setor de Cancelamento/Retenção**, substituindo o Google Sheets atual por uma aplicação web com:
 - **Login (NextAuth)** e rastreabilidade (quem fez o quê)

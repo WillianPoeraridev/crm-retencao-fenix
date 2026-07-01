@@ -2,13 +2,13 @@
 // middleware (edge runtime). A resolução no banco fica em lib/tenant.ts.
 
 const RESERVED = new Set(["www", "admin", "comercial", "retencao", "app", "api"]);
-const DEV_FALLBACK_SLUG = process.env.NEXT_PUBLIC_DEV_TENANT_SLUG || "fenix";
+const DEV_FALLBACK_SLUG = process.env.NEXT_PUBLIC_DEV_TENANT_SLUG || "wp-fibra";
 export const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || "crm-operacional.com.br";
 
 /**
  * Extrai o slug do tenant a partir do host. Em prod o tenant é o 1º label do
- * subdomínio (ex: `fenix.retencao.crm-operacional.com.br` → "fenix"). Em dev
- * (localhost / sem subdomínio) usa NEXT_PUBLIC_DEV_TENANT_SLUG (default "fenix").
+ * subdomínio (ex: `wp-fibra.retencao.crm-operacional.com.br` → "wp-fibra"). Em dev
+ * (localhost / sem subdomínio) usa NEXT_PUBLIC_DEV_TENANT_SLUG (default "wp-fibra").
  * Retorna "" quando não há slug válido em produção.
  */
 export function tenantSlugFromHost(host: string | null | undefined): string {

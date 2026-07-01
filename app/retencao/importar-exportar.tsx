@@ -45,7 +45,7 @@ function parseTicket(raw: string): number | null {
 }
 
 // Mapeia o nome de cabeçalho para um campo lógico. Lida com variações
-// de acento, caixa e espaços. A planilha da Fênix mudou e agora pode
+// de acento, caixa e espaços. O layout da planilha mudou e agora pode
 // ter "TICKET CLIENTE" entre RETIRADA e ATENDENTE.
 function normalizarHeader(s: string): string {
   return s

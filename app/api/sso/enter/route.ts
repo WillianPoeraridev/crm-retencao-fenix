@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { validarPasse } from "@/lib/sso";
 import { tenantSlugFromHost, resolveTenantBySlug } from "@/lib/tenant";
 
-// Consome um passe vindo de outro app Fênix e cria a sessão local (sem senha).
+// Consome um passe vindo de outro app da plataforma e cria a sessão local (sem senha).
 // Multi-tenant: o passe carrega tenant; conferimos que o slug bate com o
 // subdomínio e buscamos o user ESCOPADO ao tenant.
 export async function GET(req: Request) {

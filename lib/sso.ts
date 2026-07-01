@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-// SSO por "passe": token HMAC de curta duração, compartilhado entre os apps Fênix.
+// SSO por "passe": token HMAC de curta duração, compartilhado entre os apps da plataforma.
 // Espelhado em crm-comercial-fenix/lib/sso.ts e fenix-dashboard/lib/sso.ts — manter sincronizado.
 //
 // Multi-tenant: o passe carrega tenantId + tenantSlug; o app de destino confere

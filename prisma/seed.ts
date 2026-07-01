@@ -18,17 +18,17 @@ async function main() {
   const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({ adapter });
 
-  // Tenant dos dados da Fênix (slug = subdomínio). Idempotente entre os seeds.
-  const TENANT_ID = "fenix";
+  // Tenant de demonstração (slug = subdomínio). Idempotente entre os seeds.
+  const TENANT_ID = "wp-fibra";
   await prisma.tenant.upsert({
     where: { slug: TENANT_ID },
     update: {},
-    create: { id: TENANT_ID, slug: TENANT_ID, nome: "Fênix Fibra" },
+    create: { id: TENANT_ID, slug: TENANT_ID, nome: "WP-Fibra" },
   });
 
   // Emails (vão no campo "email" do teu model atual)
-  const ADMIN_EMAIL = "willianpoerari@fenixfibra.com.br";
-  const ATENDENTE_EMAIL = "willianpoerarifx@gmail.com";
+  const ADMIN_EMAIL = "admin@wp-fibra.com.br";
+  const ATENDENTE_EMAIL = "atendente@wp-fibra.com.br";
 
   const ADMIN_PASS = mustEnv("SEED_ADMIN_PASSWORD");
   const ATENDENTE_PASS = mustEnv("SEED_ATENDENTE_PASSWORD");
@@ -58,11 +58,11 @@ async function main() {
 
   // Atendentes — todos usam a mesma senha provisória do .env
   const atendentesData = [
-    { name: "Willian P", email: ATENDENTE_EMAIL },
-    { name: "José", email: "jose@fenixfibra.com.br" },
-    { name: "Anderson", email: "anderson@fenixfibra.com.br" },
-    { name: "Douglas", email: "douglas@fenixfibra.com.br" },
-    { name: "Tiago", email: "tiago@fenixfibra.com.br" },
+    { name: "Atendente 1", email: ATENDENTE_EMAIL },
+    { name: "José", email: "jose@wp-fibra.com.br" },
+    { name: "Anderson", email: "anderson@wp-fibra.com.br" },
+    { name: "Douglas", email: "douglas@wp-fibra.com.br" },
+    { name: "Tiago", email: "tiago@wp-fibra.com.br" },
   ];
 
   const atendentes = [];

@@ -105,7 +105,7 @@ export function FormUsuario({ onSucesso, onCancelar }: Props) {
           </div>
           <div style={CAMPO}>
             <label style={LABEL}>Email *</label>
-            <input style={INPUT} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="atendente@fenixfibra.com.br" required />
+            <input style={INPUT} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="atendente@exemplo.com.br" required />
           </div>
           <div style={CAMPO}>
             <label style={LABEL}>Senha provisória *</label>
