@@ -2,12 +2,19 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
+// No cutover, o runtime conecta como `app_runtime` (NOBYPASSRLS) via
+// RUNTIME_DATABASE_URL — sem isso a RLS é teatro (postgres tem BYPASSRLS).
 const connectionString =
-  process.env.DIRECT_URL || process.env.DATABASE_URL;
+  process.env.RUNTIME_DATABASE_URL || process.env.DIRECT_URL || process.env.DATABASE_URL;
 
 if (!connectionString) {
-  throw new Error("Faltando DIRECT_URL (ou DATABASE_URL) no .env");
+  throw new Error("Faltando RUNTIME_DATABASE_URL/DIRECT_URL/DATABASE_URL no .env");
 }
+
+// Liga a fiação de RLS: cada query roda numa transação que seta `app.tenant_id`
+// (SET LOCAL via set_config) pras policies engatarem sob o pooler. Desligado por
+// padrão → comportamento atual (app-layer). Ligado no cutover com app_runtime.
+const RLS_ENABLED = process.env.RLS_ENABLED === "true";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
@@ -49,7 +56,7 @@ export function withTenant(tenantId: string) {
   return prisma.$extends({
     query: {
       $allModels: {
-        $allOperations({ model, operation, args, query }) {
+        async $allOperations({ model, operation, args, query }) {
           if (model && MODELS_SEM_TENANT.has(model)) return query(args);
 
           const a = args as { where?: Record<string, unknown>; data?: unknown; create?: unknown };
@@ -85,7 +92,16 @@ export function withTenant(tenantId: string) {
               break;
           }
 
-          return query(a);
+          if (!RLS_ENABLED) return query(a);
+
+          // RLS: seta o GUC e roda a query na MESMA transação (batch), pra o
+          // set_config valer sob pgBouncer transaction-mode. `prisma` é o client
+          // base (o $executeRaw não é op de model → não recorre na extensão).
+          const [, result] = await prisma.$transaction([
+            prisma.$executeRaw`SELECT set_config('app.tenant_id', ${tenantId}, true)`,
+            query(a),
+          ]);
+          return result;
         },
       },
     },
