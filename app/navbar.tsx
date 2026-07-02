@@ -5,27 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./theme-toggle";
 
-function getComericalUrl() {
-  const rawUrl = process.env.NEXT_PUBLIC_CRM_COMERCIAL_URL?.trim();
-  if (!rawUrl) return null;
-  try {
-    const url = new URL(rawUrl);
-    return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
-  } catch {
-    return null;
-  }
-}
-
-function getDashboardUrl() {
-  const rawUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL?.trim();
-  if (!rawUrl) return null;
-  try {
-    const url = new URL(rawUrl);
-    return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
-  } catch {
-    return null;
-  }
-}
+// SSO é por tenant: a navbar só escolhe QUAL app; o /api/sso/start monta a URL do
+// subdomínio do tenant (appUrl) e gera o passe. Nunca hardcodar/derivar a URL aqui.
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -35,9 +16,7 @@ export function Navbar() {
 
   const isAdmin = session.user.role === "ADMIN";
   const primeiroNome = session.user.name?.split(" ")[0] ?? session.user.name;
-  const urlComercial = getComericalUrl();
-  const urlDashboard = getDashboardUrl();
-  const temCrossApp = isAdmin && (urlComercial || urlDashboard);
+  const temCrossApp = isAdmin;
 
   return (
     <nav style={{
@@ -71,8 +50,8 @@ export function Navbar() {
         {temCrossApp && (
           <>
             <div style={{ display: "flex", gap: 2 }}>
-              {urlComercial && <SsoLink to={urlComercial}>Comercial</SsoLink>}
-              {urlDashboard && <SsoLink to={urlDashboard}>Dashboard</SsoLink>}
+              <SsoLink app="comercial">Comercial</SsoLink>
+              <SsoLink app="dashboard">Dashboard</SsoLink>
             </div>
             <div style={{ width: 1, height: 24, backgroundColor: "#2a3340" }} />
           </>
@@ -130,9 +109,9 @@ function NavLink({ href, atual, children }: { href: string; atual: boolean; chil
   );
 }
 
-function SsoLink({ to, children }: { to: string; children: React.ReactNode }) {
+function SsoLink({ app, children }: { app: "comercial" | "dashboard"; children: React.ReactNode }) {
   return (
-    <a href={`/api/sso/start?to=${encodeURIComponent(to)}`} style={{
+    <a href={`/api/sso/start?app=${app}`} style={{
       padding: "5px 12px", borderRadius: 6, fontSize: 13, fontWeight: 500,
       color: "#f97316", backgroundColor: "rgba(249,115,22,0.1)", textDecoration: "none",
       display: "inline-flex", alignItems: "center", gap: 4,
