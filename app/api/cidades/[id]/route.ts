@@ -25,7 +25,7 @@ export async function PATCH(
     }
 
     const atualizada = await db.cidade.update({
-      where: { id },
+      where: { tenantId_id: { tenantId: session.user.tenantId, id } },
       data: { isActive },
     });
 

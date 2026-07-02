@@ -69,7 +69,7 @@ enum MotivoCancelamento {
 
 // Cidade agora é uma tabela editável (antes era enum)
 model Cidade {
-  id        String   @id          // ex: "CACHOEIRINHA" — mesmo valor do antigo enum
+  id        String                // ex: "CACHOEIRINHA" — código único POR TENANT
   tenantId  String
   nome      String                // ex: "Cachoeirinha" — nome legível
   isActive  Boolean  @default(true)
@@ -77,7 +77,8 @@ model Cidade {
 
   solicitacoes SolicitacaoRetencao[]
 
-  @@index([tenantId])
+  // PK composta: o mesmo código de cidade pode existir em tenants diferentes.
+  @@id([tenantId, id])
   @@schema("retencao")
 }
 
@@ -140,7 +141,7 @@ model SolicitacaoRetencao {
   contato        String?
 
   cidade         String
-  cidadeInfo     Cidade       @relation(fields: [cidade], references: [id])
+  cidadeInfo     Cidade       @relation(fields: [tenantId, cidade], references: [tenantId, id])
 
   regiao         RegiaoEnum?  // DEPRECATED: usar regiaoId (transição expand)
   regiaoId       String?
