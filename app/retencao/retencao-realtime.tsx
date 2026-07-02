@@ -1,30 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase-client";
+import { useTenantEvent } from "@/lib/use-tenant-event";
 
 export function RetencaoRealtime() {
   const router = useRouter();
 
-  useEffect(() => {
-    if (!supabase) return;
-
-    const channel = supabase
-      .channel("retencao-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "shared", table: "SolicitacaoRetencaoEvent" },
-        () => {
-          router.refresh();
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase?.removeChannel(channel);
-    };
-  }, [router]);
+  // Só reage a eventos de retenção do próprio tenant. Ver useTenantEvent.
+  useTenantEvent("retencao-changes", "SolicitacaoRetencaoEvent", () => router.refresh());
 
   return null;
 }
